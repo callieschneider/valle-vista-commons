@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id         String   @id @default(cuid())
+  title      String   @db.VarChar(100)
+  desc       String   @db.VarChar(500)
+  location   String   @db.VarChar(50)
+  tag        Tag      @default(OTHER)
+  status     Status   @default(PENDING)
+  createdAt  DateTime @default(now()) @map("created_at")
+  approvedAt DateTime? @map("approved_at")
+
+  @@map("posts")
+}
+
+enum Tag {
+  VEHICLE
+  PERSON
+  OTHER
+}
+
+enum Status {
+  PENDING
+  LIVE
+  EXPIRED
+}
