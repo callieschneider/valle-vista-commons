@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-02-11 - Spec Enhancements (7 improvements from prompt review)
+
+### Summary
+Incorporated best ideas from a second spec review: new tags, honeypot anti-spam, tighter admin auth, better timestamps, DB hygiene, wider location field, and optimized health check routing.
+
+### Changes
+1. **Added Animal + Event tags** — Prisma enum expanded, new migration applied. Submit form dropdown, feed filter buttons, and admin dashboard all updated with color-coded badges (Animal: orange, Event: purple).
+2. **Honeypot anti-spam field** — Hidden `website` input on submit form. Bots that fill it get a fake success response; post is silently discarded. Layered on top of existing hCaptcha + rate limiting.
+3. **ADMIN_USER env var** — Basic auth now checks both username and password (was password-only). Defaults to `admin` if not set.
+4. **Relative timestamps** — Feed shows "just now", "2h ago", "3d ago", "yesterday" instead of formatted dates.
+5. **Auto-expire UPDATE** — Feed route runs `UPDATE posts SET status='EXPIRED'` for posts older than 14 days before fetching. Keeps DB clean instead of just filtering at query time.
+6. **Location field widened** — VarChar(50) → VarChar(100). Form maxlength updated to match.
+7. **Health check before middleware** — `/health` now mounts before helmet/cors/rate-limit so Railway health probes aren't affected by middleware.
+
+### Files Changed
+- `server.js`: All 7 changes (honeypot check, ADMIN_USER, timeAgo helper, auto-expire query, VALID_TAGS constant, health route moved)
+- `prisma/schema.prisma`: Tag enum + location width
+- `prisma/migrations/..._add_animal_event_tags_widen_location/`: New migration
+- `views/index.ejs`: New tag filters + colors, relative timestamps
+- `views/submit.ejs`: Honeypot field, new tag options, location maxlength=100
+- `views/admin.ejs`: New tag colors
+- `.env` / `.env.example`: Added ADMIN_USER
+
+### Breaking Changes
+- None (additive only)
+
+### Testing
+- All routes return correct HTTP codes
+- Honeypot silently discards bot submissions
+- Wrong admin username returns 401
+- ANIMAL tag filter works on feed
+- Relative timestamps render correctly
+- Auto-expire query runs on feed load
+
+---
+
 ## 2026-02-11 - Initial Build
 
 ### Summary

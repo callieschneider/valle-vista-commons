@@ -11,7 +11,7 @@ model Post {
   id         String   @id @default(cuid())
   title      String   @db.VarChar(100)
   desc       String   @db.VarChar(500)
-  location   String   @db.VarChar(50)
+  location   String   @db.VarChar(100)
   tag        Tag      @default(OTHER)
   status     Status   @default(PENDING)
   createdAt  DateTime @default(now()) @map("created_at")
@@ -23,6 +23,8 @@ model Post {
 enum Tag {
   VEHICLE
   PERSON
+  ANIMAL
+  EVENT
   OTHER
 }
 

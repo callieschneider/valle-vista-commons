@@ -14,6 +14,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient({ log: ['warn', 'error'] });
 const app = express();
 const PORT = process.env.PORT || 3000;
+const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'admin';
 const HCAPTCHA_SECRET = process.env.HCAPTCHA_SECRET || '';
 const HCAPTCHA_SITEKEY = process.env.HCAPTCHA_SITEKEY || '';
@@ -27,6 +28,11 @@ const submitLimiter = new RateLimiterMemory({
 const globalLimiter = new RateLimiterMemory({
   points: 120,    // 120 requests
   duration: 60,   // per 60 seconds
+});
+
+// ─── Health check (before all middleware) ────────────────
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // ─── Middleware ──────────────────────────────────────────
@@ -95,8 +101,9 @@ function requireAdmin(req, res, next) {
   }
   const decoded = Buffer.from(auth.split(' ')[1], 'base64').toString();
   const parts = decoded.split(':');
+  const user = parts[0];
   const pass = parts.slice(1).join(':'); // Handle passwords with colons
-  if (pass !== ADMIN_PASS) {
+  if (user !== ADMIN_USER || pass !== ADMIN_PASS) {
     res.setHeader('WWW-Authenticate', 'Basic realm="Valle Vista Commons Admin"');
     return res.status(401).send('Invalid credentials');
   }
@@ -128,23 +135,43 @@ function fourteenDaysAgo() {
   return new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
 }
 
-// ─── Public Routes ──────────────────────────────────────
+// Valid tags
+const VALID_TAGS = ['VEHICLE', 'PERSON', 'ANIMAL', 'EVENT', 'OTHER'];
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+// Relative timestamp helper ("2 hours ago", "3 days ago")
+function timeAgo(date) {
+  const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+  if (seconds < 60) return 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'yesterday';
+  if (days < 14) return `${days}d ago`;
+  return `${days}d ago`;
+}
+
+// ─── Public Routes ──────────────────────────────────────
 
 // Feed (home page)
 app.get('/', async (req, res) => {
   try {
+    // Auto-expire old posts (clean DB housekeeping)
+    await prisma.post.updateMany({
+      where: {
+        status: 'LIVE',
+        createdAt: { lt: fourteenDaysAgo() },
+      },
+      data: { status: 'EXPIRED' },
+    });
+
     const { tag, q } = req.query;
     const where = {
       status: 'LIVE',
-      createdAt: { gte: fourteenDaysAgo() },
     };
 
-    if (tag && ['VEHICLE', 'PERSON', 'OTHER'].includes(tag.toUpperCase())) {
+    if (tag && VALID_TAGS.includes(tag.toUpperCase())) {
       where.tag = tag.toUpperCase();
     }
 
@@ -167,10 +194,11 @@ app.get('/', async (req, res) => {
       currentTag: tag || '',
       searchQuery: q || '',
       sitekey: HCAPTCHA_SITEKEY,
+      timeAgo,
     });
   } catch (err) {
     console.error('Feed error:', err.message);
-    res.render('index', { posts: [], currentTag: '', searchQuery: '', sitekey: HCAPTCHA_SITEKEY });
+    res.render('index', { posts: [], currentTag: '', searchQuery: '', sitekey: HCAPTCHA_SITEKEY, timeAgo });
   }
 });
 
@@ -182,6 +210,17 @@ app.get('/submit', (req, res) => {
 // Handle submission
 app.post('/submit', async (req, res) => {
   try {
+    // Honeypot check — if the hidden "website" field is filled, it's a bot.
+    // Return fake success to not tip off the bot.
+    if (req.body.website) {
+      return res.render('submit', {
+        sitekey: HCAPTCHA_SITEKEY,
+        error: null,
+        success: true,
+        values: {},
+      });
+    }
+
     // Rate limit by IP (in-memory only, not logged)
     const key = req.ip || 'unknown';
     try {
@@ -210,7 +249,7 @@ app.post('/submit', async (req, res) => {
     // Validate & sanitize
     const title = sanitize(req.body.title || '').substring(0, 100);
     const desc = sanitize(req.body.desc || '').substring(0, 500);
-    const location = sanitize(req.body.location || '').substring(0, 50);
+    const location = sanitize(req.body.location || '').substring(0, 100);
     const tag = (req.body.tag || '').toUpperCase();
 
     if (!title || !desc || !location) {
@@ -222,7 +261,7 @@ app.post('/submit', async (req, res) => {
       });
     }
 
-    if (!['VEHICLE', 'PERSON', 'OTHER'].includes(tag)) {
+    if (!VALID_TAGS.includes(tag)) {
       return res.status(400).render('submit', {
         sitekey: HCAPTCHA_SITEKEY,
         error: 'Please select a valid tag.',

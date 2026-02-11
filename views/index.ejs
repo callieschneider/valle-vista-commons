@@ -14,6 +14,8 @@
     .tag-pill { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; }
     .tag-VEHICLE { background: #0d6efd; }
     .tag-PERSON { background: #dc3545; }
+    .tag-ANIMAL { background: #e67e22; }
+    .tag-EVENT { background: #6f42c1; }
     .tag-OTHER { background: #6c757d; }
     .post-card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: box-shadow 0.2s; }
     .post-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
@@ -61,7 +63,7 @@
     <div class="d-flex gap-2 mb-3 flex-wrap">
       <a href="/?<%= searchQuery ? 'q=' + encodeURIComponent(searchQuery) : '' %>"
          class="btn btn-sm filter-btn <%= !currentTag ? 'active' : 'btn-outline-secondary' %>">All</a>
-      <% ['VEHICLE', 'PERSON', 'OTHER'].forEach(t => { %>
+      <% ['VEHICLE', 'PERSON', 'ANIMAL', 'EVENT', 'OTHER'].forEach(t => { %>
         <a href="/?tag=<%= t %><%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>"
            class="btn btn-sm filter-btn <%= currentTag && currentTag.toUpperCase() === t ? 'active' : 'btn-outline-secondary' %>"><%= t.charAt(0) + t.slice(1).toLowerCase() %></a>
       <% }) %>
@@ -90,7 +92,7 @@
             <small class="text-muted">
               📍 <%= post.location %>
               &middot;
-              <%= new Date(post.approvedAt || post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %>
+              <%= timeAgo(post.approvedAt || post.createdAt) %>
             </small>
           </div>
         </div>

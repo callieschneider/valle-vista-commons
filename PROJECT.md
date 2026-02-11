@@ -6,15 +6,19 @@ No accounts. No tracking. No personal information collected. Ever.
 
 ---
 
-## Status: v0.1.0 — Initial Build
+## Status: v0.2.0 — Enhanced
 
 | Feature | Status |
 |---------|--------|
 | Public feed with search + filters | ✅ |
 | Anonymous post submission | ✅ |
-| hCaptcha spam protection | ✅ |
+| hCaptcha spam protection (optional) | ✅ |
+| Honeypot anti-spam | ✅ |
 | Admin moderation dashboard | ✅ |
 | Rate limiting | ✅ |
+| 5 tag categories (Vehicle/Person/Animal/Event/Other) | ✅ |
+| Relative timestamps | ✅ |
+| Auto-expire old posts (DB cleanup) | ✅ |
 | Railway deployment | ✅ |
 
 ---
@@ -66,8 +70,8 @@ Request → Express middleware (helmet, cors, rate-limit) → Route handler → 
 | id | String (cuid) | Primary key |
 | title | VarChar(100) | Required |
 | desc | VarChar(500) | Required |
-| location | VarChar(50) | Approximate location, intentionally vague |
-| tag | Enum: VEHICLE, PERSON, OTHER | Filterable category |
+| location | VarChar(100) | Approximate location, intentionally vague |
+| tag | Enum: VEHICLE, PERSON, ANIMAL, EVENT, OTHER | Filterable category |
 | status | Enum: PENDING, LIVE, EXPIRED | Moderation state |
 | createdAt | DateTime | Auto-set |
 | approvedAt | DateTime? | Set when admin approves |
@@ -92,6 +96,7 @@ Request → Express middleware (helmet, cors, rate-limit) → Route handler → 
 | Variable | Required | Default | Purpose |
 |----------|----------|---------|---------|
 | `DATABASE_URL` | Yes | — | Postgres connection (Railway auto-provides) |
+| `ADMIN_USER` | No | `admin` | Admin dashboard username |
 | `ADMIN_PASS` | Yes | `admin` | Admin dashboard password |
 | `HCAPTCHA_SITEKEY` | No | — | hCaptcha public key |
 | `HCAPTCHA_SECRET` | No | — | hCaptcha secret key |

@@ -47,6 +47,9 @@
           <% } %>
 
           <form method="POST" action="/submit">
+            <!-- Honeypot: hidden from humans, bots fill it -->
+            <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
+
             <div class="mb-3">
               <label for="title" class="form-label fw-semibold" style="font-size: 0.85rem;">Title</label>
               <input type="text" class="form-control" id="title" name="title"
@@ -65,7 +68,7 @@
             <div class="mb-3">
               <label for="location" class="form-label fw-semibold" style="font-size: 0.85rem;">Approximate Location</label>
               <input type="text" class="form-control" id="location" name="location"
-                     maxlength="50" required placeholder="e.g. Near Elm St & Oak Ave"
+                     maxlength="100" required placeholder="e.g. Near Elm St & Oak Ave"
                      value="<%= values.location || '' %>">
               <div class="form-text" style="font-size: 0.75rem;">Be vague — street name or intersection is enough.</div>
             </div>
@@ -76,6 +79,8 @@
                 <option value="" disabled <%= !values.tag ? 'selected' : '' %>>Select one...</option>
                 <option value="VEHICLE" <%= values.tag === 'VEHICLE' ? 'selected' : '' %>>🚗 Vehicle</option>
                 <option value="PERSON" <%= values.tag === 'PERSON' ? 'selected' : '' %>>👤 Person</option>
+                <option value="ANIMAL" <%= values.tag === 'ANIMAL' ? 'selected' : '' %>>🐾 Animal</option>
+                <option value="EVENT" <%= values.tag === 'EVENT' ? 'selected' : '' %>>📅 Event</option>
                 <option value="OTHER" <%= values.tag === 'OTHER' ? 'selected' : '' %>>📌 Other</option>
               </select>
             </div>
