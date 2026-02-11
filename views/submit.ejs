@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Submit a Post — Valle Vista Commons</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <% if (sitekey) { %>
+    <script src="https://hcaptcha.com/1/api.js" async defer></script>
+  <% } %>
+  <style>
+    :root { --vvc-green: #2d6a4f; --vvc-green-light: #40916c; --vvc-bg: #f0f4f0; }
+    body { background: var(--vvc-bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .brand { font-weight: 800; color: var(--vvc-green); letter-spacing: -0.5px; text-decoration: none; }
+    .brand:hover { color: var(--vvc-green-light); }
+    .form-card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .btn-submit { background: var(--vvc-green); border-color: var(--vvc-green); color: #fff; border-radius: 8px; }
+    .btn-submit:hover { background: var(--vvc-green-light); border-color: var(--vvc-green-light); color: #fff; }
+    .char-count { font-size: 0.75rem; color: #999; }
+    .char-count.warn { color: #dc3545; }
+  </style>
+</head>
+<body>
+  <div class="container py-4" style="max-width: 540px;">
+    <div class="text-center mb-4">
+      <a href="/" class="brand fs-4">← Valle Vista Commons</a>
+    </div>
+
+    <% if (success) { %>
+      <div class="alert alert-success text-center" role="alert">
+        <strong>Post submitted!</strong> It'll appear on the board once a moderator approves it.
+      </div>
+      <div class="text-center">
+        <a href="/" class="btn btn-outline-secondary btn-sm">Back to feed</a>
+        <a href="/submit" class="btn btn-outline-secondary btn-sm ms-2">Submit another</a>
+      </div>
+    <% } else { %>
+
+      <div class="card form-card">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-1">Submit a Post</h5>
+          <p class="text-muted" style="font-size: 0.85rem;">Completely anonymous. No account needed.</p>
+
+          <% if (error) { %>
+            <div class="alert alert-danger py-2" style="font-size: 0.85rem;" role="alert"><%= error %></div>
+          <% } %>
+
+          <form method="POST" action="/submit">
+            <div class="mb-3">
+              <label for="title" class="form-label fw-semibold" style="font-size: 0.85rem;">Title</label>
+              <input type="text" class="form-control" id="title" name="title"
+                     maxlength="100" required placeholder="e.g. Suspicious van on Elm St"
+                     value="<%= values.title || '' %>">
+            </div>
+
+            <div class="mb-3">
+              <label for="desc" class="form-label fw-semibold" style="font-size: 0.85rem;">Description</label>
+              <textarea class="form-control" id="desc" name="desc" rows="4"
+                        maxlength="500" required placeholder="What's going on? Keep it factual."
+              ><%= values.desc || '' %></textarea>
+              <div class="char-count mt-1" id="charCount">0 / 500</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="location" class="form-label fw-semibold" style="font-size: 0.85rem;">Approximate Location</label>
+              <input type="text" class="form-control" id="location" name="location"
+                     maxlength="50" required placeholder="e.g. Near Elm St & Oak Ave"
+                     value="<%= values.location || '' %>">
+              <div class="form-text" style="font-size: 0.75rem;">Be vague — street name or intersection is enough.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="tag" class="form-label fw-semibold" style="font-size: 0.85rem;">Category</label>
+              <select class="form-select" id="tag" name="tag" required>
+                <option value="" disabled <%= !values.tag ? 'selected' : '' %>>Select one...</option>
+                <option value="VEHICLE" <%= values.tag === 'VEHICLE' ? 'selected' : '' %>>🚗 Vehicle</option>
+                <option value="PERSON" <%= values.tag === 'PERSON' ? 'selected' : '' %>>👤 Person</option>
+                <option value="OTHER" <%= values.tag === 'OTHER' ? 'selected' : '' %>>📌 Other</option>
+              </select>
+            </div>
+
+            <% if (sitekey) { %>
+              <div class="mb-3">
+                <div class="h-captcha" data-sitekey="<%= sitekey %>"></div>
+              </div>
+            <% } %>
+
+            <button type="submit" class="btn btn-submit w-100 py-2 fw-semibold">Submit for Review</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="text-center mt-3">
+        <small class="text-muted">Posts are reviewed by mods before going live. No personal info is collected.</small>
+      </div>
+
+    <% } %>
+  </div>
+
+  <script>
+    const desc = document.getElementById('desc');
+    const counter = document.getElementById('charCount');
+    if (desc && counter) {
+      function update() {
+        const len = desc.value.length;
+        counter.textContent = len + ' / 500';
+        counter.classList.toggle('warn', len > 450);
+      }
+      desc.addEventListener('input', update);
+      update();
+    }
+  </script>
+</body>
+</html>
