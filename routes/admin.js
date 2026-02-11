@@ -42,12 +42,18 @@ router.get('/', async (req, res) => {
       orderBy: [{ pinned: 'desc' }, { approvedAt: 'desc' }],
     });
 
+    const rejected = await prisma.post.findMany({
+      where: { status: 'REJECTED' },
+      orderBy: { createdAt: 'desc' },
+    });
+
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     const hasApiKey = !!process.env.OPENROUTER_API_KEY;
 
     res.render('admin', {
       pending,
       live,
+      rejected,
       settings,
       hasApiKey,
       error: req.query.error || null,
@@ -87,7 +93,7 @@ router.post('/approve/:id', async (req, res) => {
 
 router.post('/reject/:id', async (req, res) => {
   try {
-    await prisma.post.delete({ where: { id: req.params.id } });
+    await prisma.post.update({ where: { id: req.params.id }, data: { status: 'REJECTED' } });
   } catch (err) {
     console.error('Reject error:', err.message);
   }
@@ -253,6 +259,28 @@ router.post('/modnote/:id', async (req, res) => {
     await prisma.post.update({ where: { id: req.params.id }, data: { modNote } });
   } catch (err) {
     console.error('Mod note error:', err.message);
+  }
+  res.redirect('/admin');
+});
+
+// ─── Archive (Rejected Posts) ───────────────────────────
+
+// Restore rejected post back to pending queue
+router.post('/restore/:id', async (req, res) => {
+  try {
+    await prisma.post.update({ where: { id: req.params.id }, data: { status: 'PENDING' } });
+  } catch (err) {
+    console.error('Restore error:', err.message);
+  }
+  res.redirect('/admin');
+});
+
+// Permanently delete from archive
+router.post('/purge/:id', async (req, res) => {
+  try {
+    await prisma.post.delete({ where: { id: req.params.id } });
+  } catch (err) {
+    console.error('Purge error:', err.message);
   }
   res.redirect('/admin');
 });

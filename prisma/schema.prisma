@@ -62,4 +62,5 @@ enum Status {
   PENDING
   LIVE
   EXPIRED
+  REJECTED
 }

@@ -3,7 +3,7 @@
 
 import { Editor } from 'https://esm.sh/@tiptap/core@2';
 import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2';
-import Image from 'https://esm.sh/@tiptap/extension-image@2';
+import ImageResize from 'https://esm.sh/tiptap-extension-resize-image@1';
 import Link from 'https://esm.sh/@tiptap/extension-link@2';
 
 // Custom Video node (Tiptap doesn't have a built-in one)
@@ -54,8 +54,8 @@ export function initEditor({ element, hiddenInput, toolbar, content = '', mode =
       heading: mode === 'full' ? { levels: [2, 3] } : false,
       blockquote: mode === 'full',
     }),
-    Image.configure({
-      inline: false,
+    ImageResize.configure({
+      inline: true,
       allowBase64: false,
     }),
     Link.configure({

@@ -34,7 +34,7 @@
 
     .tiptap-content { min-height: 120px; padding: 10px; outline: none; font-size: 0.9rem; }
     .tiptap-content p { margin-bottom: 0.5rem; }
-    .tiptap-content img { max-width: 100%; border-radius: 8px; margin: 8px 0; }
+    .tiptap-content img { max-width: 100%; border-radius: 8px; margin: 4px; vertical-align: top; display: inline-block; }
     .tiptap-content video { max-width: 100%; border-radius: 8px; margin: 8px 0; }
     .tiptap-content a { color: var(--vvc-green); }
     .tiptap-content blockquote { border-left: 3px solid #dee2e6; padding-left: 12px; color: #666; }
@@ -43,6 +43,10 @@
     .tiptap-content p.is-editor-empty:first-child::before {
       content: attr(data-placeholder); float: left; color: #adb5bd; pointer-events: none; height: 0;
     }
+    /* Resize handles */
+    .tiptap-content .image-resizer { display: inline-block; position: relative; }
+    .tiptap-content .image-resizer img { display: block; max-width: 100%; }
+    .tiptap-content .image-resizer .resize-trigger { position: absolute; right: -4px; bottom: -4px; width: 12px; height: 12px; background: var(--vvc-green); border: 2px solid #fff; border-radius: 2px; cursor: nwse-resize; }
   </style>
 </head>
 <body>

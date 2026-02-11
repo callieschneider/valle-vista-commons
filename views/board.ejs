@@ -52,12 +52,13 @@
     /* Rich content styling */
     .rich-content p { margin-bottom: 0.4rem; }
     .rich-content p:last-child { margin-bottom: 0; }
-    .rich-content img { max-width: 100%; border-radius: 8px; margin: 6px 0; }
+    .rich-content img { max-width: 100%; border-radius: 8px; margin: 4px; vertical-align: top; display: inline-block; }
     .rich-content video { max-width: 100%; border-radius: 8px; margin: 6px 0; }
     .rich-content a { color: var(--vvc-green); }
     .rich-content blockquote { border-left: 3px solid #dee2e6; padding-left: 10px; color: #666; margin: 6px 0; }
     .rich-content h2 { font-size: 1rem; font-weight: 700; margin-top: 8px; }
     .rich-content h3 { font-size: 0.95rem; font-weight: 600; margin-top: 6px; }
+    .rich-content img[style] { max-width: 100%; height: auto; }
 
     .submit-fab {
       position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px;
@@ -163,23 +164,6 @@
   <!-- Floating submit button -->
   <a href="/submit" class="submit-fab" title="Submit a tip" aria-label="Submit a tip">+</a>
 
-  <script>
-    // Client-side search
-    const searchInput = document.getElementById('boardSearch');
-    if (searchInput) {
-      searchInput.addEventListener('input', function() {
-        const q = this.value.toLowerCase().trim();
-        document.querySelectorAll('.searchable').forEach(card => {
-          const text = card.getAttribute('data-text') || '';
-          card.style.display = (!q || text.includes(q)) ? '' : 'none';
-        });
-        // Hide empty section headers
-        document.querySelectorAll('.section-block').forEach(block => {
-          const visible = block.querySelectorAll('.searchable:not([style*="display: none"])');
-          block.style.display = visible.length > 0 ? '' : 'none';
-        });
-      });
-    }
-  </script>
+  <script src="/js/board-search.js"></script>
 </body>
 </html>

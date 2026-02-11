@@ -43,7 +43,7 @@
 
     /* Rich content in admin */
     .rich-content p { margin-bottom: 0.3rem; } .rich-content p:last-child { margin-bottom: 0; }
-    .rich-content img { max-width: 100%; border-radius: 6px; margin: 4px 0; }
+    .rich-content img { max-width: 100%; border-radius: 6px; margin: 4px; vertical-align: top; display: inline-block; }
     .rich-content video { max-width: 100%; border-radius: 6px; margin: 4px 0; }
     .rich-content a { color: #0d6efd; }
 
@@ -62,9 +62,12 @@
     .editor-toolbar .sep { width: 1px; background: #dee2e6; margin: 2px 3px; }
     .tiptap-content { min-height: 80px; padding: 8px; outline: none; font-size: 0.82rem; }
     .tiptap-content p { margin-bottom: 0.3rem; }
-    .tiptap-content img { max-width: 100%; border-radius: 6px; margin: 4px 0; }
+    .tiptap-content img { max-width: 100%; border-radius: 6px; margin: 4px; vertical-align: top; display: inline-block; }
     .tiptap-content video { max-width: 100%; border-radius: 6px; margin: 4px 0; }
     .tiptap-content a { color: #0d6efd; }
+    .tiptap-content .image-resizer { display: inline-block; position: relative; }
+    .tiptap-content .image-resizer img { display: block; max-width: 100%; }
+    .tiptap-content .image-resizer .resize-trigger { position: absolute; right: -4px; bottom: -4px; width: 12px; height: 12px; background: var(--vvc-green); border: 2px solid #fff; border-radius: 2px; cursor: nwse-resize; }
   </style>
 </head>
 <body>
@@ -237,7 +240,10 @@
                     <% }) %>
                   </select>
                 </div>
-                <button type="submit" class="btn btn-sm btn-primary">Save Edit</button>
+                <div class="d-flex gap-2">
+                  <button type="submit" class="btn btn-sm btn-primary">Save Edit</button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#edit-<%= idx %>">Discard</button>
+                </div>
               </form>
             </div>
 
@@ -351,7 +357,10 @@
                     <% }) %>
                   </select>
                 </div>
-                <button type="submit" class="btn btn-sm btn-primary">Save Edit</button>
+                <div class="d-flex gap-2">
+                  <button type="submit" class="btn btn-sm btn-primary">Save Edit</button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#liveEdit-<%= idx %>">Discard</button>
+                </div>
               </form>
             </div>
 
@@ -361,6 +370,41 @@
                 <textarea name="modNote" class="form-control form-control-sm mb-2" rows="2" maxlength="1000" placeholder="Internal mod note (not visible to public)"><%= post.modNote || '' %></textarea>
                 <button type="submit" class="btn btn-sm btn-secondary">Save Note</button>
               </form>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+
+    <!-- ═══ ARCHIVE (REJECTED) ═══ -->
+    <div class="mb-4">
+      <h2 class="section-title">Archive <span class="counter"><%= rejected.length %></span></h2>
+      <% if (rejected.length === 0) { %>
+        <p class="text-muted" style="font-size: 0.82rem;">No rejected posts.</p>
+      <% } else { %>
+        <p class="text-muted" style="font-size: 0.78rem; margin-bottom: 8px;">Rejected posts are kept here for review. Restore to move back to pending queue.</p>
+        <% rejected.forEach((post, idx) => { %>
+          <div class="post-row">
+            <div class="d-flex justify-content-between align-items-start">
+              <div style="flex: 1;">
+                <span class="post-title"><%= post.title %></span>
+                <span class="section-badge section-<%= post.section %>"><%= post.section.replace('_', ' ') %></span>
+              </div>
+              <div class="d-flex gap-1">
+                <form method="POST" action="/admin/restore/<%= post.id %>" style="display:inline;">
+                  <button class="btn btn-outline-success btn-xs" title="Restore to pending">↩ Restore</button>
+                </form>
+                <form method="POST" action="/admin/purge/<%= post.id %>" style="display:inline;"
+                      onsubmit="return confirm('Permanently delete this post? This cannot be undone.')">
+                  <button class="btn btn-outline-danger btn-xs" title="Permanently delete">🗑 Delete</button>
+                </form>
+              </div>
+            </div>
+            <div class="post-desc rich-content" style="font-size: 0.8rem; color: #777; margin-top: 4px;"><%- post.desc %></div>
+            <div class="post-meta">
+              <% if (post.location) { %>📍 <%= post.location %> &middot; <% } %>
+              Submitted <%= new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) %>
+              <% if (post.modNote) { %>&middot; <em>Note: <%= post.modNote %></em><% } %>
             </div>
           </div>
         <% }) %>

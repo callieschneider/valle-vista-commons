@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
+const path = require('path');
 const prisma = require('../lib/db');
 const { requireSuperAdmin, hashPassword } = require('../lib/auth');
 const { chatCompletion } = require('../lib/openrouter');
+const { upload, UPLOAD_DIR } = require('../lib/upload');
 
 // Apply super admin auth to all routes
 router.use(requireSuperAdmin);
@@ -156,6 +159,28 @@ router.post('/settings/site', async (req, res) => {
   } catch (err) {
     console.error('Site settings error:', err.message);
     res.redirect('/super?error=site_save_failed');
+  }
+});
+
+// ─── File Sync (upload with exact filename) ─────────────
+// Super-admin-protected — used to sync local files to Railway volume
+
+router.post('/sync-upload', upload.single('file'), (req, res) => {
+  try {
+    const filename = req.query.filename;
+    if (!filename || !req.file) {
+      return res.status(400).json({ error: 'file and ?filename= required' });
+    }
+    // Sanitize filename — only allow uuid-style names with extension
+    if (!/^[a-f0-9\-]+\.\w+$/.test(filename)) {
+      return res.status(400).json({ error: 'Invalid filename' });
+    }
+    const dest = path.join(UPLOAD_DIR, filename);
+    fs.writeFileSync(dest, req.file.buffer);
+    res.json({ ok: true, url: `/uploads/${filename}` });
+  } catch (err) {
+    console.error('Sync upload error:', err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 
