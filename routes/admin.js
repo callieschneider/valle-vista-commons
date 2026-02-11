@@ -4,6 +4,7 @@ const xssFilters = require('xss-filters');
 const prisma = require('../lib/db');
 const { requireMod } = require('../lib/auth');
 const { rewriteTip, analyzeInBackground } = require('../lib/ai');
+const { sanitizeRichText } = require('../lib/sanitize');
 
 // Apply mod auth to all admin routes
 router.use(requireMod);
@@ -98,7 +99,7 @@ router.post('/reject/:id', async (req, res) => {
 router.post('/edit/:id', async (req, res) => {
   try {
     const title = sanitize(req.body.title || '').substring(0, 100);
-    const desc = sanitize(req.body.desc || '').substring(0, 500);
+    const desc = sanitizeRichText(req.body.desc || '');
     const location = sanitize(req.body.location || '').substring(0, 100) || null;
     const section = req.body.section || undefined;
 
@@ -223,7 +224,7 @@ router.post('/delete/:id', async (req, res) => {
 router.post('/notes', async (req, res) => {
   try {
     const title = sanitize(req.body.title || '').substring(0, 100);
-    const desc = sanitize(req.body.desc || '').substring(0, 500);
+    const desc = sanitizeRichText(req.body.desc || '');
 
     if (!title || !desc) return res.redirect('/admin?error=notes_empty');
 

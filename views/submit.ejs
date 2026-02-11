@@ -17,12 +17,36 @@
     .form-card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
     .btn-submit { background: var(--vvc-green); border-color: var(--vvc-green); color: #fff; border-radius: 8px; }
     .btn-submit:hover { background: var(--vvc-green-light); border-color: var(--vvc-green-light); color: #fff; }
-    .char-count { font-size: 0.75rem; color: #999; }
-    .char-count.warn { color: #dc3545; }
+
+    /* Tiptap editor styling */
+    .editor-wrapper { border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden; }
+    .editor-toolbar {
+      display: flex; flex-wrap: wrap; gap: 2px; padding: 6px 8px;
+      background: #f8f9fa; border-bottom: 1px solid #dee2e6;
+    }
+    .editor-toolbar button {
+      background: none; border: 1px solid transparent; border-radius: 4px;
+      padding: 4px 8px; font-size: 0.8rem; cursor: pointer; color: #555;
+    }
+    .editor-toolbar button:hover { background: #e9ecef; }
+    .editor-toolbar button.active { background: #dee2e6; color: #000; border-color: #ced4da; }
+    .editor-toolbar .sep { width: 1px; background: #dee2e6; margin: 2px 4px; }
+
+    .tiptap-content { min-height: 120px; padding: 10px; outline: none; font-size: 0.9rem; }
+    .tiptap-content p { margin-bottom: 0.5rem; }
+    .tiptap-content img { max-width: 100%; border-radius: 8px; margin: 8px 0; }
+    .tiptap-content video { max-width: 100%; border-radius: 8px; margin: 8px 0; }
+    .tiptap-content a { color: var(--vvc-green); }
+    .tiptap-content blockquote { border-left: 3px solid #dee2e6; padding-left: 12px; color: #666; }
+    .tiptap-content h2 { font-size: 1.1rem; font-weight: 700; }
+    .tiptap-content h3 { font-size: 1rem; font-weight: 600; }
+    .tiptap-content p.is-editor-empty:first-child::before {
+      content: attr(data-placeholder); float: left; color: #adb5bd; pointer-events: none; height: 0;
+    }
   </style>
 </head>
 <body>
-  <div class="container py-4" style="max-width: 540px;">
+  <div class="container py-4" style="max-width: 580px;">
     <div class="text-center mb-4">
       <a href="/" class="brand fs-4">&larr; <%= settings.boardName %></a>
     </div>
@@ -51,7 +75,7 @@
             <div class="alert alert-danger py-2" style="font-size: 0.85rem;" role="alert"><%= error %></div>
           <% } %>
 
-          <form method="POST" action="/submit">
+          <form method="POST" action="/submit" id="submitForm">
             <!-- Honeypot -->
             <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
 
@@ -63,11 +87,21 @@
             </div>
 
             <div class="mb-3">
-              <label for="desc" class="form-label fw-semibold" style="font-size: 0.85rem;">Description</label>
-              <textarea class="form-control" id="desc" name="desc" rows="4"
-                        maxlength="500" required placeholder="What's going on? Keep it factual."
-              ><%= values.desc || '' %></textarea>
-              <div class="char-count mt-1" id="charCount">0 / 500</div>
+              <label class="form-label fw-semibold" style="font-size: 0.85rem;">Description</label>
+              <div class="editor-wrapper">
+                <div class="editor-toolbar" id="toolbar">
+                  <button type="button" data-action="bold" title="Bold"><b>B</b></button>
+                  <button type="button" data-action="italic" title="Italic"><i>I</i></button>
+                  <div class="sep"></div>
+                  <button type="button" data-action="link" title="Add Link">🔗</button>
+                  <div class="sep"></div>
+                  <button type="button" data-action="image" title="Upload Image">📷</button>
+                  <button type="button" data-action="video" title="Upload Video">🎥</button>
+                </div>
+                <div id="editor"></div>
+              </div>
+              <input type="hidden" name="desc" id="descHidden" value="">
+              <div class="form-text" style="font-size: 0.72rem;">You can paste or drag images and videos directly into the editor.</div>
             </div>
 
             <div class="mb-3">
@@ -107,18 +141,8 @@
     <% } %>
   </div>
 
-  <script>
-    const desc = document.getElementById('desc');
-    const counter = document.getElementById('charCount');
-    if (desc && counter) {
-      function update() {
-        const len = desc.value.length;
-        counter.textContent = len + ' / 500';
-        counter.classList.toggle('warn', len > 450);
-      }
-      desc.addEventListener('input', update);
-      update();
-    }
-  </script>
+  <% if (!success) { %>
+  <script type="module" src="/js/submit-init.js"></script>
+  <% } %>
 </body>
 </html>

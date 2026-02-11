@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#2d6a4f"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Back V (lighter, offset left) -->
+    <path d="M6 8 L13 25 L20 8" stroke="#40916c" stroke-width="4"/>
+    <!-- Front V (white, offset right) -->
+    <path d="M12 8 L19 25 L26 8" stroke="#ffffff" stroke-width="4"/>
+  </g>
+</svg>

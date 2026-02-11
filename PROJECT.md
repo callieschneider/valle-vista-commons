@@ -6,7 +6,7 @@ No accounts. No tracking. No personal information collected. Ever.
 
 ---
 
-## Status: v1.0.0 — Board Expansion
+## Status: v1.1.0 — Rich Text & Media
 
 | Feature | Status |
 |---------|--------|
@@ -24,6 +24,11 @@ No accounts. No tracking. No personal information collected. Ever.
 | Client-side search across all sections | ✅ |
 | Rate limiting | ✅ |
 | Railway deployment | ✅ |
+| Tiptap rich text editor (public + admin) | ✅ |
+| Image upload with EXIF/GPS stripping | ✅ |
+| Video upload (MP4, WebM) | ✅ |
+| HTML sanitization + safe rendering | ✅ |
+| Railway volume for persistent uploads | ✅ |
 
 ---
 
@@ -37,10 +42,12 @@ No accounts. No tracking. No personal information collected. Ever.
 | ORM | Prisma 6 |
 | Templates | EJS |
 | CSS | Bootstrap 5 (CDN) |
-| Security | Helmet, xss-filters, rate-limiter-flexible |
+| Security | Helmet, xss-filters, rate-limiter-flexible, sanitize-html |
 | Captcha | hCaptcha (free tier) |
 | AI | OpenRouter API (configurable models) |
-| Hosting | Railway |
+| Rich Text | Tiptap 2 (CDN via esm.sh) |
+| Uploads | multer (multipart), sharp (image processing) |
+| Hosting | Railway (+ volume for uploads) |
 
 ---
 
@@ -57,7 +64,7 @@ Request → Express middleware (helmet, cors, rate-limit) → Route handler → 
 ```
 server.js                    -- entry point: middleware, view engine, mount routers
 routes/
-  public.js                  -- GET / (board), GET /submit, POST /submit
+  public.js                  -- GET / (board), GET /submit, POST /submit, POST /api/upload
   admin.js                   -- mod dashboard, approve/reject/edit/pin/rewrite/delete/notes
   super.js                   -- super admin: mod CRUD, LLM config, site settings
 lib/
@@ -65,6 +72,14 @@ lib/
   auth.js                    -- requireMod(), requireSuperAdmin(), hashPassword()
   openrouter.js              -- chatCompletion() wrapper with AbortController timeout
   ai.js                      -- analyzeTip(), rewriteTip(), analyzeInBackground()
+  upload.js                  -- multer config, processAndSave(), EXIF stripping
+  sanitize.js                -- sanitizeRichText(), stripHtml()
+public/
+  js/
+    editor.js                -- Tiptap editor module (ESM, CDN imports from esm.sh)
+    submit-init.js           -- submit page editor initialization
+    admin-init.js            -- admin page editor initialization
+uploads/                     -- uploaded images/videos (gitignored, Railway volume)
 views/
   board.ejs                  -- public board (sectioned)
   submit.ejs                 -- "Submit a Tip" form
@@ -80,6 +95,7 @@ prisma/
 
 | Method | Path | Auth | Purpose |
 |--------|------|------|---------|
+| POST | /api/upload | None | Upload image/video, returns JSON {url, type, filename} |
 | GET | `/` | Public | Board — sectioned community board |
 | GET | `/submit` | Public | Tip submission form |
 | POST | `/submit` | Public + hCaptcha | Create pending tip |
@@ -113,7 +129,7 @@ prisma/
 |--------|------|-------|
 | id | String (cuid) | Primary key |
 | title | VarChar(100) | Required |
-| desc | VarChar(500) | Required |
+| desc | Text | Required. Stores sanitized HTML from Tiptap editor |
 | location | VarChar(100)? | Optional, intentionally vague |
 | section | Enum: ALERT, HAPPENINGS, LOST_FOUND, NEIGHBORS, BOARD_NOTES | Board section |
 | status | Enum: PENDING, LIVE, EXPIRED | Moderation state |
@@ -197,6 +213,7 @@ Both use HTTP Basic Auth. No sessions, no cookies.
 | `HCAPTCHA_SECRET` | No | — | hCaptcha secret key |
 | `PORT` | No | `3000` | Server port (Railway auto-provides) |
 | `NODE_ENV` | No | — | Set to `production` in Railway |
+| `UPLOAD_DIR` | No | `./uploads` | Upload directory (Railway volume mounted at `/uploads/`) |
 
 ---
 
@@ -229,3 +246,4 @@ npm run studio
 4. Set `SUPER_ADMIN_PASS` in Railway environment variables
 5. Optionally set `OPENROUTER_API_KEY` for AI features
 6. Optionally set `HCAPTCHA_SITEKEY` and `HCAPTCHA_SECRET`
+7. Add a Railway volume, mount at `/uploads/`, set `UPLOAD_DIR=/uploads/`

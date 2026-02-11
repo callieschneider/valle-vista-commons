@@ -8,6 +8,7 @@ const cors = require('cors');
 const path = require('path');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 const prisma = require('./lib/db');
+const { UPLOAD_DIR } = require('./lib/upload');
 
 // ─── Routes ──────────────────────────────────────────────
 const publicRoutes = require('./routes/public');
@@ -44,11 +45,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "https://cdn.jsdelivr.net", "https://hcaptcha.com", "https://*.hcaptcha.com"],
+      scriptSrc: ["'self'", "https://cdn.jsdelivr.net", "https://hcaptcha.com", "https://*.hcaptcha.com", "https://esm.sh"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
       frameSrc: ["https://hcaptcha.com", "https://*.hcaptcha.com"],
-      connectSrc: ["'self'", "https://hcaptcha.com", "https://*.hcaptcha.com"],
+      connectSrc: ["'self'", "https://hcaptcha.com", "https://*.hcaptcha.com", "https://esm.sh"],
       imgSrc: ["'self'", "data:"],
+      mediaSrc: ["'self'"],
     }
   },
   crossOriginEmbedderPolicy: false,
@@ -75,6 +77,9 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Uploaded media (images/videos)
+app.use('/uploads', express.static(UPLOAD_DIR));
 
 // Disable x-powered-by
 app.disable('x-powered-by');

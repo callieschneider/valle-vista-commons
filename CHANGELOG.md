@@ -6,6 +6,62 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-02-11 - Rich Text Editor & Media Uploads
+
+### Added
+- **Tiptap rich text editor** on submit form, admin edit forms, and board notes composer
+  - Bold, italic, links, image upload, video upload
+  - Public submitters get simple mode (bold, italic, links, media)
+  - Mods get full mode (+ headings, lists, blockquotes)
+- **Image/video upload endpoint** (`POST /api/upload`)
+  - Images: JPG, PNG, GIF, WebP — max 10MB, auto-resized to 1920px
+  - Videos: MP4, WebM — max 50MB
+  - EXIF/GPS metadata stripped from images for privacy (via `sharp`)
+  - UUID filenames prevent collisions
+- **HTML sanitization** via `sanitize-html`
+  - Whitelisted tags: p, br, strong, em, u, s, h1-h3, ul, ol, li, blockquote, a, img, video
+  - External images/videos blocked (only `/uploads/` paths allowed)
+  - Links forced to `target="_blank" rel="noopener noreferrer"`
+- Rich content rendering on public board with safe HTML output
+- CSP updated for `esm.sh` (Tiptap CDN) and media serving
+- AI analysis strips HTML before sending to LLM
+
+### Changed
+- `desc` field: `VarChar(500)` → `Text` (Prisma migration)
+- Submit form: textarea replaced with Tiptap editor
+- Admin edit forms: textarea replaced with Tiptap editor
+- Board notes composer: textarea replaced with Tiptap editor
+- Board view: post descriptions render as rich HTML
+
+### Dependencies Added
+- `multer` ^2.0.2 — multipart file upload handling
+- `sanitize-html` ^2.17.0 — HTML sanitization
+- `sharp` ^0.34.5 — image processing, EXIF stripping
+
+### New Files
+- `lib/upload.js` — multer config, file processing, EXIF stripping
+- `lib/sanitize.js` — HTML sanitization and plain text extraction
+- `public/js/editor.js` — Tiptap editor module (ESM, loaded from esm.sh CDN)
+- `public/js/submit-init.js` — submit page editor initialization
+- `public/js/admin-init.js` — admin page editor initialization
+
+### Environment Variables
+- `UPLOAD_DIR` — upload directory path (Railway volume at `/uploads/`, or `./uploads` locally)
+
+---
+
+## 2026-02-11 - Favicon
+
+### Added
+- SVG favicon: two overlapping V's (VV) on a rounded green (`#2d6a4f`) square. Back V in lighter green, front V in white.
+- `<link rel="icon">` added to all 5 EJS views (board, submit, admin, super, error).
+
+### Files Changed
+- `public/favicon.svg`: New
+- `views/board.ejs`, `views/submit.ejs`, `views/admin.ejs`, `views/super.ejs`, `views/error.ejs`: Added favicon link tag
+
+---
+
 ## 2026-02-11 - Board Expansion v1.0.0
 
 ### Summary

@@ -4,6 +4,8 @@ const xssFilters = require('xss-filters');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 const prisma = require('../lib/db');
 const { analyzeInBackground } = require('../lib/ai');
+const { upload, processAndSave } = require('../lib/upload');
+const { sanitizeRichText, stripHtml } = require('../lib/sanitize');
 
 // ─── Config ──────────────────────────────────────────────
 const HCAPTCHA_SECRET = process.env.HCAPTCHA_SECRET || '';
@@ -94,6 +96,21 @@ async function autoExpire() {
   });
 }
 
+// ─── Upload API ─────────────────────────────────────────
+
+router.post('/api/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file provided' });
+    }
+    const result = await processAndSave(req.file);
+    res.json(result);
+  } catch (err) {
+    console.error('Upload error:', err.message);
+    res.status(400).json({ error: err.message || 'Upload failed' });
+  }
+});
+
 // ─── Routes ─────────────────────────────────────────────
 
 // Board (home page)
@@ -178,11 +195,14 @@ router.post('/submit', async (req, res) => {
 
     // Validate & sanitize
     const title = sanitize(req.body.title || '').substring(0, 100);
-    const desc = sanitize(req.body.desc || '').substring(0, 500);
+    const rawDesc = req.body.desc || '';
+    const desc = sanitizeRichText(rawDesc);
     const location = sanitize(req.body.location || '').substring(0, 100) || null;
     const section = (req.body.section || '').toUpperCase();
 
-    if (!title || !desc) {
+    // Check there's actual text content (not just empty HTML tags)
+    const plainText = stripHtml(desc);
+    if (!title || !plainText) {
       return res.status(400).render('submit', {
         ...renderOpts,
         error: 'Title and description are required.',

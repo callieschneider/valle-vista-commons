@@ -4,3 +4,4 @@ node_modules/
 .DS_Store
 prisma/*.db
 prisma/migrations/**/migration_lock.toml
+uploads/

@@ -10,7 +10,7 @@ datasource db {
 model Post {
   id          String    @id @default(cuid())
   title       String    @db.VarChar(100)
-  desc        String    @db.VarChar(500)
+  desc        String    @db.Text
   location    String?   @db.VarChar(100)
   section     Section   @default(NEIGHBORS)
   status      Status    @default(PENDING)
