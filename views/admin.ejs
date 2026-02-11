@@ -11,31 +11,75 @@
     body { background: var(--vvc-bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     .brand { font-weight: 800; color: var(--vvc-green); text-decoration: none; }
     .section-title { font-weight: 700; font-size: 1rem; color: #333; border-bottom: 2px solid var(--vvc-green); padding-bottom: 4px; }
-    .post-row { background: #fff; border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .post-row { background: #fff; border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     .post-title { font-weight: 600; font-size: 0.9rem; }
     .post-meta { font-size: 0.75rem; color: #888; }
     .post-desc { font-size: 0.82rem; color: #555; margin: 4px 0; }
     .btn-xs { font-size: 0.72rem; padding: 2px 10px; border-radius: 6px; }
-    .tag-pill { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; }
-    .tag-VEHICLE { background: #0d6efd; }
-    .tag-PERSON { background: #dc3545; }
-    .tag-ANIMAL { background: #e67e22; }
-    .tag-EVENT { background: #6f42c1; }
-    .tag-OTHER { background: #6c757d; }
     .counter { display: inline-block; background: var(--vvc-green); color: #fff; border-radius: 50%; width: 22px; height: 22px; font-size: 0.72rem; line-height: 22px; text-align: center; margin-left: 6px; }
+
+    .section-badge { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 4px; }
+    .section-ALERT { background: rgba(220,53,69,0.15); color: #dc3545; }
+    .section-HAPPENINGS { background: rgba(111,66,193,0.15); color: #6f42c1; }
+    .section-LOST_FOUND { background: rgba(13,110,253,0.15); color: #0d6efd; }
+    .section-NEIGHBORS { background: rgba(45,106,79,0.15); color: #2d6a4f; }
+    .section-BOARD_NOTES { background: rgba(108,117,125,0.15); color: #6c757d; }
+
+    .ai-panel { background: #f8f9fa; border-radius: 8px; padding: 10px 14px; margin-top: 8px; font-size: 0.8rem; border: 1px solid #e9ecef; }
+    .ai-panel .label { font-weight: 600; color: #666; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px; }
+    .urgency-LOW { color: #198754; } .urgency-MEDIUM { color: #ffc107; } .urgency-HIGH { color: #dc3545; }
+    .rec-APPROVE { color: #198754; } .rec-FLAG { color: #ffc107; } .rec-REJECT { color: #dc3545; }
+
+    .mod-note-area { font-size: 0.78rem; }
+    .pin-badge { background: #e67e22; color: #fff; font-size: 0.6rem; border-radius: 4px; padding: 1px 6px; }
+    .urgent-badge { background: #dc3545; color: #fff; font-size: 0.6rem; border-radius: 4px; padding: 1px 6px; }
+    .edited-badge { background: #6c757d; color: #fff; font-size: 0.6rem; border-radius: 4px; padding: 1px 6px; }
+
+    .collapse-toggle { cursor: pointer; color: #0d6efd; font-size: 0.78rem; }
+    .collapse-toggle:hover { text-decoration: underline; }
+
+    .notes-composer { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
   </style>
 </head>
 <body>
-  <div class="container py-4" style="max-width: 700px;">
+  <div class="container py-4" style="max-width: 800px;">
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <a href="/" class="brand fs-5">Valle Vista Commons</a>
         <span class="text-muted" style="font-size: 0.8rem;"> / Admin</span>
       </div>
-      <a href="/" class="btn btn-outline-secondary btn-sm">View Feed</a>
+      <div class="d-flex gap-2">
+        <a href="/" class="btn btn-outline-secondary btn-sm">View Board</a>
+      </div>
     </div>
 
-    <!-- Pending Queue -->
+    <!-- Error/Success Messages -->
+    <% if (error) { %>
+      <div class="alert alert-danger py-2 alert-dismissible" style="font-size: 0.85rem;">
+        <% if (error === 'not_found') { %>Post not found.
+        <% } else if (error === 'no_rewrite') { %>No AI rewrite available for this post.
+        <% } else if (error === 'rewrite_failed') { %>AI rewrite failed. Check API key and try again.
+        <% } else if (error === 'notes_empty') { %>Title and description are required for Board Notes.
+        <% } else { %><%= error %><% } %>
+        <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+    <% if (msg) { %>
+      <div class="alert alert-success py-2 alert-dismissible" style="font-size: 0.85rem;">
+        <% if (msg === 'approved') { %>Post approved!
+        <% } else { %>Done.<% } %>
+        <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <% if (!hasApiKey) { %>
+      <div class="alert alert-warning py-2" style="font-size: 0.8rem;">
+        <strong>AI features disabled</strong> — No OpenRouter API key configured. AI analysis and rewrite won't work.
+      </div>
+    <% } %>
+
+    <!-- ═══ PENDING REVIEW ═══ -->
     <div class="mb-4">
       <h2 class="section-title">
         Pending Review
@@ -43,69 +87,247 @@
       </h2>
 
       <% if (pending.length === 0) { %>
-        <div class="text-muted text-center py-4" style="font-size: 0.85rem;">No posts waiting for review. 🎉</div>
+        <div class="text-muted text-center py-4" style="font-size: 0.85rem;">No tips waiting for review.</div>
       <% } else { %>
-        <% pending.forEach(post => { %>
+        <% pending.forEach((post, idx) => { %>
           <div class="post-row">
             <div class="d-flex justify-content-between align-items-start">
               <div class="flex-grow-1">
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
                   <span class="post-title"><%= post.title %></span>
-                  <span class="badge tag-pill tag-<%= post.tag %>"><%= post.tag %></span>
+                  <span class="section-badge section-<%= post.section %>"><%= post.section.replace('_', ' ') %></span>
                 </div>
                 <div class="post-desc"><%= post.desc %></div>
                 <div class="post-meta">
-                  📍 <%= post.location %> &middot;
+                  <% if (post.location) { %>📍 <%= post.location %> &middot; <% } %>
                   Submitted <%= new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) %>
                 </div>
               </div>
-              <div class="d-flex gap-1 ms-3 flex-shrink-0">
-                <form method="POST" action="/admin/approve/<%= post.id %>" style="display:inline;">
-                  <button type="submit" class="btn btn-success btn-xs" title="Approve">✓</button>
+            </div>
+
+            <!-- AI Analysis Panel -->
+            <% if (post.aiAnalysis) { %>
+              <div class="ai-panel">
+                <div class="d-flex flex-wrap gap-3 mb-2">
+                  <div><span class="label">Section: </span><span class="fw-semibold"><%= post.aiAnalysis.suggestedSection %></span></div>
+                  <div><span class="label">Urgency: </span><span class="fw-semibold urgency-<%= post.aiAnalysis.urgency %>"><%= post.aiAnalysis.urgency %></span></div>
+                  <div><span class="label">Rec: </span><span class="fw-semibold rec-<%= post.aiAnalysis.recommendation %>"><%= post.aiAnalysis.recommendation %></span></div>
+                  <div><span class="label">Sentiment: </span><%= post.aiAnalysis.sentiment %></div>
+                </div>
+                <% if (post.aiAnalysis.piiDetected && post.aiAnalysis.piiDetected.length > 0) { %>
+                  <div class="text-danger mb-1" style="font-size: 0.75rem;">⚠️ PII detected: <%= post.aiAnalysis.piiDetected.join(', ') %></div>
+                <% } %>
+                <div class="mb-1" style="font-size: 0.78rem;"><em><%= post.aiAnalysis.reasoning %></em></div>
+
+                <% if (post.aiAnalysis.rewrite) { %>
+                  <span class="collapse-toggle" data-bs-toggle="collapse" data-bs-target="#rewrite-<%= idx %>">View AI Rewrite ▾</span>
+                  <div class="collapse mt-1" id="rewrite-<%= idx %>">
+                    <div style="font-size: 0.78rem; background: #fff; padding: 8px 10px; border-radius: 6px;">
+                      <strong><%= post.aiAnalysis.rewrite.title %></strong><br>
+                      <%= post.aiAnalysis.rewrite.desc %>
+                    </div>
+                  </div>
+                <% } %>
+              </div>
+            <% } else { %>
+              <div class="ai-panel text-muted">
+                <% if (hasApiKey) { %>
+                  Analysis pending...
+                  <form method="POST" action="/admin/reanalyze/<%= post.id %>" style="display: inline;">
+                    <button type="submit" class="btn btn-link btn-sm p-0" style="font-size: 0.75rem;">Retry</button>
+                  </form>
+                <% } else { %>
+                  AI analysis not available (no API key)
+                <% } %>
+              </div>
+            <% } %>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2 mt-2 flex-wrap align-items-center">
+              <!-- Approve -->
+              <form method="POST" action="/admin/approve/<%= post.id %>" class="d-flex align-items-center gap-1">
+                <select name="section" class="form-select form-select-sm" style="font-size: 0.72rem; width: auto; padding: 2px 24px 2px 6px;">
+                  <% ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS'].forEach(s => { %>
+                    <option value="<%= s %>" <%= (post.aiAnalysis?.suggestedSection === s || (!post.aiAnalysis && post.section === s)) ? 'selected' : '' %>><%= s.replace('_', ' ') %></option>
+                  <% }) %>
+                </select>
+                <button type="submit" class="btn btn-success btn-xs">✓ Approve</button>
+              </form>
+
+              <!-- Reject -->
+              <form method="POST" action="/admin/reject/<%= post.id %>" onsubmit="return confirm('Reject and delete this tip?')">
+                <button type="submit" class="btn btn-danger btn-xs">✗ Reject</button>
+              </form>
+
+              <!-- Apply AI Rewrite -->
+              <% if (post.aiAnalysis?.rewrite) { %>
+                <form method="POST" action="/admin/rewrite/<%= post.id %>">
+                  <input type="hidden" name="action" value="apply">
+                  <button type="submit" class="btn btn-outline-primary btn-xs">Apply AI Rewrite</button>
                 </form>
-                <form method="POST" action="/admin/reject/<%= post.id %>" style="display:inline;"
-                      onsubmit="return confirm('Reject and delete this post?')">
-                  <button type="submit" class="btn btn-danger btn-xs" title="Reject">✗</button>
+              <% } %>
+
+              <!-- Edit Toggle -->
+              <span class="collapse-toggle" data-bs-toggle="collapse" data-bs-target="#edit-<%= idx %>">Edit ✏️</span>
+
+              <!-- Custom Rewrite Toggle -->
+              <% if (hasApiKey) { %>
+                <span class="collapse-toggle" data-bs-toggle="collapse" data-bs-target="#customRewrite-<%= idx %>">Custom Rewrite 🤖</span>
+              <% } %>
+            </div>
+
+            <!-- Edit Form (collapsed) -->
+            <div class="collapse mt-2" id="edit-<%= idx %>">
+              <form method="POST" action="/admin/edit/<%= post.id %>" class="p-2" style="background: #f8f9fa; border-radius: 8px;">
+                <div class="mb-2">
+                  <input type="text" name="title" class="form-control form-control-sm" value="<%= post.title %>" maxlength="100">
+                </div>
+                <div class="mb-2">
+                  <textarea name="desc" class="form-control form-control-sm" rows="3" maxlength="500"><%= post.desc %></textarea>
+                </div>
+                <div class="mb-2">
+                  <input type="text" name="location" class="form-control form-control-sm" value="<%= post.location || '' %>" maxlength="100" placeholder="Location (optional)">
+                </div>
+                <div class="mb-2">
+                  <select name="section" class="form-select form-select-sm">
+                    <% ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS'].forEach(s => { %>
+                      <option value="<%= s %>" <%= post.section === s ? 'selected' : '' %>><%= s.replace('_', ' ') %></option>
+                    <% }) %>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary">Save Edit</button>
+              </form>
+            </div>
+
+            <!-- Custom Rewrite Form (collapsed) -->
+            <% if (hasApiKey) { %>
+              <div class="collapse mt-2" id="customRewrite-<%= idx %>">
+                <form method="POST" action="/admin/rewrite/<%= post.id %>" class="p-2" style="background: #f8f9fa; border-radius: 8px;">
+                  <input type="hidden" name="action" value="custom">
+                  <div class="mb-2">
+                    <input type="text" name="instructions" class="form-control form-control-sm" placeholder="e.g. Make shorter, remove location details" required>
+                  </div>
+                  <button type="submit" class="btn btn-sm btn-outline-primary">Rewrite with AI</button>
+                  <small class="text-muted ms-2">(takes a few seconds)</small>
                 </form>
               </div>
-            </div>
+            <% } %>
           </div>
         <% }) %>
       <% } %>
     </div>
 
-    <!-- Live Posts -->
-    <div>
-      <h2 class="section-title">Live Posts <small class="text-muted fw-normal" style="font-size: 0.75rem;">(<%= live.length %>)</small></h2>
+    <!-- ═══ LIVE POSTS ═══ -->
+    <div class="mb-4">
+      <h2 class="section-title">Live Board <small class="text-muted fw-normal" style="font-size: 0.75rem;">(<%= live.length %>)</small></h2>
 
       <% if (live.length === 0) { %>
         <div class="text-muted text-center py-4" style="font-size: 0.85rem;">No live posts.</div>
       <% } else { %>
-        <% live.forEach(post => { %>
+        <% live.forEach((post, idx) => { %>
           <div class="post-row">
             <div class="d-flex justify-content-between align-items-start">
               <div class="flex-grow-1">
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
                   <span class="post-title"><%= post.title %></span>
-                  <span class="badge tag-pill tag-<%= post.tag %>"><%= post.tag %></span>
+                  <span class="section-badge section-<%= post.section %>"><%= post.section.replace('_', ' ') %></span>
+                  <% if (post.pinned) { %><span class="pin-badge">📌 PINNED</span><% } %>
+                  <% if (post.urgent) { %><span class="urgent-badge">🚨 URGENT</span><% } %>
+                  <% if (post.editedAt) { %><span class="edited-badge">edited</span><% } %>
+                  <% if (post.modPost) { %><span class="edited-badge">mod post</span><% } %>
                 </div>
                 <div class="post-desc"><%= post.desc %></div>
                 <div class="post-meta">
-                  📍 <%= post.location %> &middot;
-                  Approved <%= new Date(post.approvedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %>
+                  <% if (post.location) { %>📍 <%= post.location %> &middot; <% } %>
+                  Approved <%= post.approvedAt ? new Date(post.approvedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'n/a' %>
+                  <% if (post.expiresAt) { %>&middot; Expires <%= new Date(post.expiresAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %><% } %>
                 </div>
+                <% if (post.modNote) { %>
+                  <div class="mod-note-area mt-1" style="color: #6c757d;"><strong>Mod note:</strong> <%= post.modNote %></div>
+                <% } %>
               </div>
-              <div class="ms-3 flex-shrink-0">
-                <form method="POST" action="/admin/delete/<%= post.id %>" style="display:inline;"
-                      onsubmit="return confirm('Delete this post permanently?')">
-                  <button type="submit" class="btn btn-outline-danger btn-xs" title="Delete">🗑</button>
-                </form>
-              </div>
+            </div>
+
+            <!-- Live Post Actions -->
+            <div class="d-flex gap-2 mt-2 flex-wrap align-items-center">
+              <form method="POST" action="/admin/pin/<%= post.id %>" style="display:inline;">
+                <button type="submit" class="btn btn-xs <%= post.pinned ? 'btn-warning' : 'btn-outline-warning' %>" title="<%= post.pinned ? 'Unpin' : 'Pin' %>">
+                  📌 <%= post.pinned ? 'Unpin' : 'Pin' %>
+                </button>
+              </form>
+
+              <form method="POST" action="/admin/urgent/<%= post.id %>" style="display:inline;">
+                <button type="submit" class="btn btn-xs <%= post.urgent ? 'btn-danger' : 'btn-outline-danger' %>" title="<%= post.urgent ? 'Remove Urgent' : 'Mark Urgent' %>">
+                  🚨 <%= post.urgent ? 'Not Urgent' : 'Urgent' %>
+                </button>
+              </form>
+
+              <form method="POST" action="/admin/expire/<%= post.id %>" style="display:inline;" onsubmit="return confirm('Expire this post?')">
+                <button type="submit" class="btn btn-outline-secondary btn-xs">⏰ Expire</button>
+              </form>
+
+              <form method="POST" action="/admin/delete/<%= post.id %>" style="display:inline;" onsubmit="return confirm('Delete this post permanently?')">
+                <button type="submit" class="btn btn-outline-danger btn-xs">🗑 Delete</button>
+              </form>
+
+              <span class="collapse-toggle" data-bs-toggle="collapse" data-bs-target="#liveEdit-<%= idx %>">Edit ✏️</span>
+              <span class="collapse-toggle" data-bs-toggle="collapse" data-bs-target="#modNote-<%= idx %>">Mod Note 📝</span>
+            </div>
+
+            <!-- Live Edit Form (collapsed) -->
+            <div class="collapse mt-2" id="liveEdit-<%= idx %>">
+              <form method="POST" action="/admin/edit/<%= post.id %>" class="p-2" style="background: #f8f9fa; border-radius: 8px;">
+                <div class="mb-2">
+                  <input type="text" name="title" class="form-control form-control-sm" value="<%= post.title %>" maxlength="100">
+                </div>
+                <div class="mb-2">
+                  <textarea name="desc" class="form-control form-control-sm" rows="3" maxlength="500"><%= post.desc %></textarea>
+                </div>
+                <div class="mb-2">
+                  <input type="text" name="location" class="form-control form-control-sm" value="<%= post.location || '' %>" maxlength="100" placeholder="Location (optional)">
+                </div>
+                <div class="mb-2">
+                  <select name="section" class="form-select form-select-sm">
+                    <% ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS', 'BOARD_NOTES'].forEach(s => { %>
+                      <option value="<%= s %>" <%= post.section === s ? 'selected' : '' %>><%= s.replace('_', ' ') %></option>
+                    <% }) %>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary">Save Edit</button>
+              </form>
+            </div>
+
+            <!-- Mod Note Form (collapsed) -->
+            <div class="collapse mt-2" id="modNote-<%= idx %>">
+              <form method="POST" action="/admin/modnote/<%= post.id %>" class="p-2" style="background: #f8f9fa; border-radius: 8px;">
+                <textarea name="modNote" class="form-control form-control-sm mb-2" rows="2" maxlength="1000" placeholder="Internal mod note (not visible to public)"><%= post.modNote || '' %></textarea>
+                <button type="submit" class="btn btn-sm btn-secondary">Save Note</button>
+              </form>
             </div>
           </div>
         <% }) %>
       <% } %>
     </div>
+
+    <!-- ═══ BOARD NOTES COMPOSER ═══ -->
+    <div class="mb-4">
+      <h2 class="section-title">Compose Board Note</h2>
+      <div class="notes-composer">
+        <p class="text-muted" style="font-size: 0.8rem;">Board Notes go live immediately — no review needed. Visible on the public board.</p>
+        <form method="POST" action="/admin/notes">
+          <div class="mb-2">
+            <input type="text" name="title" class="form-control form-control-sm" placeholder="Note title" maxlength="100" required>
+          </div>
+          <div class="mb-2">
+            <textarea name="desc" class="form-control form-control-sm" rows="3" placeholder="Note content" maxlength="500" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-sm btn-primary">Publish Board Note</button>
+        </form>
+      </div>
+    </div>
+
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

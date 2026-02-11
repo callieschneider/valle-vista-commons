@@ -1,24 +1,28 @@
 # Valle Vista Commons
 
-**Privacy-first anonymous neighborhood bulletin board.**
+**Privacy-first moderated community bulletin board.**
 
 No accounts. No tracking. No personal information collected. Ever.
 
 ---
 
-## Status: v0.2.0 — Enhanced
+## Status: v1.0.0 — Board Expansion
 
 | Feature | Status |
 |---------|--------|
-| Public feed with search + filters | ✅ |
-| Anonymous post submission | ✅ |
-| hCaptcha spam protection (optional) | ✅ |
-| Honeypot anti-spam | ✅ |
-| Admin moderation dashboard | ✅ |
+| Sectioned public board (Alerts, Happenings, Lost & Found, Neighbors, Board Notes) | ✅ |
+| Anonymous tip submission with section picker | ✅ |
+| hCaptcha + honeypot spam protection | ✅ |
+| Two-tier auth: Super admin (env vars) + Mods (DB) | ✅ |
+| Admin dashboard with review queue, AI analysis, edit, pin, urgent, expire | ✅ |
+| AI-powered tip analysis via OpenRouter (background, non-blocking) | ✅ |
+| AI-powered tip rewrite (apply auto or custom instructions) | ✅ |
+| Board Notes composer (mod-authored, skip review) | ✅ |
+| Super admin panel (mod CRUD, LLM config, site settings) | ✅ |
+| Configurable LLM models (analysis + rewrite) | ✅ |
+| Section-aware auto-expiry (7d alerts, 14d others) | ✅ |
+| Client-side search across all sections | ✅ |
 | Rate limiting | ✅ |
-| 5 tag categories (Vehicle/Person/Animal/Event/Other) | ✅ |
-| Relative timestamps | ✅ |
-| Auto-expire old posts (DB cleanup) | ✅ |
 | Railway deployment | ✅ |
 
 ---
@@ -35,30 +39,70 @@ No accounts. No tracking. No personal information collected. Ever.
 | CSS | Bootstrap 5 (CDN) |
 | Security | Helmet, xss-filters, rate-limiter-flexible |
 | Captcha | hCaptcha (free tier) |
+| AI | OpenRouter API (configurable models) |
 | Hosting | Railway |
 
 ---
 
 ## Architecture
 
-Single-file Express server (`server.js`) with EJS server-side rendering. No build step. No frontend framework. No bundler.
+Modular Express app with route files and shared lib modules.
 
 ```
 Request → Express middleware (helmet, cors, rate-limit) → Route handler → Prisma query → EJS render → Response
+```
+
+### File Structure
+
+```
+server.js                    -- entry point: middleware, view engine, mount routers
+routes/
+  public.js                  -- GET / (board), GET /submit, POST /submit
+  admin.js                   -- mod dashboard, approve/reject/edit/pin/rewrite/delete/notes
+  super.js                   -- super admin: mod CRUD, LLM config, site settings
+lib/
+  db.js                      -- shared PrismaClient singleton
+  auth.js                    -- requireMod(), requireSuperAdmin(), hashPassword()
+  openrouter.js              -- chatCompletion() wrapper with AbortController timeout
+  ai.js                      -- analyzeTip(), rewriteTip(), analyzeInBackground()
+views/
+  board.ejs                  -- public board (sectioned)
+  submit.ejs                 -- "Submit a Tip" form
+  admin.ejs                  -- mod dashboard
+  super.ejs                  -- super admin panel
+  error.ejs                  -- error page
+prisma/
+  schema.prisma              -- Post, Mod, SiteSettings models
+  seed.js                    -- seeds SiteSettings default row
 ```
 
 ### Routes
 
 | Method | Path | Auth | Purpose |
 |--------|------|------|---------|
-| GET | `/` | Public | Feed — browse approved posts |
-| GET | `/submit` | Public | Submission form |
-| POST | `/submit` | Public + hCaptcha | Create pending post |
-| GET | `/admin` | Basic Auth | Admin dashboard |
-| POST | `/admin/approve/:id` | Basic Auth | Approve a pending post |
-| POST | `/admin/reject/:id` | Basic Auth | Reject (delete) a pending post |
-| POST | `/admin/delete/:id` | Basic Auth | Delete any post |
-| GET | `/health` | Public | Health check endpoint |
+| GET | `/` | Public | Board — sectioned community board |
+| GET | `/submit` | Public | Tip submission form |
+| POST | `/submit` | Public + hCaptcha | Create pending tip |
+| GET | `/admin` | Mod (Basic Auth) | Mod dashboard |
+| POST | `/admin/approve/:id` | Mod | Approve pending tip |
+| POST | `/admin/reject/:id` | Mod | Reject (delete) tip |
+| POST | `/admin/edit/:id` | Mod | Edit tip content |
+| POST | `/admin/rewrite/:id` | Mod | AI rewrite (apply or custom) |
+| POST | `/admin/reanalyze/:id` | Mod | Retry AI analysis |
+| POST | `/admin/pin/:id` | Mod | Toggle pin |
+| POST | `/admin/urgent/:id` | Mod | Toggle urgent |
+| POST | `/admin/expire/:id` | Mod | Expire post |
+| POST | `/admin/delete/:id` | Mod | Delete post |
+| POST | `/admin/notes` | Mod | Publish board note |
+| POST | `/admin/modnote/:id` | Mod | Save internal mod note |
+| GET | `/super` | Super Admin | Super admin panel |
+| POST | `/super/mods/create` | Super Admin | Create mod |
+| POST | `/super/mods/:id/toggle` | Super Admin | Enable/disable mod |
+| POST | `/super/mods/:id/delete` | Super Admin | Delete mod |
+| POST | `/super/settings/llm` | Super Admin | Save LLM model config |
+| POST | `/super/settings/llm-test` | Super Admin | Test LLM connection |
+| POST | `/super/settings/site` | Super Admin | Save site settings |
+| GET | `/health` | Public | Health check |
 
 ---
 
@@ -70,11 +114,39 @@ Request → Express middleware (helmet, cors, rate-limit) → Route handler → 
 | id | String (cuid) | Primary key |
 | title | VarChar(100) | Required |
 | desc | VarChar(500) | Required |
-| location | VarChar(100) | Approximate location, intentionally vague |
-| tag | Enum: VEHICLE, PERSON, ANIMAL, EVENT, OTHER | Filterable category |
+| location | VarChar(100)? | Optional, intentionally vague |
+| section | Enum: ALERT, HAPPENINGS, LOST_FOUND, NEIGHBORS, BOARD_NOTES | Board section |
 | status | Enum: PENDING, LIVE, EXPIRED | Moderation state |
+| pinned | Boolean | Pinned to top of section |
+| urgent | Boolean | Highlighted as urgent |
+| modNote | Text? | Internal mod note (not public) |
+| modPost | Boolean | True if mod-authored (Board Notes) |
+| eventDate | DateTime? | For HAPPENINGS section |
+| expiresAt | DateTime? | Custom expiry date |
+| editedAt | DateTime? | Last edit timestamp |
 | createdAt | DateTime | Auto-set |
-| approvedAt | DateTime? | Set when admin approves |
+| approvedAt | DateTime? | Set when approved |
+| aiAnalysis | Json? | AI analysis result |
+
+### Mod
+| Column | Type | Notes |
+|--------|------|-------|
+| id | String (cuid) | Primary key |
+| username | VarChar(50) | Unique, lowercase |
+| passHash | VarChar(64) | SHA-256 hash |
+| active | Boolean | Can be disabled |
+| createdAt | DateTime | Auto-set |
+
+### SiteSettings (singleton)
+| Column | Type | Notes |
+|--------|------|-------|
+| id | String | Always "default" |
+| boardName | String | Displayed on board |
+| boardTagline | String | Subtitle |
+| analysisModel | String | OpenRouter model ID for analysis |
+| rewriteModel | String | OpenRouter model ID for rewrite |
+| aboutText | Text? | About section content |
+| updatedAt | DateTime | Auto-updated |
 
 ---
 
@@ -83,11 +155,33 @@ Request → Express middleware (helmet, cors, rate-limit) → Route handler → 
 | Concern | Approach |
 |---------|----------|
 | User identity | None collected — fully anonymous |
-| IP addresses | Used only for in-memory rate limiting; never stored to disk or DB |
+| IP addresses | Used only for in-memory rate limiting; never stored |
 | Cookies/Sessions | None. Stateless app. |
 | Tracking | No analytics, no scripts, no pixels |
 | Post content | Sanitized with xss-filters before storage |
-| Location data | User-entered approximate text only (e.g., "Elm St"), not GPS |
+| Location data | User-entered approximate text only (optional) |
+| AI processing | Post content sent to OpenRouter only if API key is set; no PII should be in posts |
+
+---
+
+## Authentication
+
+### Two-tier system
+
+1. **Super Admin** — env vars `SUPER_ADMIN_USER`/`SUPER_ADMIN_PASS`. Access to `/super` (mod management, LLM config, site settings) and `/admin`.
+2. **Mods** — DB `Mod` table, managed by super admin via `/super`. Access to `/admin` only.
+
+Both use HTTP Basic Auth. No sessions, no cookies.
+
+---
+
+## AI Features (OpenRouter)
+
+- **Auto-analysis**: When a tip is submitted, AI analyzes it in the background (fire-and-forget). Results shown in admin review queue.
+- **Apply rewrite**: One-click apply of AI-suggested rewrite from analysis.
+- **Custom rewrite**: Mod provides instructions, AI rewrites (intentionally blocking — mod waits).
+- **Models configurable**: Super admin picks models for analysis and rewrite separately.
+- **Graceful degradation**: If `OPENROUTER_API_KEY` is not set, all AI features are disabled. No data leaves server.
 
 ---
 
@@ -96,8 +190,9 @@ Request → Express middleware (helmet, cors, rate-limit) → Route handler → 
 | Variable | Required | Default | Purpose |
 |----------|----------|---------|---------|
 | `DATABASE_URL` | Yes | — | Postgres connection (Railway auto-provides) |
-| `ADMIN_USER` | No | `admin` | Admin dashboard username |
-| `ADMIN_PASS` | Yes | `admin` | Admin dashboard password |
+| `SUPER_ADMIN_USER` | No | `super` | Super admin username |
+| `SUPER_ADMIN_PASS` | Yes | — | Super admin password (REQUIRED for /super) |
+| `OPENROUTER_API_KEY` | No | — | OpenRouter key (AI disabled if empty) |
 | `HCAPTCHA_SITEKEY` | No | — | hCaptcha public key |
 | `HCAPTCHA_SECRET` | No | — | hCaptcha secret key |
 | `PORT` | No | `3000` | Server port (Railway auto-provides) |
@@ -111,8 +206,11 @@ Request → Express middleware (helmet, cors, rate-limit) → Route handler → 
 # Install
 npm install
 
-# Create/apply migrations (requires DATABASE_URL)
+# Create/apply migrations
 npm run migrate:dev
+
+# Seed database
+npm run seed
 
 # Start dev server (with auto-reload)
 npm run dev
@@ -126,7 +224,8 @@ npm run studio
 ## Deployment (Railway)
 
 1. Push to `main` branch → Railway auto-deploys
-2. Procfile runs `prisma migrate deploy` then `node server.js`
+2. Procfile runs `prisma migrate deploy`, then `seed.js`, then `node server.js`
 3. Railway provides `DATABASE_URL` and `PORT` automatically
-4. Set `ADMIN_PASS` in Railway environment variables
-5. Optionally set `HCAPTCHA_SITEKEY` and `HCAPTCHA_SECRET`
+4. Set `SUPER_ADMIN_PASS` in Railway environment variables
+5. Optionally set `OPENROUTER_API_KEY` for AI features
+6. Optionally set `HCAPTCHA_SITEKEY` and `HCAPTCHA_SECRET`

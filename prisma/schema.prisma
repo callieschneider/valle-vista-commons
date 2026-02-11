@@ -8,24 +8,54 @@ datasource db {
 }
 
 model Post {
-  id         String   @id @default(cuid())
-  title      String   @db.VarChar(100)
-  desc       String   @db.VarChar(500)
-  location   String   @db.VarChar(100)
-  tag        Tag      @default(OTHER)
-  status     Status   @default(PENDING)
-  createdAt  DateTime @default(now()) @map("created_at")
-  approvedAt DateTime? @map("approved_at")
+  id          String    @id @default(cuid())
+  title       String    @db.VarChar(100)
+  desc        String    @db.VarChar(500)
+  location    String?   @db.VarChar(100)
+  section     Section   @default(NEIGHBORS)
+  status      Status    @default(PENDING)
+  pinned      Boolean   @default(false)
+  urgent      Boolean   @default(false)
+  modNote     String?   @db.Text
+  modPost     Boolean   @default(false)
+  eventDate   DateTime?
+  expiresAt   DateTime?
+  editedAt    DateTime?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  approvedAt  DateTime? @map("approved_at")
+  aiAnalysis  Json?
 
   @@map("posts")
 }
 
-enum Tag {
-  VEHICLE
-  PERSON
-  ANIMAL
-  EVENT
-  OTHER
+model Mod {
+  id        String   @id @default(cuid())
+  username  String   @unique @db.VarChar(50)
+  passHash  String   @db.VarChar(64)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("mods")
+}
+
+model SiteSettings {
+  id              String   @id @default("default")
+  boardName       String   @default("Valle Vista Commons")
+  boardTagline    String   @default("Your neighborhood board")
+  analysisModel   String   @default("anthropic/claude-3.5-haiku")
+  rewriteModel    String   @default("anthropic/claude-3.5-haiku")
+  aboutText       String?  @db.Text
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
+
+enum Section {
+  ALERT
+  HAPPENINGS
+  LOST_FOUND
+  NEIGHBORS
+  BOARD_NOTES
 }
 
 enum Status {

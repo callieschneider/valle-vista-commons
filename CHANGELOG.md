@@ -6,6 +6,59 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-02-11 - Board Expansion v1.0.0
+
+### Summary
+Major expansion: flat feed transformed into sectioned community board with AI-powered tip analysis, mod editorial tools, two-tier authentication, and super admin control panel.
+
+### Added
+- **Sectioned board**: Alerts, Happenings, Lost & Found, Neighbors, Board Notes — each with accent colors, icons, and section-aware auto-expiry (7d alerts, 14d others)
+- **Two-tier auth**: Super admin (env vars) manages mods via `/super`; mods (DB) manage content via `/admin`
+- **Mod model**: DB-managed mod accounts with username/password, enable/disable, CRUD via super admin
+- **SiteSettings model**: Board name, tagline, about text, LLM model selections — all editable via super admin
+- **AI analysis**: OpenRouter-powered auto-analysis of submitted tips (background, fire-and-forget). Shows urgency, PII detection, suggested section, recommendation, sentiment, and rewrite suggestion
+- **AI rewrite**: One-click apply of AI suggestion, or custom rewrite with mod instructions
+- **Admin overhaul**: Review queue with AI panel, section reassignment on approve, edit forms, pin/unpin, mark urgent, expire now, delete, board notes composer, mod notes
+- **Super admin panel**: Mod CRUD, LLM model config (8 curated models), LLM connection test, site settings editor
+- **Client-side search**: Search bar filters all posts across sections without server round-trip
+- **Board Notes composer**: Mods can publish notes directly (skip review queue)
+
+### Changed
+- `server.js` slimmed to entry point only — routes moved to `routes/public.js`, `routes/admin.js`, `routes/super.js`
+- Shared logic moved to `lib/db.js`, `lib/auth.js`, `lib/openrouter.js`, `lib/ai.js`
+- Post model: `tag` field replaced by `section` enum; added `pinned`, `urgent`, `modNote`, `modPost`, `eventDate`, `expiresAt`, `editedAt`, `aiAnalysis` fields; `location` now optional
+- Submit form: "Submit a Tip" messaging, section picker replaces tags, location optional
+- Auth: `ADMIN_USER`/`ADMIN_PASS` replaced by DB-managed mods + `SUPER_ADMIN_USER`/`SUPER_ADMIN_PASS`
+- Procfile: now runs seed script on every deploy (idempotent upsert)
+
+### Removed
+- `views/index.ejs` (replaced by `views/board.ejs`)
+- `Tag` enum (replaced by `Section` enum)
+- `ADMIN_USER`/`ADMIN_PASS` env vars (replaced by super admin + DB mods)
+
+### Files Changed
+- `server.js`: Complete rewrite (entry point only)
+- `prisma/schema.prisma`: Post modified, Mod and SiteSettings added, Section enum replaces Tag
+- `prisma/seed.js`: New — seeds SiteSettings default row
+- `prisma/migrations/board_expansion/`: New migration
+- `routes/public.js`, `routes/admin.js`, `routes/super.js`: New route modules
+- `lib/db.js`, `lib/auth.js`, `lib/openrouter.js`, `lib/ai.js`: New lib modules
+- `views/board.ejs`: New — sectioned public board
+- `views/submit.ejs`: Updated — section picker, new messaging
+- `views/admin.ejs`: Complete overhaul
+- `views/super.ejs`: New — super admin panel
+- `Procfile`, `.env`, `.env.example`, `package.json`, `PROJECT.md`: Updated
+
+### Database Migration
+- Single migration `board_expansion` — drops Tag enum, adds Section enum, Mod table, SiteSettings table, new Post fields
+- Clean slate migration (no data to preserve)
+
+### Dependencies
+- No new production dependencies (still 7)
+- OpenRouter uses built-in `fetch()`, password hashing uses built-in `crypto`
+
+---
+
 ## 2026-02-11 - Spec Enhancements (7 improvements from prompt review)
 
 ### Summary
