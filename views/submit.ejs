@@ -86,6 +86,10 @@
                 <div class="sep"></div>
                 <button type="button" data-action="image" title="Upload Image">📷</button>
                 <button type="button" data-action="video" title="Upload Video">🎥</button>
+                <% if (hasApiKey) { %>
+                  <div class="sep"></div>
+                  <button type="button" data-action="ai-rewrite" title="AI Rewrite">✨</button>
+                <% } %>
               </div>
               <div id="editor"></div>
             </div>

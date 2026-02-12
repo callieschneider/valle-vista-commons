@@ -333,7 +333,7 @@
                         <button type="button" data-action="bulletList">• List</button><button type="button" data-action="link">Link</button>
                         <div class="sep"></div>
                         <button type="button" data-action="image">Image</button><button type="button" data-action="video">Video</button>
-                        <% if (hasApiKey) { %><div class="sep"></div><button type="button" data-action="ai-rewrite" title="AI Rewrite">🤖</button><% } %>
+                        <% if (hasApiKey) { %><div class="sep"></div><button type="button" data-action="ai-rewrite" title="AI Rewrite">✨</button><% } %>
                       </div>
                       <div class="admin-editor tiptap-content admin-editor" id="editEditor-p<%= idx %>" data-content="<%= encodeURIComponent(post.desc) %>" data-post-id="<%= post.id %>"></div>
                     </div>
@@ -462,7 +462,7 @@
                         <button type="button" data-action="bulletList">• List</button><button type="button" data-action="link">Link</button>
                         <div class="sep"></div>
                         <button type="button" data-action="image">Image</button><button type="button" data-action="video">Video</button>
-                        <% if (hasApiKey) { %><div class="sep"></div><button type="button" data-action="ai-rewrite" title="AI Rewrite">🤖</button><% } %>
+                        <% if (hasApiKey) { %><div class="sep"></div><button type="button" data-action="ai-rewrite" title="AI Rewrite">✨</button><% } %>
                       </div>
                       <div class="admin-editor tiptap-content admin-editor" id="editEditor-l<%= idx %>" data-content="<%= encodeURIComponent(post.desc) %>" data-post-id="<%= post.id %>"></div>
                     </div>
@@ -574,17 +574,41 @@
             <div style="margin-bottom: 10px;">
               <div class="editor-wrapper">
                 <div class="editor-toolbar" id="notesToolbar">
-                  <button type="button" data-action="bold"><b>B</b></button><button type="button" data-action="italic"><i>I</i></button>
+                  <button type="button" data-action="bold"><b>B</b></button>
+                  <button type="button" data-action="italic"><i>I</i></button>
+                  <button type="button" data-action="strike"><s>S</s></button>
                   <div class="sep"></div>
-                  <button type="button" data-action="heading2">H2</button><button type="button" data-action="heading3">H3</button>
+                  <button type="button" data-action="heading1">H1</button>
+                  <button type="button" data-action="heading2">H2</button>
+                  <button type="button" data-action="heading3">H3</button>
+                  <button type="button" data-action="heading4">H4</button>
                   <div class="sep"></div>
-                  <button type="button" data-action="bulletList">• List</button><button type="button" data-action="orderedList">1. List</button><button type="button" data-action="blockquote">Quote</button>
+                  <button type="button" data-action="bulletList">• List</button>
+                  <button type="button" data-action="orderedList">1. List</button>
+                  <button type="button" data-action="blockquote">Quote</button>
                   <div class="sep"></div>
-                  <button type="button" data-action="link">Link</button><button type="button" data-action="image">Image</button><button type="button" data-action="video">Video</button>
+                  <button type="button" data-action="link">Link</button>
+                  <button type="button" data-action="image">Image</button>
+                  <button type="button" data-action="video">Video</button>
+                  <% if (hasApiKey) { %>
+                    <div class="sep"></div>
+                    <button type="button" data-action="ai-rewrite" title="AI Rewrite">✨</button>
+                  <% } %>
                 </div>
                 <div id="notesEditor" class="tiptap-content admin-editor"></div>
               </div>
               <input type="hidden" name="desc" id="notesHidden">
+            </div>
+            <div style="margin-bottom: 10px;">
+              <label style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">Map Pin (optional)</label>
+              <div id="notesMapContainer" class="submit-map-container"></div>
+              <div class="map-coord-display">
+                <span id="notesMapDisplay">Click map to drop a pin</span>
+                <button type="button" class="btn-link-vvc" id="notesRemovePin" style="font-size: 0.75rem; margin-left: 8px;">Remove pin</button>
+              </div>
+              <input type="hidden" name="latitude" id="notesLatitude">
+              <input type="hidden" name="longitude" id="notesLongitude">
+              <input type="hidden" name="locationName" id="notesLocationName">
             </div>
             <button type="submit" class="panel-btn-primary">Publish Board Note</button>
           </form>

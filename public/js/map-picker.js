@@ -1,19 +1,20 @@
 // Map picker utility for Leaflet
 // Usage: initMapPicker({ containerId, latInput, lngInput, nameInput, initialLat?, initialLng?, onPinSet?, onPinRemove? })
 
-// Fix Leaflet default marker icon paths (leaflet-rotate compatibility)
-L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+// Fix Leaflet default marker icon (leaflet-rotate breaks default icon resolution)
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 const NOMINATIM_ENDPOINT = 'https://nominatim.openstreetmap.org/reverse';
 const NOMINATIM_SEARCH_ENDPOINT = 'https://nominatim.openstreetmap.org/search';
 
-// Valle Vista Commons specific bounds
+// Valle Vista Commons defaults
 const DEFAULT_CENTER = [45.487792, -122.445500]; // Valle Vista center
-const DEFAULT_ZOOM = 16;
-const MAP_BOUNDS = [
-  [45.484798, -122.448344], // Southwest corner
-  [45.490063, -122.442604]  // Northeast corner
-];
+const DEFAULT_ZOOM = 15; // Standard neighborhood-level zoom
 const MAP_BEARING = -90; // 90° counter-clockwise rotation
 
 // Custom rotate control — cycles 90° CW on each click
@@ -45,7 +46,7 @@ let forwardGeocodeTimeout = null;
 // Forward geocode (address → coordinates)
 async function forwardGeocode(address) {
   try {
-    const url = `${NOMINATIM_SEARCH_ENDPOINT}?format=json&q=${encodeURIComponent(address)}&limit=1&bounded=1&viewbox=-122.448344,45.490063,-122.442604,45.484798`;
+    const url = `${NOMINATIM_SEARCH_ENDPOINT}?format=json&q=${encodeURIComponent(address)}&limit=1`;
     const res = await fetch(url, {
       headers: { 'User-Agent': 'Valle Vista Commons Board' }
     });
@@ -104,9 +105,6 @@ export function initMapPicker(options) {
     touchRotate: false,
     shiftKeyRotate: false,
     rotateControl: false,
-    maxBounds: MAP_BOUNDS,
-    maxBoundsViscosity: 1.0,
-    minZoom: 14,
     maxZoom: 19
   }).setView(center, DEFAULT_ZOOM);
   
@@ -185,7 +183,7 @@ export function initMapPicker(options) {
       return;
     }
     
-    map.setView([result.lat, result.lng], DEFAULT_ZOOM);
+    map.setView([result.lat, result.lng], Math.max(map.getZoom(), DEFAULT_ZOOM));
     
     if (marker) {
       marker.setLatLng([result.lat, result.lng]);

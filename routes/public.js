@@ -188,12 +188,14 @@ router.get('/', async (req, res) => {
 // Submit form page
 router.get('/submit', async (req, res) => {
   const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } }).catch(() => null);
+  const hasApiKey = !!process.env.OPENROUTER_API_KEY;
   res.render('submit', {
     sitekey: HCAPTCHA_SITEKEY,
     error: null,
     success: false,
     values: {},
     settings: settings || { boardName: 'Valle Vista Commons' },
+    hasApiKey,
   });
 });
 

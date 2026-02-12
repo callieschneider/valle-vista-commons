@@ -90,6 +90,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Board Notes composer map (always visible, initialize on DOMContentLoaded)
+  const notesMapContainer = document.getElementById('notesMapContainer');
+  if (notesMapContainer) {
+    const notesMapInstance = initMapPicker({
+      containerId: 'notesMapContainer',
+      latInput: document.getElementById('notesLatitude'),
+      lngInput: document.getElementById('notesLongitude'),
+      nameInput: document.getElementById('notesLocationName'),
+      initialLat: null,
+      initialLng: null,
+      onPinSet: (lat, lng) => {
+        document.getElementById('notesMapDisplay').innerHTML = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      },
+      onPinRemove: () => {
+        document.getElementById('notesMapDisplay').textContent = 'Click map to drop a pin';
+      }
+    });
+    
+    document.getElementById('notesRemovePin').addEventListener('click', () => {
+      notesMapInstance.removePin();
+    });
+    
+    setTimeout(() => notesMapInstance.map.invalidateSize(), 100);
+  }
+
   // Pin button handlers (geocode and center)
   document.querySelectorAll('.map-pin-btn').forEach(btn => {
     btn.addEventListener('click', async () => {

@@ -238,10 +238,16 @@ async function handleAiRewrite(editor, postId, btn) {
 
   try {
     const content = editor.getText(); // Get plain text from editor
+    
+    // If no postId, we're in a new content context (submit or board notes) - no rate limiting
+    const body = postId 
+      ? JSON.stringify({ postId, content })
+      : JSON.stringify({ content });
+    
     const res = await fetch('/admin/api/rewrite-editor', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ postId, content }),
+      body: body,
     });
 
     const data = await res.json();

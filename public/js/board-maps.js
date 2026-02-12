@@ -1,5 +1,10 @@
-// Fix Leaflet default marker icon paths (leaflet-rotate compatibility)
-L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+// Fix Leaflet default marker icon (leaflet-rotate breaks default icon resolution)
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 // Custom rotate control — cycles 90° CW on each click
 L.Control.RotateControl = L.Control.extend({
@@ -112,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       activeModalMap = L.map('modalMapContainer', {
         center: [lat, lng],
-        zoom: 16,
+        zoom: 15,
         rotate: true,
         bearing: -90,
         rotateControl: false,
@@ -123,9 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
         touchZoom: true,
         doubleClickZoom: true,
         zoomControl: true,
-        maxBounds: [[45.484798, -122.448344], [45.490063, -122.442604]],
-        maxBoundsViscosity: 1.0,
-        minZoom: 14,
         maxZoom: 19
       });
       

@@ -488,10 +488,29 @@ router.post('/api/rewrite-editor', async (req, res) => {
     }
 
     const postId = req.body.postId;
+    
+    // If no postId, this is new content (board notes or submit) - no rate limiting, no logging
     if (!postId) {
-      return res.status(400).json({ error: 'postId required' });
+      const content = req.body.content || '';
+      const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+      const prompt = settings?.rewritePrompt || 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
+      
+      const result = await require('../lib/openrouter').chatCompletion({
+        model: settings?.rewriteModel || 'anthropic/claude-3.5-haiku',
+        messages: [
+          { role: 'user', content: `${prompt}\n\nText to rewrite:\n${content}` }
+        ],
+        temperature: 0.3,
+      });
+
+      if (!result) {
+        return res.status(500).json({ error: 'LLM rewrite failed' });
+      }
+
+      return res.json({ success: true, rewritten: result });
     }
 
+    // If postId provided, enforce limits
     // Check per-post limit
     const post = await prisma.post.findUnique({ where: { id: postId } });
     if (!post) {
