@@ -1,12 +1,15 @@
 // Map picker utility for Leaflet
 // Usage: initMapPicker({ containerId, latInput, lngInput, nameInput, initialLat?, initialLng?, onPinSet?, onPinRemove? })
 
-// Fix Leaflet default marker icon (leaflet-rotate breaks default icon resolution)
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
+// Explicit marker icon — leaflet-rotate breaks Leaflet's default icon resolution
+const PIN_ICON = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
 
 const NOMINATIM_ENDPOINT = 'https://nominatim.openstreetmap.org/reverse';
@@ -105,6 +108,7 @@ export function initMapPicker(options) {
     touchRotate: false,
     shiftKeyRotate: false,
     rotateControl: false,
+    doubleClickZoom: false,
     maxZoom: 19
   }).setView(center, DEFAULT_ZOOM);
   
@@ -120,7 +124,7 @@ export function initMapPicker(options) {
 
   // Place initial marker if coords provided
   if (hasInitialPin) {
-    marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
+    marker = L.marker([initialLat, initialLng], { draggable: true, icon: PIN_ICON }).addTo(map);
     setupMarkerDrag(marker);
   }
 
@@ -131,7 +135,7 @@ export function initMapPicker(options) {
     if (marker) {
       marker.setLatLng([lat, lng]);
     } else {
-      marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+      marker = L.marker([lat, lng], { draggable: true, icon: PIN_ICON }).addTo(map);
       setupMarkerDrag(marker);
     }
 
@@ -188,7 +192,7 @@ export function initMapPicker(options) {
     if (marker) {
       marker.setLatLng([result.lat, result.lng]);
     } else {
-      marker = L.marker([result.lat, result.lng], { draggable: true }).addTo(map);
+      marker = L.marker([result.lat, result.lng], { draggable: true, icon: PIN_ICON }).addTo(map);
       setupMarkerDrag(marker);
     }
     

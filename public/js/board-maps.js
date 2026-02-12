@@ -1,9 +1,12 @@
-// Fix Leaflet default marker icon (leaflet-rotate breaks default icon resolution)
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
+// Explicit marker icon — leaflet-rotate breaks Leaflet's default icon resolution
+const PIN_ICON = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
 
 // Custom rotate control — cycles 90° CW on each click
@@ -100,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }).addTo(thumbnailMap);
     
     // Add marker
-    const thumbnailMarker = L.marker([lat, lng]).addTo(thumbnailMap);
+    const thumbnailMarker = L.marker([lat, lng], { icon: PIN_ICON }).addTo(thumbnailMap);
     
     // Make thumbnail clickable
     el.style.cursor = 'pointer';
@@ -126,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollWheelZoom: true,
         dragging: true,
         touchZoom: true,
-        doubleClickZoom: true,
+        doubleClickZoom: false,
         zoomControl: true,
         maxZoom: 19
       });
@@ -140,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
       activeModalMap.addControl(new L.Control.RotateControl({ position: 'topleft' }));
       
       // Add marker with popup
-      const modalMarker = L.marker([lat, lng]).addTo(activeModalMap);
+      const modalMarker = L.marker([lat, lng], { icon: PIN_ICON }).addTo(activeModalMap);
       
       const popupContent = `
         <div class="map-popup-content">

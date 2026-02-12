@@ -5,6 +5,7 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 const prisma = require('./lib/db');
@@ -50,7 +51,7 @@ app.use(helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       frameSrc: ["https://hcaptcha.com", "https://*.hcaptcha.com"],
       connectSrc: ["'self'", "https://hcaptcha.com", "https://*.hcaptcha.com", "https://esm.sh", "https://nominatim.openstreetmap.org"],
-      imgSrc: ["'self'", "data:", "https://*.tile.openstreetmap.org"],
+      imgSrc: ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://unpkg.com"],
       mediaSrc: ["'self'"],
     }
   },
@@ -60,6 +61,7 @@ app.use(helmet({
 app.use(cors());
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 app.use(express.json({ limit: '10kb' }));
+app.use(cookieParser());
 
 // Global rate limiter
 app.use(async (req, res, next) => {

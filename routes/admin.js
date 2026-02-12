@@ -2,9 +2,48 @@ const express = require('express');
 const router = express.Router();
 const xssFilters = require('xss-filters');
 const prisma = require('../lib/db');
-const { requireMod } = require('../lib/auth');
+const { requireMod, hashPassword, setAuthCookie, clearAuthCookie } = require('../lib/auth');
 const { rewriteTip, analyzeInBackground } = require('../lib/ai');
 const { sanitizeRichText } = require('../lib/sanitize');
+
+const SUPER_USER = process.env.SUPER_ADMIN_USER || 'super';
+const SUPER_PASS = process.env.SUPER_ADMIN_PASS;
+
+// ─── Login / Logout (before auth middleware) ─────────────
+router.get('/login', (req, res) => {
+  res.render('login', { error: null });
+});
+
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.render('login', { error: 'Username and password are required.' });
+  }
+
+  // Check super admin
+  if (SUPER_PASS && username === SUPER_USER && password === SUPER_PASS) {
+    setAuthCookie(res, { isSuperAdmin: true, username: SUPER_USER });
+    return res.redirect('/admin');
+  }
+
+  // Check mod table
+  try {
+    const mod = await prisma.mod.findUnique({ where: { username } });
+    if (!mod || !mod.active || mod.passHash !== hashPassword(password)) {
+      return res.render('login', { error: 'Invalid username or password.' });
+    }
+    setAuthCookie(res, { modId: mod.id, username: mod.username });
+    return res.redirect('/admin');
+  } catch (err) {
+    console.error('Login error:', err.message);
+    return res.render('login', { error: 'Something went wrong. Try again.' });
+  }
+});
+
+router.get('/logout', (req, res) => {
+  clearAuthCookie(res);
+  res.redirect('/admin/login');
+});
 
 // Apply mod auth to all admin routes
 router.use(requireMod);

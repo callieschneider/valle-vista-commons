@@ -1037,26 +1037,7 @@ a:hover { color: var(--primary-600); }
   position: fixed; top: 0; left: 0; bottom: 0;
   z-index: 200;
   transition: background 0.3s, border-color 0.3s;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  
-  /* Styled scrollbar - only shows when needed */
-  scrollbar-width: thin;
-  scrollbar-color: var(--surface-border) transparent;
-}
-.admin-sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-.admin-sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.admin-sidebar::-webkit-scrollbar-thumb {
-  background: var(--surface-border);
-  border-radius: 3px;
-}
-.admin-sidebar::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  overflow: visible; /* Allow popover to escape sidebar bounds */
 }
 [data-theme="dark"] .admin-sidebar {
   background: var(--surface-card);
@@ -1066,6 +1047,7 @@ a:hover { color: var(--primary-600); }
   padding: 1.25rem 1.25rem 1rem;
   border-bottom: 1px solid var(--surface-border);
   transition: border-color 0.3s;
+  flex-shrink: 0;
 }
 .admin-sidebar-header .admin-brand {
   display: flex; align-items: center; gap: 8px; text-decoration: none;
@@ -1081,6 +1063,25 @@ a:hover { color: var(--primary-600); }
 .admin-sidebar-nav {
   flex: 1; padding: 0.75rem 0;
   display: flex; flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  
+  /* Styled scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-border) transparent;
+}
+.admin-sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+.admin-sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--surface-border);
+  border-radius: 3px;
+}
+.admin-sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .sidebar-item {
@@ -1139,6 +1140,8 @@ a:hover { color: var(--primary-600); }
   display: flex; align-items: center; justify-content: space-between;
   gap: 8px; transition: border-color 0.3s;
   margin-top: auto; /* Push to bottom, removes extra space */
+  position: relative; /* Anchor for popover */
+  flex-shrink: 0; /* Never shrink */
 }
 
 /* ─── Content Area ───────────────────────────────────────── */
