@@ -127,17 +127,12 @@
     <% } %>
 
     <!-- About -->
-    <% if (settings.aboutText) { %>
-      <div class="about-section">
-        <h3 class="about-title">About This Board</h3>
-        <p class="about-text"><%= settings.aboutText %></p>
-      </div>
-    <% } %>
+    <div class="about-section">
+      <h3 class="about-title">About This Board</h3>
+      <p class="about-text"><%= settings.aboutText || 'Valle Vista Commons is a privacy-first community board for our neighborhood. No accounts, no tracking, no personal information collected.' %></p>
+    </div>
 
-    <!-- Footer -->
-    <footer class="site-footer">
-      <p class="footer-text">No accounts, no tracking <span class="dot"></span> All posts reviewed by mods</p>
-    </footer>
+    <!-- Footer (removed - content moved to About section) -->
   </div>
 
   <!-- FAB -->

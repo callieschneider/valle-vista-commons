@@ -11,7 +11,7 @@ async function main() {
       boardTagline: 'Your neighborhood board',
       analysisModel: 'anthropic/claude-3.5-haiku',
       rewriteModel: 'anthropic/claude-3.5-haiku',
-      aboutText: 'Valle Vista Commons is a moderated community board for our neighborhood. All tips are reviewed by moderators before appearing. Anonymous — no accounts, no tracking.',
+      aboutText: 'Valle Vista Commons is a privacy-first community board for our neighborhood. No accounts, no tracking, no personal information collected.',
     },
   });
   console.log('Seeded SiteSettings');
