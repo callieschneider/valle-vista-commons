@@ -1132,13 +1132,11 @@ a:hover { color: var(--primary-600); }
 .admin-content {
   flex: 1;
   margin-left: 260px;
-  padding: 1.5rem 2rem 3rem;
+  padding: 1.5rem 0 3rem; /* Remove horizontal padding from container */
   min-height: 100vh; min-height: 100dvh;
-  max-width: 1200px; /* Increased to allow centering */
-  margin-right: auto;
   overflow-y: auto;
   
-  /* Center the actual content within this container */
+  /* Center content with equal margins */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1150,6 +1148,7 @@ a:hover { color: var(--primary-600); }
 .admin-content > * {
   width: 100%;
   max-width: 900px; /* Content max width */
+  padding: 0 2rem; /* Horizontal padding on children for proper spacing */
 }
 .admin-content::-webkit-scrollbar {
   width: 8px;
