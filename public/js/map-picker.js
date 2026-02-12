@@ -1,6 +1,9 @@
 // Map picker utility for Leaflet
 // Usage: initMapPicker({ containerId, latInput, lngInput, nameInput, initialLat?, initialLng?, onPinSet?, onPinRemove? })
 
+// Fix Leaflet default marker icon paths (leaflet-rotate compatibility)
+L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+
 const NOMINATIM_ENDPOINT = 'https://nominatim.openstreetmap.org/reverse';
 const NOMINATIM_SEARCH_ENDPOINT = 'https://nominatim.openstreetmap.org/search';
 
@@ -8,9 +11,33 @@ const NOMINATIM_SEARCH_ENDPOINT = 'https://nominatim.openstreetmap.org/search';
 const DEFAULT_CENTER = [45.487792, -122.445500]; // Valle Vista center
 const DEFAULT_ZOOM = 16;
 const MAP_BOUNDS = [
-  [45.484798, -122.448344], // Southwest corner (bottom-left)
-  [45.490063, -122.442604]  // Northeast corner (top-right)
+  [45.484798, -122.448344], // Southwest corner
+  [45.490063, -122.442604]  // Northeast corner
 ];
+const MAP_BEARING = -90; // 90° counter-clockwise rotation
+
+// Custom rotate control — cycles 90° CW on each click
+L.Control.RotateControl = L.Control.extend({
+  onAdd: function(map) {
+    const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+    const button = L.DomUtil.create('a', 'leaflet-control-rotate-btn', container);
+    button.innerHTML = '↻';
+    button.href = '#';
+    button.title = 'Rotate map 90° clockwise';
+    button.setAttribute('role', 'button');
+    button.setAttribute('aria-label', 'Rotate map 90° clockwise');
+
+    L.DomEvent.disableClickPropagation(container);
+    L.DomEvent.on(button, 'click', function(e) {
+      L.DomEvent.preventDefault(e);
+      const currentBearing = map.getBearing();
+      const newBearing = (currentBearing + 90) % 360;
+      map.setBearing(newBearing);
+    });
+
+    return container;
+  }
+});
 
 let reverseGeocodeTimeout = null;
 let forwardGeocodeTimeout = null;
@@ -72,6 +99,11 @@ export function initMapPicker(options) {
   const center = hasInitialPin ? [initialLat, initialLng] : DEFAULT_CENTER;
   
   const map = L.map(containerId, {
+    rotate: true,
+    bearing: MAP_BEARING,
+    touchRotate: false,
+    shiftKeyRotate: false,
+    rotateControl: false,
     maxBounds: MAP_BOUNDS,
     maxBoundsViscosity: 1.0,
     minZoom: 14,
@@ -82,6 +114,9 @@ export function initMapPicker(options) {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 19
   }).addTo(map);
+
+  // Add custom rotate control
+  map.addControl(new L.Control.RotateControl({ position: 'topleft' }));
 
   let marker = null;
 

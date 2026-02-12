@@ -6,6 +6,85 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-02-12 - Tiptap Enhanced Toolbar & In-Editor AI Rewrite with Rate Limits
+
+### Added
+- **Strikethrough button** — Added to Tiptap toolbar (all editors)
+- **H1 and H4 heading buttons** — Extended heading options in full-mode toolbars
+- **In-editor AI Rewrite button (🤖)** — Appears in admin post edit toolbars when API key is configured
+  - Sends editor content to LLM and replaces with rewritten text
+  - Uses configurable prompt template (super admin)
+  - Per-post limit: 10 rewrites max (tracks `rewriteCount` on Post model)
+  - Per-mod hourly limit: 5 rewrites/hour (default, configurable per mod)
+  - Super admin bypass: no limits
+- **RewriteLog model** — Tracks every in-editor rewrite (postId, modId, timestamp)
+- **Mod rewrite controls in super admin** — Each mod has:
+  - Enable/disable toggle for AI rewrite feature
+  - Per-post rewrite limit (1-50, default 10)
+  - Per-hour rewrite limit (1-100, default 5)
+- **Rewrite stats in super admin** — Shows total rewrites and last-hour count per mod
+- **Configurable rewrite prompt** — Super admin can customize the LLM prompt for in-editor rewrites (Settings → LLM)
+- `POST /admin/api/rewrite-editor` — API endpoint for in-editor AI rewrite with auth + limit checks
+
+### Changed
+- Tiptap `StarterKit` now enables `strike: true` and `heading: { levels: [1, 2, 3, 4] }` in full mode
+- `lib/auth.js` now attaches `req.mod` and `req.modId` to requests for use in routes
+- `SiteSettings` model adds `rewritePrompt` field (Text, nullable)
+- `Mod` model adds `rewriteEnabled`, `rewriteLimitPerPost`, `rewriteLimitPerHour` fields
+- `Post` model adds `rewriteCount` field (Int, default 0)
+
+### Database Migrations
+- `20260212043548_tiptap_ai_rewrite_features`: Added RewriteLog table, Mod rewrite fields, Post rewriteCount, SiteSettings rewritePrompt
+
+---
+
+## 2026-02-12 - Unified Admin Sidebar (v1.4.0)
+
+### Summary
+Consolidated all admin features (mod dashboard + super admin panel) into a single unified interface at `/admin` with a left-hand sidebar navigation and client-side tab switching. Added block list management, activity logging, dashboard stats, and custom LLM model support. Super admin-only tabs (Moderators, Settings) are hidden from regular mods.
+
+### Added
+- **Admin sidebar layout** — 260px fixed sidebar with 9 navigation tabs: Dashboard, Review Queue, Live Board, Archive, Board Notes, Block List, Moderators (super), Settings (super), Activity Log
+- **Dashboard tab** — stat cards (pending, live, archived, weekly posts, blocked count) with click-to-navigate and quick action buttons
+- **Block list** — block/unblock anonymous submitters with configurable actions (REJECT = silent auto-reject, FLAG = auto-flag in queue with mod note)
+- **Activity log** — AuditLog model tracking all moderator actions (approve, reject, edit, block, etc.) with timestamps and details
+- **Archive filters** — filter archived posts by status (Rejected, Expired, Deleted) with pill buttons
+- **Board Notes management tab** — dedicated view for published mod-authored notes
+- **Custom LLM model ID** — text fields for arbitrary OpenRouter model IDs, overriding the dropdown selection
+- **Updated LLM model list** — Grok 4.1 Fast, Claude 3.5 Haiku, Claude Sonnet 4.5, GPT-4o Mini, GPT-4o, Gemini 2.0 Flash, Gemini 2.5 Pro, DeepSeek Chat v3
+- **Client-side tab switching** — no page reloads between tabs, URL hash persistence, `?tab=` query param support for POST redirects
+- **Mobile responsive sidebar** — hamburger toggle button, backdrop overlay, slide-in animation
+- **SVG icons** — Feather-style inline SVG icons for all sidebar navigation items
+- **Empty states** — friendly empty states for all tabs when data is empty
+- `public/js/admin-sidebar.js` — tab switching logic, archive filters, mobile toggle
+- `req.authUser` — set on all authenticated requests for audit logging
+
+### Changed
+- `GET /admin` now loads all data for all tabs in one query (pending, live, archived, board notes, blocked users, all submitters, audit log, stats, and conditionally mods + rewrite stats for super admins)
+- `GET /super` now redirects to `/admin?tab=moderators` instead of rendering separate page
+- All POST routes in admin.js and super.js redirect with `?tab=` parameter to return user to the correct tab
+- All admin POST actions now create audit log entries via `logAction()` helper
+- Public submit handler now checks blocked status before creating post — REJECT causes silent auto-reject (user still sees success), FLAG adds mod note
+- `resolveSubmitter()` in public.js now returns `{ submitterId, blocked, blockAction }` instead of just `submitterId`
+
+### Schema
+- **Submitter** — added `blocked` (Boolean), `blockAction` (VarChar), `blockedAt` (DateTime), `blockedBy` (VarChar), `blockReason` (VarChar)
+- **SiteSettings** — added `customAnalysisModel` (VarChar), `customRewriteModel` (VarChar)
+- **AuditLog** — new model: `id`, `action`, `postId`, `targetId`, `modUser`, `details`, `createdAt`
+- Migration: `20260212044817_admin_sidebar_block_list_audit_log`
+
+### Files Changed
+- `prisma/schema.prisma` — Submitter block fields, AuditLog model, SiteSettings custom model fields
+- `routes/admin.js` — consolidated GET handler, block/unblock routes, logAction() helper, AVAILABLE_MODELS, audit logging on all actions
+- `routes/super.js` — GET redirects to /admin, POST redirects with ?tab=, custom model validation, audit logging
+- `routes/public.js` — resolveSubmitter() returns block status, submit handler checks blocked
+- `lib/auth.js` — sets req.authUser for audit logging
+- `views/admin.ejs` — complete rewrite: sidebar layout + 9 tab panels
+- `public/css/style.css` — admin sidebar layout, stat cards, block list table, audit log, archive filters, mobile responsive
+- `public/js/admin-sidebar.js` — new file: tab switching, URL hash, mobile toggle
+
+---
+
 ## 2026-02-11 - Submit Form Validation UX
 
 ### Summary
@@ -29,13 +108,14 @@ Improved submit form with required field indicators and inline validation. Users
 
 ---
 
-## 2026-02-12 - Interactive Map Picker (Updated)
+## 2026-02-12 - Interactive Map Picker (Updated v2)
 
 ### Summary
-Added optional interactive map picker for posts using Leaflet + OpenStreetMap with Valle Vista Commons-specific bounds and geocoding. Submit form shows inline compact map (always visible) with discreet pin button for address lookup. Board mini-maps are clickable thumbnails that expand to interactive modal. Feather Icons (inline SVG) established as the standard icon system.
+Added optional interactive map picker for posts using Leaflet + leaflet-rotate + OpenStreetMap with Valle Vista Commons-specific bounds and 90° counter-clockwise rotation. Submit form shows inline compact map (always visible) with discreet pin button for address lookup. Board mini-maps are clickable thumbnails that expand to interactive modal. Feather Icons (inline SVG) established as the standard icon system.
 
 ### Added
 - **Inline map on submit form** — 280px height compact map (always visible, no toggle)
+- **90° counter-clockwise rotation** — leaflet-rotate plugin, bearing: -90, fits neighborhood shape
 - **Pin button with geocoding** — discreet Feather icon button (map pin) to left of location field
 - **Forward geocoding** — type address, click pin button, map centers and drops pin automatically
 - **Clickable mini-maps on board** — posts with coordinates show 180px thumbnail maps
@@ -45,7 +125,7 @@ Added optional interactive map picker for posts using Leaflet + OpenStreetMap wi
 - **Wide container on submit** — submit page now uses `vvc-container--wide` matching admin width
 - **Reverse geocoding** — coordinates automatically resolved to nearest address via Nominatim
 - **Three new Post fields** — `latitude` (Float?), `longitude` (Float?), `locationName` (VarChar 200?)
-- **Leaflet 1.9.4** — loaded via unpkg CDN, no npm dependency
+- **Leaflet 1.9.4 + leaflet-rotate 0.2.8** — loaded via unpkg CDN, no npm dependency
 - **OpenStreetMap tiles** — free map tiles from OSM, no API key required
 - **Coordinate validation** — server validates lat (-90 to 90) and lng (-180 to 180)
 - **Map utility module** (`public/js/map-picker.js`) — reusable ES module with `geocodeAndCenter()`
@@ -53,11 +133,11 @@ Added optional interactive map picker for posts using Leaflet + OpenStreetMap wi
 - **PATTERNS.md** — comprehensive documentation of code patterns, Feather Icons system, map integration
 
 ### Changed
-- **CSP updated** — added `unpkg.com` (Leaflet), `tile.openstreetmap.org` (tiles), `nominatim.openstreetmap.org` (geocoding)
+- **CSP updated** — added `unpkg.com` (Leaflet + plugins), `tile.openstreetmap.org` (tiles), `nominatim.openstreetmap.org` (geocoding)
 - **CSS** — added `.map-pin-btn`, `.submit-map-container`, `.map-modal`, modal styles
 - **Submit route** — saves latitude, longitude, locationName fields
 - **Admin edit route** — saves latitude, longitude, locationName fields with validation
-- **PROJECT.md** — updated status to v1.3.0, added Feather Icons + forward geocoding to tech stack
+- **PROJECT.md** — updated status to v1.3.0, added Feather Icons + forward geocoding + leaflet-rotate to tech stack
 
 ### Privacy
 - **No auto-geolocation** — users must manually drop a pin (no location permission requested)

@@ -59,7 +59,7 @@ The project uses **Feather Icons** style inline SVGs — simple, clean, stroke-b
 
 ### Leaflet + OpenStreetMap
 
-**Library:** Leaflet 1.9.4 (CDN: unpkg.com)  
+**Library:** Leaflet 1.9.4 + leaflet-rotate 0.2.8 (CDN: unpkg.com)  
 **Tiles:** OpenStreetMap (free, no API key)  
 **Geocoding:** Nominatim (reverse and forward)
 
@@ -69,6 +69,9 @@ The project uses **Feather Icons** style inline SVGs — simple, clean, stroke-b
 **Map Bounds (restricts panning):**
 - Southwest: `[45.484798, -122.448344]`
 - Northeast: `[45.490063, -122.442604]`
+
+**Rotation:** 90° counter-clockwise (bearing: -90)  
+Fits the horizontal neighborhood shape better.
 
 **Zoom limits:**
 - Min: 14
@@ -93,6 +96,17 @@ const mapInstance = initMapPicker({
 
 // Geocode address and center map
 await mapInstance.geocodeAndCenter('123 Main St');
+```
+
+**Rotation options:**
+```javascript
+const map = L.map(containerId, {
+  rotate: true,           // Enable rotation plugin
+  bearing: -90,           // 90° counter-clockwise
+  touchRotate: false,     // Disable touch rotation gestures
+  shiftKeyRotate: false,  // Disable keyboard rotation
+  // ... other options
+});
 ```
 
 **Rate limiting:** Nominatim API has a 1 request/second policy. The map-picker module automatically debounces reverse geocoding by 1 second.

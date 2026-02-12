@@ -1025,7 +1025,25 @@ a:hover { color: var(--primary-600); }
   z-index: 200;
   transition: background 0.3s, border-color 0.3s;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  
+  /* Styled scrollbar - only shows when needed */
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-border) transparent;
+}
+.admin-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.admin-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background: var(--surface-border);
+  border-radius: 3px;
+}
+.admin-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 [data-theme="dark"] .admin-sidebar {
   background: var(--surface-card);
@@ -1107,6 +1125,7 @@ a:hover { color: var(--primary-600); }
   border-top: 1px solid var(--surface-border);
   display: flex; align-items: center; justify-content: space-between;
   gap: 8px; transition: border-color 0.3s;
+  margin-top: auto; /* Push to bottom, removes extra space */
 }
 
 /* ─── Content Area ───────────────────────────────────────── */
@@ -1115,7 +1134,25 @@ a:hover { color: var(--primary-600); }
   padding: 1.5rem 2rem 3rem;
   min-height: 100vh; min-height: 100dvh;
   max-width: 900px;
+  margin-right: auto; /* Center content in viewport */
   overflow-y: auto;
+  
+  /* Styled scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-border) transparent;
+}
+.admin-content::-webkit-scrollbar {
+  width: 8px;
+}
+.admin-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-content::-webkit-scrollbar-thumb {
+  background: var(--surface-border);
+  border-radius: 4px;
+}
+.admin-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 /* ─── Tab Panels ─────────────────────────────────────────── */

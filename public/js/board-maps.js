@@ -1,3 +1,29 @@
+// Fix Leaflet default marker icon paths (leaflet-rotate compatibility)
+L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+
+// Custom rotate control — cycles 90° CW on each click
+L.Control.RotateControl = L.Control.extend({
+  onAdd: function(map) {
+    const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+    const button = L.DomUtil.create('a', 'leaflet-control-rotate-btn', container);
+    button.innerHTML = '↻';
+    button.href = '#';
+    button.title = 'Rotate map 90° clockwise';
+    button.setAttribute('role', 'button');
+    button.setAttribute('aria-label', 'Rotate map 90° clockwise');
+
+    L.DomEvent.disableClickPropagation(container);
+    L.DomEvent.on(button, 'click', function(e) {
+      L.DomEvent.preventDefault(e);
+      const currentBearing = map.getBearing();
+      const newBearing = (currentBearing + 90) % 360;
+      map.setBearing(newBearing);
+    });
+
+    return container;
+  }
+});
+
 // Initialize clickable mini-map thumbnails with modal expansion
 document.addEventListener('DOMContentLoaded', () => {
   const mapElements = document.querySelectorAll('.post-mini-map');
@@ -50,9 +76,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const thumbnailMap = L.map(el.id, {
       center: [lat, lng],
       zoom: 15,
+      rotate: true,
+      bearing: -90,
+      rotateControl: false,
       scrollWheelZoom: false,
       dragging: false,
       touchZoom: false,
+      touchRotate: false,
       doubleClickZoom: false,
       boxZoom: false,
       keyboard: false,
@@ -83,6 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
       activeModalMap = L.map('modalMapContainer', {
         center: [lat, lng],
         zoom: 16,
+        rotate: true,
+        bearing: -90,
+        rotateControl: false,
+        touchRotate: false,
+        shiftKeyRotate: false,
         scrollWheelZoom: true,
         dragging: true,
         touchZoom: true,
@@ -98,6 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
         attribution: '&copy; OSM',
         maxZoom: 19
       }).addTo(activeModalMap);
+
+      // Add custom rotate control to modal map
+      activeModalMap.addControl(new L.Control.RotateControl({ position: 'topleft' }));
       
       // Add marker with popup
       const modalMarker = L.marker([lat, lng]).addTo(activeModalMap);

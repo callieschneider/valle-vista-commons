@@ -6,37 +6,48 @@ No accounts. No tracking. No personal information collected. Ever.
 
 ---
 
-## Status: v1.3.0 — Interactive Map Picker
+## Status: v1.5.0 — Tiptap Enhanced + In-Editor AI Rewrite
 
 | Feature | Status |
 |---------|--------|
 | Sectioned public board (Alerts, Happenings, Lost & Found, Neighbors, Board Notes) | ✅ |
 | Anonymous tip submission with section picker | ✅ |
-| **Interactive map picker on submit form with geocoding** | ✅ |
-| **Clickable mini-maps on board postcards (expand to modal)** | ✅ |
-| **Map pin editor in admin dashboard with geocoding** | ✅ |
+| Interactive map picker on submit form with geocoding | ✅ |
+| Clickable mini-maps on board postcards (expand to modal) | ✅ |
+| Map pin editor in admin dashboard with geocoding | ✅ |
 | hCaptcha + honeypot spam protection | ✅ |
 | Two-tier auth: Super admin (env vars) + Mods (DB) | ✅ |
-| Admin dashboard with review queue, AI analysis, edit, pin, urgent, expire | ✅ |
+| **Unified admin with left sidebar navigation (9 tabs)** | ✅ |
+| **Dashboard overview with stat cards and quick actions** | ✅ |
+| **Block list for anonymous submitters (auto-reject or auto-flag)** | ✅ |
+| **Activity log tracking all moderator actions** | ✅ |
+| **Custom LLM model ID support (any OpenRouter model)** | ✅ |
+| **Client-side tab switching with URL hash persistence** | ✅ |
+| **Responsive mobile sidebar with hamburger toggle** | ✅ |
+| Admin review queue with AI analysis, edit, pin, urgent, expire | ✅ |
 | AI-powered tip analysis via OpenRouter (background, non-blocking) | ✅ |
 | AI-powered tip rewrite (apply auto, quick rewrite, or custom instructions) | ✅ |
 | Quick AI Rewrite button on all posts (pending + live) | ✅ |
+| **In-editor AI Rewrite (🤖) with per-mod rate limits** | ✅ |
+| **Rewrite logs & stats in super admin mod management** | ✅ |
+| **Configurable rewrite limits per mod (post + hourly)** | ✅ |
 | 10-level undo history for edits and rewrites | ✅ |
-| Universal archive (rejected, deleted, expired — collapsed by default) | ✅ |
+| Dedicated archive tab with status filters | ✅ |
 | Soft-delete (no permanent deletion except explicit purge) | ✅ |
 | Board Notes composer (mod-authored, skip review) | ✅ |
-| Super admin panel (mod CRUD, LLM config, site settings) | ✅ |
-| Configurable LLM models (analysis + rewrite) | ✅ |
+| Super admin features (mod CRUD, LLM config, site settings) — in sidebar | ✅ |
+| Configurable LLM models: Grok 4.1 Fast, Haiku 3.5, Sonnet 4.5 + more | ✅ |
+| **Configurable rewrite prompt template** | ✅ |
 | Section-aware auto-expiry (7d alerts, 14d others) | ✅ |
 | Client-side search across all sections | ✅ |
 | Rate limiting | ✅ |
 | Railway deployment | ✅ |
-| Tiptap rich text editor (public + admin) | ✅ |
+| **Tiptap rich text editor with Strikethrough, H1-H4 headings** | ✅ |
 | Image upload with EXIF/GPS stripping | ✅ |
 | Video upload (MP4, WebM) | ✅ |
 | HTML sanitization + safe rendering | ✅ |
 | Railway volume for persistent uploads | ✅ |
-| **Feather Icons (inline SVG) for consistent UI** | ✅ |
+| Feather Icons (inline SVG) for consistent UI | ✅ |
 
 ---
 
@@ -99,6 +110,7 @@ public/
     editor.js                -- Tiptap editor module (ESM, CDN imports from esm.sh)
     submit-init.js           -- submit page editor initialization
     admin-init.js            -- admin page editor initialization
+    admin-sidebar.js         -- sidebar tab switching, URL hash, mobile toggle
     board-search.js          -- client-side search filter
     category-select.js       -- category selection handler
     lightbox.js              -- image lightbox viewer
@@ -106,8 +118,8 @@ uploads/                     -- uploaded images/videos (gitignored, Railway volu
 views/
   board.ejs                  -- public board (sectioned)
   submit.ejs                 -- "Submit a Tip" form
-  admin.ejs                  -- mod dashboard
-  super.ejs                  -- super admin panel
+  admin.ejs                  -- unified admin dashboard (sidebar + 9 tab panels)
+  super.ejs                  -- (deprecated) super admin panel — GET now redirects to /admin
   error.ejs                  -- error page
 prisma/
   schema.prisma              -- Post, Mod, SiteSettings models
@@ -123,13 +135,14 @@ PATTERNS.md                  -- code patterns, conventions, and design decisions
 | GET | `/` | Public | Board — sectioned community board |
 | GET | `/submit` | Public | Tip submission form |
 | POST | `/submit` | Public + hCaptcha | Create pending tip |
-| GET | `/admin` | Mod (Basic Auth) | Mod dashboard |
+| GET | `/admin` | Mod (Basic Auth) | Unified admin dashboard (all tabs) |
 | POST | `/admin/approve/:id` | Mod | Approve pending tip |
 | POST | `/admin/reject/:id` | Mod | Reject tip (moves to archive) |
 | POST | `/admin/edit/:id` | Mod | Edit tip content (saves undo history) |
 | POST | `/admin/rewrite/:id` | Mod | AI rewrite (apply/quick/custom, saves undo) |
 | POST | `/admin/reanalyze/:id` | Mod | Retry AI analysis |
 | POST | `/admin/undo/:id` | Mod | Undo last edit/rewrite (pops from history) |
+| POST | `/admin/api/rewrite-editor` | Mod | In-editor AI rewrite with rate limits (JSON endpoint) |
 | POST | `/admin/pin/:id` | Mod | Toggle pin |
 | POST | `/admin/urgent/:id` | Mod | Toggle urgent |
 | POST | `/admin/expire/:id` | Mod | Expire post (moves to archive) |
@@ -138,11 +151,14 @@ PATTERNS.md                  -- code patterns, conventions, and design decisions
 | POST | `/admin/purge/:id` | Mod | Permanently delete from archive |
 | POST | `/admin/notes` | Mod | Publish board note |
 | POST | `/admin/modnote/:id` | Mod | Save internal mod note |
-| GET | `/super` | Super Admin | Super admin panel |
+| POST | `/admin/block/:submitterId` | Mod | Block a submitter |
+| POST | `/admin/unblock/:submitterId` | Mod | Unblock a submitter |
+| GET | `/super` | Super Admin | Redirects to /admin?tab=moderators |
 | POST | `/super/mods/create` | Super Admin | Create mod |
 | POST | `/super/mods/:id/toggle` | Super Admin | Enable/disable mod |
 | POST | `/super/mods/:id/delete` | Super Admin | Delete mod |
-| POST | `/super/settings/llm` | Super Admin | Save LLM model config |
+| POST | `/super/mods/:id/rewrite-settings` | Super Admin | Update mod rewrite limits |
+| POST | `/super/settings/llm` | Super Admin | Save LLM model config (+ custom models) |
 | POST | `/super/settings/llm-test` | Super Admin | Test LLM connection |
 | POST | `/super/settings/site` | Super Admin | Save site settings |
 | GET | `/health` | Public | Health check |
@@ -174,6 +190,7 @@ PATTERNS.md                  -- code patterns, conventions, and design decisions
 | approvedAt | DateTime? | Set when approved |
 | aiAnalysis | Json? | AI analysis result |
 | descHistory | Json? | Array of {title, desc, timestamp} — last 10 versions for undo |
+| rewriteCount | Int | Number of in-editor AI rewrites (for rate limiting) |
 | submitterId | Int? | FK → Submitter. Anonymous submitter tracking (admin-only) |
 
 ### Submitter
@@ -181,6 +198,11 @@ PATTERNS.md                  -- code patterns, conventions, and design decisions
 |--------|------|-------|
 | id | Int (autoincrement) | Sequential user number (User #1, #2, etc.) |
 | hash | VarChar(64) | SHA-256 hash of IP + salt. One-way, irreversible. |
+| blocked | Boolean | Whether submitter is blocked |
+| blockAction | VarChar(10)? | "REJECT" (silent auto-reject) or "FLAG" (auto-flag in queue) |
+| blockedAt | DateTime? | When the block was applied |
+| blockedBy | VarChar(50)? | Username of mod who blocked |
+| blockReason | VarChar(200)? | Optional reason for blocking |
 | createdAt | DateTime | Auto-set |
 
 ### Mod
@@ -190,6 +212,17 @@ PATTERNS.md                  -- code patterns, conventions, and design decisions
 | username | VarChar(50) | Unique, lowercase |
 | passHash | VarChar(64) | SHA-256 hash |
 | active | Boolean | Can be disabled |
+| rewriteEnabled | Boolean | Can this mod use in-editor AI rewrite? |
+| rewriteLimitPerPost | Int | Max in-editor rewrites per post (default 10) |
+| rewriteLimitPerHour | Int | Max in-editor rewrites per hour (default 5) |
+| createdAt | DateTime | Auto-set |
+
+### RewriteLog
+| Column | Type | Notes |
+|--------|------|-------|
+| id | String (cuid) | Primary key |
+| postId | String | FK → Post |
+| modId | String | FK → Mod |
 | createdAt | DateTime | Auto-set |
 
 ### SiteSettings (singleton)
@@ -200,8 +233,22 @@ PATTERNS.md                  -- code patterns, conventions, and design decisions
 | boardTagline | String | Subtitle |
 | analysisModel | String | OpenRouter model ID for analysis |
 | rewriteModel | String | OpenRouter model ID for rewrite |
+| customAnalysisModel | VarChar(100)? | Custom model override (any OpenRouter model) |
+| customRewriteModel | VarChar(100)? | Custom model override (any OpenRouter model) |
+| rewritePrompt | Text? | Custom prompt for in-editor AI rewrite |
 | aboutText | Text? | About section content |
 | updatedAt | DateTime | Auto-updated |
+
+### AuditLog
+| Column | Type | Notes |
+|--------|------|-------|
+| id | String (cuid) | Primary key |
+| action | VarChar(50) | Action type (approve, reject, block, etc.) |
+| postId | String? | Related post ID (if applicable) |
+| targetId | String? | Target entity ID (submitter/mod for block/admin actions) |
+| modUser | VarChar(50) | Username of mod who performed action |
+| details | Text? | Human-readable description |
+| createdAt | DateTime | Auto-set |
 
 ---
 
