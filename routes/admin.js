@@ -464,12 +464,13 @@ router.post('/api/rewrite-editor', async (req, res) => {
     if (req.isSuperAdmin) {
       const content = req.body.content || '';
       const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-      const prompt = settings?.rewritePrompt || 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
+      const basePrompt = settings?.rewritePrompt || 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
+      const prompt = `${basePrompt}\n\nIMPORTANT: Respond with ONLY the rewritten text. Do not add explanations, commentary, or notes about what you changed.\n\nText to rewrite:\n${content}`;
       
       const result = await require('../lib/openrouter').chatCompletion({
         model: settings?.rewriteModel || 'anthropic/claude-3.5-haiku',
         messages: [
-          { role: 'user', content: `${prompt}\n\nText to rewrite:\n${content}` }
+          { role: 'user', content: prompt }
         ],
         temperature: 0.3,
       });
@@ -493,12 +494,13 @@ router.post('/api/rewrite-editor', async (req, res) => {
     if (!postId) {
       const content = req.body.content || '';
       const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-      const prompt = settings?.rewritePrompt || 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
+      const basePrompt = settings?.rewritePrompt || 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
+      const prompt = `${basePrompt}\n\nIMPORTANT: Respond with ONLY the rewritten text. Do not add explanations, commentary, or notes about what you changed.\n\nText to rewrite:\n${content}`;
       
       const result = await require('../lib/openrouter').chatCompletion({
         model: settings?.rewriteModel || 'anthropic/claude-3.5-haiku',
         messages: [
-          { role: 'user', content: `${prompt}\n\nText to rewrite:\n${content}` }
+          { role: 'user', content: prompt }
         ],
         temperature: 0.3,
       });
@@ -534,12 +536,13 @@ router.post('/api/rewrite-editor', async (req, res) => {
     // Perform rewrite
     const content = req.body.content || '';
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-    const prompt = settings?.rewritePrompt || 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
+    const basePrompt = settings?.rewritePrompt || 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
+    const prompt = `${basePrompt}\n\nIMPORTANT: Respond with ONLY the rewritten text. Do not add explanations, commentary, or notes about what you changed.\n\nText to rewrite:\n${content}`;
     
     const result = await require('../lib/openrouter').chatCompletion({
       model: settings?.rewriteModel || 'anthropic/claude-3.5-haiku',
       messages: [
-        { role: 'user', content: `${prompt}\n\nText to rewrite:\n${content}` }
+        { role: 'user', content: prompt }
       ],
       temperature: 0.3,
     });

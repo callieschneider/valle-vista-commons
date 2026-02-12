@@ -1130,16 +1130,26 @@ a:hover { color: var(--primary-600); }
 
 /* ─── Content Area ───────────────────────────────────────── */
 .admin-content {
-  flex: 1; margin-left: 260px;
+  flex: 1;
+  margin-left: 260px;
   padding: 1.5rem 2rem 3rem;
   min-height: 100vh; min-height: 100dvh;
-  max-width: 900px;
-  margin-right: auto; /* Center content in viewport */
+  max-width: 1200px; /* Increased to allow centering */
+  margin-right: auto;
   overflow-y: auto;
+  
+  /* Center the actual content within this container */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   
   /* Styled scrollbar */
   scrollbar-width: thin;
   scrollbar-color: var(--surface-border) transparent;
+}
+.admin-content > * {
+  width: 100%;
+  max-width: 900px; /* Content max width */
 }
 .admin-content::-webkit-scrollbar {
   width: 8px;
