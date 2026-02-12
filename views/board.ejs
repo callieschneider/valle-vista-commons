@@ -22,7 +22,7 @@
   </script>
 </head>
 <body>
-  <div class="admin-return-bar" id="adminReturnBar" style="display:none;">
+  <div class="admin-return-bar" id="adminReturnBar" style="visibility:hidden;">
     <a href="/admin" class="admin-return-link">&#8249; Admin</a>
   </div>
   <div class="vvc-container vvc-container--wide">
@@ -158,7 +158,7 @@
       var bar = document.getElementById('adminReturnBar');
       if (isAdmin) localStorage.setItem('vvc-admin','1');
       if (isAdmin || localStorage.getItem('vvc-admin') === '1') {
-        bar.style.display = '';
+        bar.style.visibility = 'visible';
       }
       
       // Secret: tap logo 7 times to reveal admin access
