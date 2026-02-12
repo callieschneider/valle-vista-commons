@@ -32,7 +32,7 @@
   }
 
   // ─── Switch tab ────────────────────────────────────────
-  function switchTab(tabId) {
+  function switchTab(tabId, skipUrlUpdate) {
     if (!VALID_TABS.includes(tabId)) tabId = DEFAULT_TAB;
     const panel = document.getElementById('tab-' + tabId);
     if (!panel) { tabId = DEFAULT_TAB; }
@@ -47,12 +47,14 @@
       p.classList.toggle('active', p.id === 'tab-' + tabId);
     });
 
-    // Update URL hash (without triggering scroll)
-    if (history.replaceState) {
-      var url = window.location.pathname + window.location.search + '#' + tabId;
-      history.replaceState(null, '', url);
-    } else {
-      window.location.hash = tabId;
+    // Update URL hash only if not skipping (to preserve auth on first load)
+    if (!skipUrlUpdate) {
+      if (history.replaceState) {
+        var url = window.location.pathname + window.location.search + '#' + tabId;
+        history.replaceState(null, '', url);
+      } else {
+        window.location.hash = tabId;
+      }
     }
 
     // Close mobile sidebar
@@ -136,16 +138,17 @@
 
   // ─── Initialize ───────────────────────────────────────
   var initialTab = getInitialTab();
-  switchTab(initialTab);
+  switchTab(initialTab, true); // Skip URL update on first load to preserve auth
 
-  // Clean up query param from URL (so refresh stays on tab via hash)
+  // Clean up query param from URL on subsequent interactions only
   if (window.location.search.includes('tab=')) {
-    var cleanUrl = window.location.pathname + '#' + initialTab;
-    // Preserve msg/error params for alert display
-    var params = new URLSearchParams(window.location.search);
-    params.delete('tab');
-    var remaining = params.toString();
-    if (remaining) cleanUrl = window.location.pathname + '?' + remaining + '#' + initialTab;
-    if (history.replaceState) history.replaceState(null, '', cleanUrl);
+    // Wait a moment, then clean up query params without breaking auth
+    setTimeout(function() {
+      var params = new URLSearchParams(window.location.search);
+      params.delete('tab');
+      var remaining = params.toString();
+      var cleanUrl = window.location.pathname + (remaining ? '?' + remaining : '') + '#' + initialTab;
+      if (history.replaceState) history.replaceState(null, '', cleanUrl);
+    }, 500);
   }
 })();

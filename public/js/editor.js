@@ -215,7 +215,7 @@ function setupToolbar(toolbar, editor, postId, enableAiRewrite) {
           break;
         }
         case 'ai-rewrite': {
-          if (!enableAiRewrite || !postId) break;
+          if (!enableAiRewrite) break;
           handleAiRewrite(editor, postId, btn);
           break;
         }
@@ -246,7 +246,10 @@ async function handleAiRewrite(editor, postId, btn) {
     
     const res = await fetch('/admin/api/rewrite-editor', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // Send auth credentials
       body: body,
     });
 

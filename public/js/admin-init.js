@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
       content: '',
       mode: 'full',
       postId: null,
-      enableAiRewrite: false, // Board notes don't need AI rewrite (they're fresh content)
+      enableAiRewrite: true, // Enable for board notes (no rate limits)
     });
   }
 
