@@ -14,9 +14,8 @@ html:not([data-theme]) { visibility: hidden; }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* ─── iOS Safari Input Zoom Prevention ───────────────────────── */
-/* iOS auto-zooms when input font-size < 16px. Force 16px minimum. */
-input, textarea, select { font-size: 16px !important; }
-@media (hover: none) and (pointer: coarse) {
+/* Keep this scoped to iOS Safari to avoid cross-platform drift. */
+@supports (-webkit-touch-callout: none) {
   input, textarea, select { font-size: 16px !important; }
 }
 
@@ -24,8 +23,21 @@ input, textarea, select { font-size: 16px !important; }
 html {
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 html, body { overscroll-behavior-y: none; }
+
+/* iOS Safari can auto-inflate text in scroll containers. Lock parity. */
+@supports (-webkit-touch-callout: none) {
+  .post-body,
+  .post-row-desc,
+  .tiptap-content,
+  .editor-toolbar button {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
 
 /* Prevent pull-to-refresh in standalone mode */
 @media all and (display-mode: standalone) {
