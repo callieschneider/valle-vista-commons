@@ -46,7 +46,8 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "https://cdn.jsdelivr.net", "https://hcaptcha.com", "https://*.hcaptcha.com", "https://esm.sh"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
       frameSrc: ["https://hcaptcha.com", "https://*.hcaptcha.com"],
       connectSrc: ["'self'", "https://hcaptcha.com", "https://*.hcaptcha.com", "https://esm.sh"],
       imgSrc: ["'self'", "data:"],

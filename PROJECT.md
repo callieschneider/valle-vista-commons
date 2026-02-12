@@ -45,7 +45,9 @@ No accounts. No tracking. No personal information collected. Ever.
 | Database | PostgreSQL (Railway add-on) |
 | ORM | Prisma 6 |
 | Templates | EJS |
-| CSS | Bootstrap 5 (CDN) |
+| CSS | Custom design system (`public/css/style.css`) + Bootstrap 5 (CDN, admin only) |
+| Fonts | Inter (Google Fonts CDN) |
+| Theming | 5 color schemes × 2 modes (light/dark), localStorage persistence |
 | Security | Helmet, xss-filters, rate-limiter-flexible, sanitize-html |
 | Captcha | hCaptcha (free tier) |
 | AI | OpenRouter API (configurable models) |
@@ -79,10 +81,14 @@ lib/
   upload.js                  -- multer config, processAndSave(), EXIF stripping
   sanitize.js                -- sanitizeRichText(), stripHtml()
 public/
+  css/
+    style.css                -- shared design system (schemes, dark mode, all components)
   js/
+    theme.js                 -- dark/light mode + color scheme controller (localStorage)
     editor.js                -- Tiptap editor module (ESM, CDN imports from esm.sh)
     submit-init.js           -- submit page editor initialization
     admin-init.js            -- admin page editor initialization
+    board-search.js          -- client-side search filter
 uploads/                     -- uploaded images/videos (gitignored, Railway volume)
 views/
   board.ejs                  -- public board (sectioned)

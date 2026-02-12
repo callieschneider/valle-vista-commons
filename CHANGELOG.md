@@ -6,6 +6,51 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-02-12 - Design System v2: Themes, Dark Mode, Modern UI
+
+### Summary
+Complete visual redesign. Replaced inline Bootstrap-only styling with a custom CSS design system featuring 5 color schemes, dark/light mode, Inter font, and modern Framer-style UI.
+
+### Added
+- **Custom CSS design system** (`public/css/style.css`) — 700+ lines of hand-written CSS replacing inline styles
+- **5 color schemes**: Forest Green (default), Terracotta, Slate Blue, Sage, Indigo
+- **Dark mode** + light mode with smooth transitions — respects OS `prefers-color-scheme` on first visit
+- **Theme controller** (`public/js/theme.js`) — saves preferences to localStorage (no cookies, privacy-first)
+- **Dark/light toggle** on all pages (pill-style sun/moon switcher)
+- **Scheme picker** (colored dots) on board and admin pages
+- **Inter font** via Google Fonts CDN — clean, modern typography
+- **Staggered fade-in animations** on board post cards
+- **SVG search icon** in search bar
+- **SVG plus icon** on FAB (replaces raw "+" text)
+- **Category grid** on submit page (2×2 visual cards replace `<select>` dropdown)
+- **Success state card** with checkmark icon on submit confirmation
+- **Privacy lock icon** on submit page footer note
+
+### Changed
+- All 5 EJS views completely rewritten with new markup and CSS classes
+- Board: section headers now use dot + uppercase label + hairline (was colored background bars)
+- Board: post cards show accent bar on hover only (was always-visible left border)
+- Submit: category picker is now a visual 2×2 grid (was dropdown)
+- Submit: page title changed to "Share with the neighborhood"
+- Admin/Super: all forms, buttons, badges, panels restyled with design system tokens
+- Error page: consistent styling with design system
+- CSP updated in `server.js` for Google Fonts (`fonts.googleapis.com`, `fonts.gstatic.com`)
+- Bootstrap kept on admin/super pages (for collapse functionality) but layered under custom CSS
+
+### Removed
+- All inline `<style>` blocks from EJS templates (styles now in shared CSS file)
+- Mockup HTML files (development artifacts)
+
+### New Files
+- `public/css/style.css` — shared design system
+- `public/js/theme.js` — theme/scheme controller
+
+### Files Changed
+- `views/board.ejs`, `views/submit.ejs`, `views/admin.ejs`, `views/super.ejs`, `views/error.ejs` — complete rewrites
+- `server.js` — CSP update for font CDN
+
+---
+
 ## 2026-02-12 - AI Rewrite, Undo History, Universal Archive
 
 ### Added
