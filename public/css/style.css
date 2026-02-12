@@ -273,6 +273,7 @@ a:hover { color: var(--primary-600); }
   left: 0; /* Align to left edge of button */
   right: auto;
   transform: translateY(6px) scale(0.97); /* Transform upward */
+  z-index: 1000; /* Higher z-index to appear above sidebar content */
 }
 .admin-sidebar-footer .theme-popover.open {
   transform: translateY(0) scale(1);
