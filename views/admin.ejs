@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="robots" content="noindex, nofollow">
@@ -22,18 +22,75 @@
   </script>
 </head>
 <body>
-  <div class="vvc-container vvc-container--wide">
-    <!-- Header -->
-    <header class="admin-header">
-      <div>
+  <!-- Mobile Sidebar Toggle -->
+  <button class="admin-sidebar-toggle" aria-label="Toggle sidebar">
+    <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+
+  <!-- Sidebar Backdrop (mobile) -->
+  <div class="sidebar-backdrop"></div>
+
+  <div class="admin-layout">
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-header">
         <a href="/" class="admin-brand">
           <div class="admin-brand-mark">VV</div>
           <span class="admin-brand-text">Valle Vista Commons</span>
         </a>
-        <span class="admin-breadcrumb">/ Admin</span>
+        <span class="admin-breadcrumb">Admin Panel</span>
       </div>
-      <div class="admin-nav">
-        <a href="/" class="nav-btn">View Board</a>
+
+      <nav class="admin-sidebar-nav">
+        <a data-tab="dashboard" class="sidebar-item active">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a data-tab="queue" class="sidebar-item">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>
+          Review Queue
+          <% if (stats.pendingCount > 0) { %><span class="sidebar-badge"><%= stats.pendingCount %></span><% } %>
+        </a>
+        <a data-tab="board" class="sidebar-item">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          Live Board
+          <span class="sidebar-badge muted"><%= stats.liveCount %></span>
+        </a>
+        <a data-tab="archive" class="sidebar-item">
+          <svg viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+          Archive
+        </a>
+        <a data-tab="notes" class="sidebar-item">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Board Notes
+        </a>
+        <a data-tab="blocklist" class="sidebar-item">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Block List
+        </a>
+
+        <% if (isSuperAdmin) { %>
+          <div class="sidebar-divider"></div>
+          <div class="sidebar-section-label">Super Admin</div>
+          <a data-tab="moderators" class="sidebar-item">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            Moderators
+          </a>
+          <a data-tab="settings" class="sidebar-item">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            Settings
+          </a>
+        <% } %>
+
+        <div class="sidebar-divider"></div>
+        <a data-tab="activity" class="sidebar-item">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Activity Log
+        </a>
+      </nav>
+
+      <div class="admin-sidebar-footer">
+        <a href="/" class="nav-btn" style="flex: 1; text-align: center;">View Board</a>
         <div class="theme-menu">
           <button class="theme-trigger" aria-label="Appearance" title="Appearance">
             <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
@@ -57,423 +114,434 @@
           </div>
         </div>
       </div>
-    </header>
+    </aside>
 
-    <!-- Error/Success Messages -->
-    <% if (error) { %>
-      <div class="alert-banner danger">
-        <span>✗</span>
-        <% if (error === 'not_found') { %>Post not found.
-        <% } else if (error === 'no_rewrite') { %>No AI rewrite available for this post.
-        <% } else if (error === 'rewrite_failed') { %>AI rewrite failed. Check API key and try again.
-        <% } else if (error === 'no_undo') { %>No undo history for this post.
-        <% } else if (error === 'notes_empty') { %>Title and description are required for Board Notes.
-        <% } else { %><%= error %><% } %>
-      </div>
-    <% } %>
-    <% if (msg) { %>
-      <div class="alert-banner success">
-        <span>✓</span>
-        <% if (msg === 'approved') { %>Post approved!
-        <% } else { %>Done.<% } %>
-      </div>
-    <% } %>
+    <!-- ═══ CONTENT ═══ -->
+    <main class="admin-content">
+      <!-- Error/Success Messages -->
+      <% if (error) { %>
+        <div class="alert-banner danger">
+          <span>✗</span>
+          <% if (error === 'not_found') { %>Post not found.
+          <% } else if (error === 'no_rewrite') { %>No AI rewrite available for this post.
+          <% } else if (error === 'rewrite_failed') { %>AI rewrite failed. Check API key and try again.
+          <% } else if (error === 'no_undo') { %>No undo history for this post.
+          <% } else if (error === 'notes_empty') { %>Title and description are required for Board Notes.
+          <% } else if (error === 'invalid_username') { %>Username must be 3-30 characters, lowercase letters/numbers/underscore only.
+          <% } else if (error === 'password_short') { %>Password must be at least 8 characters.
+          <% } else if (error === 'username_taken') { %>That username is already taken.
+          <% } else if (error === 'invalid_model') { %>Invalid model selection.
+          <% } else if (error === 'llm_failed') { %>LLM connection failed — check API key and try again.
+          <% } else { %><%= error %><% } %>
+        </div>
+      <% } %>
+      <% if (msg) { %>
+        <div class="alert-banner success">
+          <span>✓</span>
+          <% if (msg === 'approved') { %>Post approved!
+          <% } else if (msg === 'mod_created') { %>Mod created successfully!
+          <% } else if (msg === 'llm_saved') { %>LLM settings saved.
+          <% } else if (msg === 'llm_ok') { %>LLM connection test passed!
+          <% } else if (msg === 'site_saved') { %>Site settings saved.
+          <% } else if (msg === 'user_blocked') { %>User blocked.
+          <% } else if (msg === 'user_unblocked') { %>User unblocked.
+          <% } else { %>Done.<% } %>
+        </div>
+      <% } %>
 
-    <% if (!hasApiKey) { %>
-      <div class="alert-banner warning">
-        <span>⚠</span> <strong>AI features disabled</strong> — No OpenRouter API key configured.
-      </div>
-    <% } %>
+      <!-- ═══════ TAB: DASHBOARD ═══════ -->
+      <div id="tab-dashboard" class="tab-panel">
+        <div class="content-header">
+          <div>
+            <h1 class="content-title">Dashboard</h1>
+            <p class="content-subtitle">Overview of your community board</p>
+          </div>
+        </div>
 
-    <!-- ═══ PENDING REVIEW ═══ -->
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <span class="admin-section-title">Pending Review</span>
-        <% if (pending.length > 0) { %><span class="admin-section-count"><%= pending.length %></span><% } %>
-      </div>
-
-      <% if (pending.length === 0) { %>
-        <div style="text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.85rem;">No tips waiting for review.</div>
-      <% } else { %>
-        <% pending.forEach((post, idx) => { %>
-          <div class="post-row">
-            <div class="post-row-header">
-              <span class="post-row-title"><%= post.title %></span>
-              <span class="badge badge-section-<%= post.section %>"><%= post.section.replace('_', ' ') %></span>
-              <% if (post.submitter) { %>
-                <span class="badge-submitter" title="Anonymous submitter #<%= post.submitter.id %>">User #<%= post.submitter.id %><% if (submitterCounts[post.submitterId] > 1) { %> <span class="submitter-count">(<%= submitterCounts[post.submitterId] %> posts)</span><% } %></span>
-              <% } %>
+        <div class="stats-grid">
+          <div class="stat-card accent-danger" data-goto-tab="queue" title="Go to Review Queue">
+            <div class="stat-card-value"><%= stats.pendingCount %></div>
+            <div class="stat-card-label">Pending Review</div>
+          </div>
+          <div class="stat-card accent-success" data-goto-tab="board" title="Go to Live Board">
+            <div class="stat-card-value"><%= stats.liveCount %></div>
+            <div class="stat-card-label">Live Posts</div>
+          </div>
+          <div class="stat-card" data-goto-tab="archive" title="Go to Archive">
+            <div class="stat-card-value"><%= stats.archivedCount %></div>
+            <div class="stat-card-label">Archived</div>
+          </div>
+          <div class="stat-card accent-info">
+            <div class="stat-card-value"><%= stats.postsThisWeek %></div>
+            <div class="stat-card-label">Posts This Week</div>
+          </div>
+          <% if (hasHashSalt) { %>
+            <div class="stat-card accent-warning" data-goto-tab="blocklist" title="Go to Block List">
+              <div class="stat-card-value"><%= stats.blockedCount %></div>
+              <div class="stat-card-label">Blocked Users</div>
             </div>
-            <div class="post-row-desc rich-content"><%- post.desc %></div>
-            <div class="post-row-meta">
-              <% if (post.location) { %><span>📍 <%= post.location %></span><span class="sep"></span><% } %>
-              <span>Submitted <%= new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) %></span>
-            </div>
+          <% } %>
+        </div>
 
-            <!-- AI Analysis Panel -->
-            <% if (post.aiAnalysis) { %>
-              <div class="ai-panel">
-                <div class="ai-panel-grid">
-                  <div class="ai-chip"><span class="ai-chip-label">Section: </span><span class="ai-chip-value"><%= post.aiAnalysis.suggestedSection %></span></div>
-                  <div class="ai-chip"><span class="ai-chip-label">Urgency: </span><span class="ai-chip-value urgency-<%= post.aiAnalysis.urgency %>"><%= post.aiAnalysis.urgency %></span></div>
-                  <div class="ai-chip"><span class="ai-chip-label">Rec: </span><span class="ai-chip-value rec-<%= post.aiAnalysis.recommendation %>"><%= post.aiAnalysis.recommendation %></span></div>
-                  <div class="ai-chip"><span class="ai-chip-label">Sentiment: </span><span class="ai-chip-value" style="color: var(--text-secondary);"><%= post.aiAnalysis.sentiment %></span></div>
-                </div>
-                <% if (post.aiAnalysis.piiDetected && post.aiAnalysis.piiDetected.length > 0) { %>
-                  <div class="ai-pii-warning">⚠ PII detected: <%= post.aiAnalysis.piiDetected.join(', ') %></div>
+        <% if (!hasApiKey) { %>
+          <div class="alert-banner warning" style="margin-top: 1rem;">
+            <span>⚠</span> <strong>AI features disabled</strong> — No OpenRouter API key configured.
+          </div>
+        <% } %>
+
+        <div style="margin-top: 1.5rem;">
+          <h3 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.75rem;">Quick Actions</h3>
+          <div class="quick-actions">
+            <a class="quick-action-btn" data-goto-tab="queue">
+              <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg>
+              Review Queue
+            </a>
+            <a class="quick-action-btn" data-goto-tab="notes">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Compose Note
+            </a>
+            <a href="/" class="quick-action-btn" target="_blank">
+              <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              View Public Board
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ TAB: REVIEW QUEUE ═══════ -->
+      <div id="tab-queue" class="tab-panel">
+        <div class="content-header">
+          <div>
+            <h1 class="content-title">Review Queue</h1>
+            <p class="content-subtitle"><%= pending.length %> post<%= pending.length !== 1 ? 's' : '' %> awaiting review</p>
+          </div>
+        </div>
+
+        <% if (pending.length === 0) { %>
+          <div class="empty-state">
+            <div class="empty-state-icon">&#x2713;</div>
+            <div class="empty-state-text">All caught up!</div>
+            <div class="empty-state-sub">No tips waiting for review.</div>
+          </div>
+        <% } else { %>
+          <% pending.forEach((post, idx) => { %>
+            <div class="post-row">
+              <div class="post-row-header">
+                <span class="post-row-title"><%= post.title %></span>
+                <span class="badge badge-section-<%= post.section %>"><%= post.section.replace('_', ' ') %></span>
+                <% if (post.submitter) { %>
+                  <span class="badge-submitter" title="Anonymous submitter #<%= post.submitter.id %>">User #<%= post.submitter.id %><% if (submitterCounts[post.submitterId] > 1) { %> <span class="submitter-count">(<%= submitterCounts[post.submitterId] %> posts)</span><% } %></span>
                 <% } %>
-                <div class="ai-reasoning"><%= post.aiAnalysis.reasoning %></div>
+              </div>
+              <div class="post-row-desc rich-content"><%- post.desc %></div>
+              <div class="post-row-meta">
+                <% if (post.location) { %><span>📍 <%= post.location %></span><span class="sep"></span><% } %>
+                <span>Submitted <%= new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) %></span>
+              </div>
 
-                <% if (post.aiAnalysis.rewrite) { %>
-                  <div style="margin-top: 6px;">
-                    <span class="collapse-toggle" data-bs-toggle="collapse" data-bs-target="#rewrite-<%= idx %>">View AI Rewrite ▾</span>
-                    <div class="collapse mt-1" id="rewrite-<%= idx %>">
-                      <div class="inline-panel" style="margin-top: 4px; font-size: 0.78rem;">
-                        <strong><%= post.aiAnalysis.rewrite.title %></strong><br>
-                        <span style="color: var(--text-secondary);"><%= post.aiAnalysis.rewrite.desc %></span>
+              <!-- AI Analysis Panel -->
+              <% if (post.aiAnalysis) { %>
+                <div class="ai-panel">
+                  <div class="ai-panel-grid">
+                    <div class="ai-chip"><span class="ai-chip-label">Section: </span><span class="ai-chip-value"><%= post.aiAnalysis.suggestedSection %></span></div>
+                    <div class="ai-chip"><span class="ai-chip-label">Urgency: </span><span class="ai-chip-value urgency-<%= post.aiAnalysis.urgency %>"><%= post.aiAnalysis.urgency %></span></div>
+                    <div class="ai-chip"><span class="ai-chip-label">Rec: </span><span class="ai-chip-value rec-<%= post.aiAnalysis.recommendation %>"><%= post.aiAnalysis.recommendation %></span></div>
+                    <div class="ai-chip"><span class="ai-chip-label">Sentiment: </span><span class="ai-chip-value" style="color: var(--text-secondary);"><%= post.aiAnalysis.sentiment %></span></div>
+                  </div>
+                  <% if (post.aiAnalysis.piiDetected && post.aiAnalysis.piiDetected.length > 0) { %>
+                    <div class="ai-pii-warning">⚠ PII detected: <%= post.aiAnalysis.piiDetected.join(', ') %></div>
+                  <% } %>
+                  <div class="ai-reasoning"><%= post.aiAnalysis.reasoning %></div>
+                  <% if (post.aiAnalysis.rewrite) { %>
+                    <div style="margin-top: 6px;">
+                      <span class="collapse-toggle" data-bs-toggle="collapse" data-bs-target="#rewrite-<%= idx %>">View AI Rewrite ▾</span>
+                      <div class="collapse mt-1" id="rewrite-<%= idx %>">
+                        <div class="inline-panel" style="margin-top: 4px; font-size: 0.78rem;">
+                          <strong><%= post.aiAnalysis.rewrite.title %></strong><br>
+                          <span style="color: var(--text-secondary);"><%= post.aiAnalysis.rewrite.desc %></span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                <% } %>
-              </div>
-            <% } else { %>
-              <div class="ai-panel" style="color: var(--text-muted);">
-                <% if (hasApiKey) { %>
-                  Analysis pending...
-                  <form method="POST" action="/admin/reanalyze/<%= post.id %>" style="display: inline;">
-                    <button type="submit" class="action-link" style="margin-left: 4px;">Retry</button>
+                  <% } %>
+                </div>
+              <% } else { %>
+                <div class="ai-panel" style="color: var(--text-muted);">
+                  <% if (hasApiKey) { %>
+                    Analysis pending...
+                    <form method="POST" action="/admin/reanalyze/<%= post.id %>" style="display: inline;">
+                      <button type="submit" class="action-link" style="margin-left: 4px;">Retry</button>
+                    </form>
+                  <% } else { %>
+                    AI analysis not available (no API key)
+                  <% } %>
+                </div>
+              <% } %>
+
+              <!-- Action Buttons -->
+              <div class="actions-row">
+                <div class="action-group">
+                  <form method="POST" action="/admin/approve/<%= post.id %>" style="display: inline-flex; align-items: center; gap: 4px;">
+                    <select name="section" class="section-select">
+                      <% ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS'].forEach(s => { %>
+                        <option value="<%= s %>" <%= (post.aiAnalysis?.suggestedSection === s || (!post.aiAnalysis && post.section === s)) ? 'selected' : '' %>><%= s.replace('_', ' ') %></option>
+                      <% }) %>
+                    </select>
+                    <button type="submit" class="action-btn approve">Approve</button>
                   </form>
-                <% } else { %>
-                  AI analysis not available (no API key)
-                <% } %>
-              </div>
-            <% } %>
-
-            <!-- Action Buttons -->
-            <div class="actions-row">
-              <!-- Primary: Approve + Reject -->
-              <div class="action-group">
-                <form method="POST" action="/admin/approve/<%= post.id %>" style="display: inline-flex; align-items: center; gap: 4px;">
-                  <select name="section" class="section-select">
-                    <% ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS'].forEach(s => { %>
-                      <option value="<%= s %>" <%= (post.aiAnalysis?.suggestedSection === s || (!post.aiAnalysis && post.section === s)) ? 'selected' : '' %>><%= s.replace('_', ' ') %></option>
-                    <% }) %>
-                  </select>
-                  <button type="submit" class="action-btn approve">Approve</button>
-                </form>
-                <form method="POST" action="/admin/reject/<%= post.id %>" style="display: inline;" onsubmit="return confirm('Reject this tip? It will move to archive.')">
-                  <button type="submit" class="action-btn reject">Reject</button>
-                </form>
-              </div>
-
-              <span class="actions-sep"></span>
-
-              <!-- Secondary: Edit + AI -->
-              <div class="action-group">
-                <button type="button" class="action-btn outline" data-bs-toggle="collapse" data-bs-target="#edit-<%= idx %>">Edit</button>
-                <% if (post.aiAnalysis?.rewrite) { %>
-                  <form method="POST" action="/admin/rewrite/<%= post.id %>" style="display:inline;">
-                    <input type="hidden" name="action" value="apply">
-                    <button type="submit" class="action-btn outline ai">Apply Rewrite</button>
+                  <form method="POST" action="/admin/reject/<%= post.id %>" style="display: inline;" onsubmit="return confirm('Reject this tip? It will move to archive.')">
+                    <button type="submit" class="action-btn reject">Reject</button>
                   </form>
-                <% } %>
-                <% if (hasApiKey) { %>
-                  <form method="POST" action="/admin/rewrite/<%= post.id %>" style="display:inline;">
-                    <input type="hidden" name="action" value="quick">
-                    <button type="submit" class="action-btn outline ai">Rewrite</button>
-                  </form>
-                  <button type="button" class="action-btn outline ai" data-bs-toggle="collapse" data-bs-target="#customRewrite-<%= idx %>">Custom Rewrite</button>
-                <% } %>
-                <% if (post.descHistory && post.descHistory.length > 0) { %>
-                  <form method="POST" action="/admin/undo/<%= post.id %>" style="display:inline;">
-                    <button type="submit" class="action-btn outline undo">Undo (<%= post.descHistory.length %>)</button>
-                  </form>
-                <% } %>
+                </div>
+                <span class="actions-sep"></span>
+                <div class="action-group">
+                  <button type="button" class="action-btn outline" data-bs-toggle="collapse" data-bs-target="#edit-p<%= idx %>">Edit</button>
+                  <% if (post.aiAnalysis?.rewrite) { %>
+                    <form method="POST" action="/admin/rewrite/<%= post.id %>" style="display:inline;">
+                      <input type="hidden" name="action" value="apply">
+                      <button type="submit" class="action-btn outline ai">Apply Rewrite</button>
+                    </form>
+                  <% } %>
+                  <% if (hasApiKey) { %>
+                    <form method="POST" action="/admin/rewrite/<%= post.id %>" style="display:inline;">
+                      <input type="hidden" name="action" value="quick">
+                      <button type="submit" class="action-btn outline ai">Rewrite</button>
+                    </form>
+                    <button type="button" class="action-btn outline ai" data-bs-toggle="collapse" data-bs-target="#customRewrite-p<%= idx %>">Custom Rewrite</button>
+                  <% } %>
+                  <% if (post.descHistory && post.descHistory.length > 0) { %>
+                    <form method="POST" action="/admin/undo/<%= post.id %>" style="display:inline;">
+                      <button type="submit" class="action-btn outline undo">Undo (<%= post.descHistory.length %>)</button>
+                    </form>
+                  <% } %>
+                </div>
               </div>
-            </div>
 
-            <!-- Edit Form (collapsed) -->
-            <div class="collapse mt-2" id="edit-<%= idx %>">
-              <form method="POST" action="/admin/edit/<%= post.id %>" class="inline-panel">
-                <div style="margin-bottom: 8px;">
-                  <input type="text" name="title" class="vvc-input" value="<%= post.title %>" maxlength="100" style="font-size: 0.85rem; padding: 8px 12px;">
-                </div>
-                <div style="margin-bottom: 8px;">
-                  <div class="editor-wrapper">
-                    <div class="editor-toolbar" id="editToolbar-p<%= idx %>">
-                      <button type="button" data-action="bold"><b>B</b></button>
-                      <button type="button" data-action="italic"><i>I</i></button>
-                      <button type="button" data-action="strike"><s>S</s></button>
-                      <div class="sep"></div>
-                      <button type="button" data-action="heading1">H1</button>
-                      <button type="button" data-action="heading2">H2</button>
-                      <button type="button" data-action="heading3">H3</button>
-                      <button type="button" data-action="heading4">H4</button>
-                      <div class="sep"></div>
-                      <button type="button" data-action="bulletList">• List</button>
-                      <button type="button" data-action="link">Link</button>
-                      <div class="sep"></div>
-                      <button type="button" data-action="image">Image</button>
-                      <button type="button" data-action="video">Video</button>
-                      <% if (hasApiKey) { %>
-                        <div class="sep"></div>
-                        <button type="button" data-action="ai-rewrite" title="AI Rewrite">🤖</button>
-                      <% } %>
-                    </div>
-                    <div class="admin-editor tiptap-content admin-editor" id="editEditor-p<%= idx %>" data-content="<%= encodeURIComponent(post.desc) %>" data-post-id="<%= post.id %>"></div>
-                  </div>
-                  <input type="hidden" name="desc" id="editHidden-p<%= idx %>">
-                </div>
-                <div style="margin-bottom: 8px;">
-                  <input type="text" name="location" class="vvc-input" value="<%= post.location || '' %>" maxlength="100" placeholder="Location (optional)" style="font-size: 0.85rem; padding: 8px 12px;">
-                </div>
-                <div style="margin-bottom: 8px;">
-                  <label style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">Map Pin (optional)</label>
-                  <div id="adminMap-p<%= idx %>" class="admin-map-container"></div>
-                  <div class="map-coord-display">
-                    <span id="coordDisplay-p<%= idx %>">
-                      <% if (post.latitude && post.longitude) { %>
-                        📍 <%= post.latitude.toFixed(5) %>, <%= post.longitude.toFixed(5) %>
-                      <% } else { %>
-                        Click map to drop a pin
-                      <% } %>
-                    </span>
-                    <button type="button" class="btn-link-vvc" id="removeMapPin-p<%= idx %>" style="font-size: 0.75rem; margin-left: 8px;">
-                      Remove pin
-                    </button>
-                  </div>
-                  <input type="hidden" name="latitude" id="adminLat-p<%= idx %>" value="<%= post.latitude || '' %>">
-                  <input type="hidden" name="longitude" id="adminLng-p<%= idx %>" value="<%= post.longitude || '' %>">
-                  <input type="hidden" name="locationName" id="adminName-p<%= idx %>" value="<%= post.locationName || '' %>">
-                </div>
-                <div style="margin-bottom: 8px;">
-                  <select name="section" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
-                    <% ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS'].forEach(s => { %>
-                      <option value="<%= s %>" <%= post.section === s ? 'selected' : '' %>><%= s.replace('_', ' ') %></option>
-                    <% }) %>
-                  </select>
-                </div>
-                <div class="panel-actions">
-                  <button type="submit" class="panel-btn-primary">Save Edit</button>
-                  <button type="button" class="panel-btn-ghost" data-bs-toggle="collapse" data-bs-target="#edit-<%= idx %>">Discard</button>
-                </div>
-              </form>
-            </div>
-
-            <!-- Custom Rewrite Form (collapsed) -->
-            <% if (hasApiKey) { %>
-              <div class="collapse mt-2" id="customRewrite-<%= idx %>">
-                <form method="POST" action="/admin/rewrite/<%= post.id %>" class="inline-panel">
-                  <input type="hidden" name="action" value="custom">
+              <!-- Edit Form (collapsed) -->
+              <div class="collapse mt-2" id="edit-p<%= idx %>">
+                <form method="POST" action="/admin/edit/<%= post.id %>" class="inline-panel">
+                  <div style="margin-bottom: 8px;"><input type="text" name="title" class="vvc-input" value="<%= post.title %>" maxlength="100" style="font-size: 0.85rem; padding: 8px 12px;"></div>
                   <div style="margin-bottom: 8px;">
-                    <input type="text" name="instructions" class="vvc-input" placeholder="e.g. Make shorter, remove location details" required style="font-size: 0.85rem; padding: 8px 12px;">
+                    <div class="editor-wrapper">
+                      <div class="editor-toolbar" id="editToolbar-p<%= idx %>">
+                        <button type="button" data-action="bold"><b>B</b></button>
+                        <button type="button" data-action="italic"><i>I</i></button>
+                        <button type="button" data-action="strike"><s>S</s></button>
+                        <div class="sep"></div>
+                        <button type="button" data-action="heading1">H1</button><button type="button" data-action="heading2">H2</button><button type="button" data-action="heading3">H3</button><button type="button" data-action="heading4">H4</button>
+                        <div class="sep"></div>
+                        <button type="button" data-action="bulletList">• List</button><button type="button" data-action="link">Link</button>
+                        <div class="sep"></div>
+                        <button type="button" data-action="image">Image</button><button type="button" data-action="video">Video</button>
+                        <% if (hasApiKey) { %><div class="sep"></div><button type="button" data-action="ai-rewrite" title="AI Rewrite">🤖</button><% } %>
+                      </div>
+                      <div class="admin-editor tiptap-content admin-editor" id="editEditor-p<%= idx %>" data-content="<%= encodeURIComponent(post.desc) %>" data-post-id="<%= post.id %>"></div>
+                    </div>
+                    <input type="hidden" name="desc" id="editHidden-p<%= idx %>">
                   </div>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <button type="submit" class="panel-btn-primary">Rewrite with AI</button>
-                    <span style="font-size: 0.72rem; color: var(--text-muted);">(takes a few seconds)</span>
+                  <div style="margin-bottom: 8px;">
+                    <label class="vvc-label">Location <span class="optional">(optional)</span></label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                      <button type="button" class="map-pin-btn" data-target="p<%= idx %>" title="Find location on map"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
+                      <input type="text" name="location" class="vvc-input" value="<%= post.location || '' %>" maxlength="100" placeholder="Location (optional)" style="font-size: 0.85rem; padding: 8px 12px; flex: 1;">
+                    </div>
+                  </div>
+                  <div style="margin-bottom: 8px;">
+                    <div id="adminMap-p<%= idx %>" class="admin-map-container"></div>
+                    <div class="map-coord-display">
+                      <span id="coordDisplay-p<%= idx %>"><% if (post.latitude && post.longitude) { %>📍 <%= post.latitude.toFixed(5) %>, <%= post.longitude.toFixed(5) %><% } else { %>Click map to drop a pin<% } %></span>
+                      <button type="button" class="btn-link-vvc" id="removeMapPin-p<%= idx %>" style="font-size: 0.75rem; margin-left: 8px;">Remove pin</button>
+                    </div>
+                    <input type="hidden" name="latitude" id="adminLat-p<%= idx %>" value="<%= post.latitude || '' %>">
+                    <input type="hidden" name="longitude" id="adminLng-p<%= idx %>" value="<%= post.longitude || '' %>">
+                    <input type="hidden" name="locationName" id="adminName-p<%= idx %>" value="<%= post.locationName || '' %>">
+                  </div>
+                  <div style="margin-bottom: 8px;">
+                    <select name="section" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
+                      <% ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS'].forEach(s => { %><option value="<%= s %>" <%= post.section === s ? 'selected' : '' %>><%= s.replace('_', ' ') %></option><% }) %>
+                    </select>
+                  </div>
+                  <div class="panel-actions">
+                    <button type="submit" class="panel-btn-primary">Save Edit</button>
+                    <button type="button" class="panel-btn-ghost" data-bs-toggle="collapse" data-bs-target="#edit-p<%= idx %>">Discard</button>
                   </div>
                 </form>
               </div>
-            <% } %>
-          </div>
-        <% }) %>
-      <% } %>
-    </div>
 
-    <!-- ═══ LIVE POSTS ═══ -->
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <span class="admin-section-title">Live Board</span>
-        <span class="admin-section-subtitle"><%= live.length %> posts</span>
-      </div>
-
-      <% if (live.length === 0) { %>
-        <div style="text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.85rem;">No live posts.</div>
-      <% } else { %>
-        <% live.forEach((post, idx) => { %>
-          <div class="post-row">
-            <div class="post-row-header">
-              <span class="post-row-title"><%= post.title %></span>
-              <span class="badge badge-section-<%= post.section %>"><%= post.section.replace('_', ' ') %></span>
-              <% if (post.pinned) { %><span class="badge badge-pinned-admin">Pinned</span><% } %>
-              <% if (post.urgent) { %><span class="badge badge-urgent-admin">Urgent</span><% } %>
-              <% if (post.editedAt) { %><span class="badge badge-edited">edited</span><% } %>
-              <% if (post.modPost) { %><span class="badge badge-mod">mod post</span><% } %>
-              <% if (post.submitter) { %>
-                <span class="badge-submitter" title="Anonymous submitter #<%= post.submitter.id %>">User #<%= post.submitter.id %><% if (submitterCounts[post.submitterId] > 1) { %> <span class="submitter-count">(<%= submitterCounts[post.submitterId] %> posts)</span><% } %></span>
+              <!-- Custom Rewrite Form (collapsed) -->
+              <% if (hasApiKey) { %>
+                <div class="collapse mt-2" id="customRewrite-p<%= idx %>">
+                  <form method="POST" action="/admin/rewrite/<%= post.id %>" class="inline-panel">
+                    <input type="hidden" name="action" value="custom">
+                    <div style="margin-bottom: 8px;"><input type="text" name="instructions" class="vvc-input" placeholder="e.g. Make shorter, remove location details" required style="font-size: 0.85rem; padding: 8px 12px;"></div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <button type="submit" class="panel-btn-primary">Rewrite with AI</button>
+                      <span style="font-size: 0.72rem; color: var(--text-muted);">(takes a few seconds)</span>
+                    </div>
+                  </form>
+                </div>
               <% } %>
             </div>
-            <div class="post-row-desc rich-content"><%- post.desc %></div>
-            <div class="post-row-meta">
-              <% if (post.location) { %><span>📍 <%= post.location %></span><span class="sep"></span><% } %>
-              <span>Approved <%= post.approvedAt ? new Date(post.approvedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'n/a' %></span>
-              <% if (post.expiresAt) { %><span class="sep"></span><span>Expires <%= new Date(post.expiresAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %></span><% } %>
-            </div>
-            <% if (post.modNote) { %>
-              <div class="mod-note-inline"><strong>Mod note:</strong> <%= post.modNote %></div>
-            <% } %>
-
-            <!-- Live Post Actions -->
-            <div class="actions-row">
-              <!-- State toggles -->
-              <div class="action-group">
-                <form method="POST" action="/admin/pin/<%= post.id %>" style="display:inline;">
-                  <button type="submit" class="action-btn outline pin <%= post.pinned ? 'active' : '' %>">
-                    <%= post.pinned ? 'Unpin' : 'Pin' %>
-                  </button>
-                </form>
-                <form method="POST" action="/admin/urgent/<%= post.id %>" style="display:inline;">
-                  <button type="submit" class="action-btn outline urgent-action <%= post.urgent ? 'active' : '' %>">
-                    <%= post.urgent ? 'Not Urgent' : 'Urgent' %>
-                  </button>
-                </form>
-              </div>
-
-              <span class="actions-sep"></span>
-
-              <!-- Edit + Notes -->
-              <div class="action-group">
-                <button type="button" class="action-btn outline" data-bs-toggle="collapse" data-bs-target="#liveEdit-<%= idx %>">Edit</button>
-                <button type="button" class="action-btn outline" data-bs-toggle="collapse" data-bs-target="#modNote-<%= idx %>">Mod Note</button>
-                <% if (hasApiKey) { %>
-                  <form method="POST" action="/admin/rewrite/<%= post.id %>" style="display:inline;">
-                    <input type="hidden" name="action" value="quick">
-                    <button type="submit" class="action-btn outline ai">Rewrite</button>
-                  </form>
-                <% } %>
-                <% if (post.descHistory && post.descHistory.length > 0) { %>
-                  <form method="POST" action="/admin/undo/<%= post.id %>" style="display:inline;">
-                    <button type="submit" class="action-btn outline undo">Undo (<%= post.descHistory.length %>)</button>
-                  </form>
-                <% } %>
-              </div>
-
-              <span class="actions-sep"></span>
-
-              <!-- Destructive -->
-              <div class="action-group">
-                <form method="POST" action="/admin/expire/<%= post.id %>" style="display:inline;" onsubmit="return confirm('Expire this post?')">
-                  <button type="submit" class="action-btn outline">Expire</button>
-                </form>
-                <form method="POST" action="/admin/delete/<%= post.id %>" style="display:inline;" onsubmit="return confirm('Remove this post? It will move to archive.')">
-                  <button type="submit" class="action-btn outline delete">Delete</button>
-                </form>
-              </div>
-            </div>
-
-            <!-- Live Edit Form (collapsed) -->
-            <div class="collapse mt-2" id="liveEdit-<%= idx %>">
-              <form method="POST" action="/admin/edit/<%= post.id %>" class="inline-panel">
-                <div style="margin-bottom: 8px;">
-                  <input type="text" name="title" class="vvc-input" value="<%= post.title %>" maxlength="100" style="font-size: 0.85rem; padding: 8px 12px;">
-                </div>
-                <div style="margin-bottom: 8px;">
-                  <div class="editor-wrapper">
-                    <div class="editor-toolbar" id="editToolbar-l<%= idx %>">
-                      <button type="button" data-action="bold"><b>B</b></button>
-                      <button type="button" data-action="italic"><i>I</i></button>
-                      <button type="button" data-action="strike"><s>S</s></button>
-                      <div class="sep"></div>
-                      <button type="button" data-action="heading1">H1</button>
-                      <button type="button" data-action="heading2">H2</button>
-                      <button type="button" data-action="heading3">H3</button>
-                      <button type="button" data-action="heading4">H4</button>
-                      <div class="sep"></div>
-                      <button type="button" data-action="bulletList">• List</button>
-                      <button type="button" data-action="link">Link</button>
-                      <div class="sep"></div>
-                      <button type="button" data-action="image">Image</button>
-                      <button type="button" data-action="video">Video</button>
-                      <% if (hasApiKey) { %>
-                        <div class="sep"></div>
-                        <button type="button" data-action="ai-rewrite" title="AI Rewrite">🤖</button>
-                      <% } %>
-                    </div>
-                    <div class="admin-editor tiptap-content admin-editor" id="editEditor-l<%= idx %>" data-content="<%= encodeURIComponent(post.desc) %>" data-post-id="<%= post.id %>"></div>
-                  </div>
-                  <input type="hidden" name="desc" id="editHidden-l<%= idx %>">
-                </div>
-                <div style="margin-bottom: 8px;">
-                  <input type="text" name="location" class="vvc-input" value="<%= post.location || '' %>" maxlength="100" placeholder="Location (optional)" style="font-size: 0.85rem; padding: 8px 12px;">
-                </div>
-                <div style="margin-bottom: 8px;">
-                  <label style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">Map Pin (optional)</label>
-                  <div id="adminMap-l<%= idx %>" class="admin-map-container"></div>
-                  <div class="map-coord-display">
-                    <span id="coordDisplay-l<%= idx %>">
-                      <% if (post.latitude && post.longitude) { %>
-                        📍 <%= post.latitude.toFixed(5) %>, <%= post.longitude.toFixed(5) %>
-                      <% } else { %>
-                        Click map to drop a pin
-                      <% } %>
-                    </span>
-                    <button type="button" class="btn-link-vvc" id="removeMapPin-l<%= idx %>" style="font-size: 0.75rem; margin-left: 8px;">
-                      Remove pin
-                    </button>
-                  </div>
-                  <input type="hidden" name="latitude" id="adminLat-l<%= idx %>" value="<%= post.latitude || '' %>">
-                  <input type="hidden" name="longitude" id="adminLng-l<%= idx %>" value="<%= post.longitude || '' %>">
-                  <input type="hidden" name="locationName" id="adminName-l<%= idx %>" value="<%= post.locationName || '' %>">
-                </div>
-                <div style="margin-bottom: 8px;">
-                  <select name="section" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
-                    <% ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS', 'BOARD_NOTES'].forEach(s => { %>
-                      <option value="<%= s %>" <%= post.section === s ? 'selected' : '' %>><%= s.replace('_', ' ') %></option>
-                    <% }) %>
-                  </select>
-                </div>
-                <div class="panel-actions">
-                  <button type="submit" class="panel-btn-primary">Save Edit</button>
-                  <button type="button" class="panel-btn-ghost" data-bs-toggle="collapse" data-bs-target="#liveEdit-<%= idx %>">Discard</button>
-                </div>
-              </form>
-            </div>
-
-            <!-- Mod Note Form (collapsed) -->
-            <div class="collapse mt-2" id="modNote-<%= idx %>">
-              <form method="POST" action="/admin/modnote/<%= post.id %>" class="inline-panel">
-                <textarea name="modNote" class="vvc-textarea" rows="2" maxlength="1000" placeholder="Internal mod note (not visible to public)" style="font-size: 0.82rem; min-height: 60px;"><%= post.modNote || '' %></textarea>
-                <div class="panel-actions">
-                  <button type="submit" class="panel-btn-primary">Save Note</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        <% }) %>
-      <% } %>
-    </div>
-
-    <!-- ═══ ARCHIVE ═══ -->
-    <div class="admin-section">
-      <div class="admin-section-header" style="cursor: pointer; border-bottom-color: var(--text-muted);" data-bs-toggle="collapse" data-bs-target="#archiveSection">
-        <span class="admin-section-title">Archive</span>
-        <span class="admin-section-count" style="background: var(--text-muted);"><%= archived.length %></span>
-        <span style="font-size: 0.7rem; color: var(--text-muted); margin-left: 4px;">▸ click to expand</span>
+          <% }) %>
+        <% } %>
       </div>
-      <div class="collapse" id="archiveSection">
-        <% if (archived.length === 0) { %>
-          <p style="font-size: 0.82rem; color: var(--text-muted);">Archive is empty.</p>
+
+      <!-- ═══════ TAB: LIVE BOARD ═══════ -->
+      <div id="tab-board" class="tab-panel">
+        <div class="content-header">
+          <div>
+            <h1 class="content-title">Live Board</h1>
+            <p class="content-subtitle"><%= live.length %> post<%= live.length !== 1 ? 's' : '' %> currently live</p>
+          </div>
+        </div>
+
+        <% if (live.length === 0) { %>
+          <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <div class="empty-state-text">No live posts</div>
+            <div class="empty-state-sub">Approve some posts from the Review Queue to get started.</div>
+          </div>
         <% } else { %>
-          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">All rejected, deleted, and expired posts live here. Restore moves back to pending.</p>
-          <% archived.forEach((post, idx) => { %>
-            <div class="post-row" style="opacity: 0.8;">
+          <% live.forEach((post, idx) => { %>
+            <div class="post-row">
+              <div class="post-row-header">
+                <span class="post-row-title"><%= post.title %></span>
+                <span class="badge badge-section-<%= post.section %>"><%= post.section.replace('_', ' ') %></span>
+                <% if (post.pinned) { %><span class="badge badge-pinned-admin">Pinned</span><% } %>
+                <% if (post.urgent) { %><span class="badge badge-urgent-admin">Urgent</span><% } %>
+                <% if (post.editedAt) { %><span class="badge badge-edited">edited</span><% } %>
+                <% if (post.modPost) { %><span class="badge badge-mod">mod post</span><% } %>
+                <% if (post.submitter) { %>
+                  <span class="badge-submitter" title="Anonymous submitter #<%= post.submitter.id %>">User #<%= post.submitter.id %><% if (submitterCounts[post.submitterId] > 1) { %> <span class="submitter-count">(<%= submitterCounts[post.submitterId] %> posts)</span><% } %></span>
+                <% } %>
+              </div>
+              <div class="post-row-desc rich-content"><%- post.desc %></div>
+              <div class="post-row-meta">
+                <% if (post.location) { %><span>📍 <%= post.location %></span><span class="sep"></span><% } %>
+                <span>Approved <%= post.approvedAt ? new Date(post.approvedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'n/a' %></span>
+                <% if (post.expiresAt) { %><span class="sep"></span><span>Expires <%= new Date(post.expiresAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %></span><% } %>
+              </div>
+              <% if (post.modNote) { %>
+                <div class="mod-note-inline"><strong>Mod note:</strong> <%= post.modNote %></div>
+              <% } %>
+
+              <div class="actions-row">
+                <div class="action-group">
+                  <form method="POST" action="/admin/pin/<%= post.id %>" style="display:inline;"><button type="submit" class="action-btn outline pin <%= post.pinned ? 'active' : '' %>"><%= post.pinned ? 'Unpin' : 'Pin' %></button></form>
+                  <form method="POST" action="/admin/urgent/<%= post.id %>" style="display:inline;"><button type="submit" class="action-btn outline urgent-action <%= post.urgent ? 'active' : '' %>"><%= post.urgent ? 'Not Urgent' : 'Urgent' %></button></form>
+                </div>
+                <span class="actions-sep"></span>
+                <div class="action-group">
+                  <button type="button" class="action-btn outline" data-bs-toggle="collapse" data-bs-target="#liveEdit-<%= idx %>">Edit</button>
+                  <button type="button" class="action-btn outline" data-bs-toggle="collapse" data-bs-target="#modNote-<%= idx %>">Mod Note</button>
+                  <% if (hasApiKey) { %>
+                    <form method="POST" action="/admin/rewrite/<%= post.id %>" style="display:inline;"><input type="hidden" name="action" value="quick"><button type="submit" class="action-btn outline ai">Rewrite</button></form>
+                  <% } %>
+                  <% if (post.descHistory && post.descHistory.length > 0) { %>
+                    <form method="POST" action="/admin/undo/<%= post.id %>" style="display:inline;"><button type="submit" class="action-btn outline undo">Undo (<%= post.descHistory.length %>)</button></form>
+                  <% } %>
+                </div>
+                <span class="actions-sep"></span>
+                <div class="action-group">
+                  <form method="POST" action="/admin/expire/<%= post.id %>" style="display:inline;" onsubmit="return confirm('Expire this post?')"><button type="submit" class="action-btn outline">Expire</button></form>
+                  <form method="POST" action="/admin/delete/<%= post.id %>" style="display:inline;" onsubmit="return confirm('Remove this post? It will move to archive.')"><button type="submit" class="action-btn outline delete">Delete</button></form>
+                </div>
+              </div>
+
+              <!-- Live Edit Form -->
+              <div class="collapse mt-2" id="liveEdit-<%= idx %>">
+                <form method="POST" action="/admin/edit/<%= post.id %>" class="inline-panel">
+                  <div style="margin-bottom: 8px;"><input type="text" name="title" class="vvc-input" value="<%= post.title %>" maxlength="100" style="font-size: 0.85rem; padding: 8px 12px;"></div>
+                  <div style="margin-bottom: 8px;">
+                    <div class="editor-wrapper">
+                      <div class="editor-toolbar" id="editToolbar-l<%= idx %>">
+                        <button type="button" data-action="bold"><b>B</b></button><button type="button" data-action="italic"><i>I</i></button><button type="button" data-action="strike"><s>S</s></button>
+                        <div class="sep"></div>
+                        <button type="button" data-action="heading1">H1</button><button type="button" data-action="heading2">H2</button><button type="button" data-action="heading3">H3</button><button type="button" data-action="heading4">H4</button>
+                        <div class="sep"></div>
+                        <button type="button" data-action="bulletList">• List</button><button type="button" data-action="link">Link</button>
+                        <div class="sep"></div>
+                        <button type="button" data-action="image">Image</button><button type="button" data-action="video">Video</button>
+                        <% if (hasApiKey) { %><div class="sep"></div><button type="button" data-action="ai-rewrite" title="AI Rewrite">🤖</button><% } %>
+                      </div>
+                      <div class="admin-editor tiptap-content admin-editor" id="editEditor-l<%= idx %>" data-content="<%= encodeURIComponent(post.desc) %>" data-post-id="<%= post.id %>"></div>
+                    </div>
+                    <input type="hidden" name="desc" id="editHidden-l<%= idx %>">
+                  </div>
+                  <div style="margin-bottom: 8px;">
+                    <label class="vvc-label">Location <span class="optional">(optional)</span></label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                      <button type="button" class="map-pin-btn" data-target="l<%= idx %>" title="Find location on map"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
+                      <input type="text" name="location" class="vvc-input" value="<%= post.location || '' %>" maxlength="100" placeholder="Location (optional)" style="font-size: 0.85rem; padding: 8px 12px; flex: 1;">
+                    </div>
+                  </div>
+                  <div style="margin-bottom: 8px;">
+                    <div id="adminMap-l<%= idx %>" class="admin-map-container"></div>
+                    <div class="map-coord-display">
+                      <span id="coordDisplay-l<%= idx %>"><% if (post.latitude && post.longitude) { %>📍 <%= post.latitude.toFixed(5) %>, <%= post.longitude.toFixed(5) %><% } else { %>Click map to drop a pin<% } %></span>
+                      <button type="button" class="btn-link-vvc" id="removeMapPin-l<%= idx %>" style="font-size: 0.75rem; margin-left: 8px;">Remove pin</button>
+                    </div>
+                    <input type="hidden" name="latitude" id="adminLat-l<%= idx %>" value="<%= post.latitude || '' %>">
+                    <input type="hidden" name="longitude" id="adminLng-l<%= idx %>" value="<%= post.longitude || '' %>">
+                    <input type="hidden" name="locationName" id="adminName-l<%= idx %>" value="<%= post.locationName || '' %>">
+                  </div>
+                  <div style="margin-bottom: 8px;">
+                    <select name="section" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
+                      <% ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS', 'BOARD_NOTES'].forEach(s => { %><option value="<%= s %>" <%= post.section === s ? 'selected' : '' %>><%= s.replace('_', ' ') %></option><% }) %>
+                    </select>
+                  </div>
+                  <div class="panel-actions"><button type="submit" class="panel-btn-primary">Save Edit</button><button type="button" class="panel-btn-ghost" data-bs-toggle="collapse" data-bs-target="#liveEdit-<%= idx %>">Discard</button></div>
+                </form>
+              </div>
+
+              <!-- Mod Note Form -->
+              <div class="collapse mt-2" id="modNote-<%= idx %>">
+                <form method="POST" action="/admin/modnote/<%= post.id %>" class="inline-panel">
+                  <textarea name="modNote" class="vvc-textarea" rows="2" maxlength="1000" placeholder="Internal mod note (not visible to public)" style="font-size: 0.82rem; min-height: 60px;"><%= post.modNote || '' %></textarea>
+                  <div class="panel-actions"><button type="submit" class="panel-btn-primary">Save Note</button></div>
+                </form>
+              </div>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+
+      <!-- ═══════ TAB: ARCHIVE ═══════ -->
+      <div id="tab-archive" class="tab-panel">
+        <div class="content-header">
+          <div>
+            <h1 class="content-title">Archive</h1>
+            <p class="content-subtitle"><%= archived.length %> archived post<%= archived.length !== 1 ? 's' : '' %></p>
+          </div>
+        </div>
+
+        <div class="archive-filters">
+          <button class="archive-filter-btn active" data-filter="all">All (<%= archived.length %>)</button>
+          <button class="archive-filter-btn" data-filter="REJECTED">Rejected (<%= archived.filter(p => p.status === 'REJECTED').length %>)</button>
+          <button class="archive-filter-btn" data-filter="EXPIRED">Expired (<%= archived.filter(p => p.status === 'EXPIRED').length %>)</button>
+          <button class="archive-filter-btn" data-filter="DELETED">Deleted (<%= archived.filter(p => p.status === 'DELETED').length %>)</button>
+        </div>
+
+        <% if (archived.length === 0) { %>
+          <div class="empty-state">
+            <div class="empty-state-icon">📦</div>
+            <div class="empty-state-text">Archive is empty</div>
+            <div class="empty-state-sub">Rejected, expired, and deleted posts will appear here.</div>
+          </div>
+        <% } else { %>
+          <% archived.forEach((post) => { %>
+            <div class="post-row archive-post-row" data-status="<%= post.status %>" style="opacity: 0.85;">
               <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1;">
                   <span class="post-row-title" style="font-size: 0.85rem;"><%= post.title %></span>
                   <span class="badge badge-section-<%= post.section %>"><%= post.section.replace('_', ' ') %></span>
-                  <span class="badge" style="background: var(--accent-<%= post.status === 'REJECTED' ? 'danger' : 'warning' %>-soft); color: var(--accent-<%= post.status === 'REJECTED' ? 'danger' : 'warning' %>);"><%= post.status %></span>
+                  <span class="badge" style="background: var(--accent-<%= post.status === 'REJECTED' ? 'danger' : post.status === 'DELETED' ? 'danger' : 'warning' %>-soft); color: var(--accent-<%= post.status === 'REJECTED' ? 'danger' : post.status === 'DELETED' ? 'danger' : 'warning' %>);"><%= post.status %></span>
                   <% if (post.submitter) { %>
-                    <span class="badge-submitter" title="Anonymous submitter #<%= post.submitter.id %>">User #<%= post.submitter.id %><% if (submitterCounts[post.submitterId] > 1) { %> <span class="submitter-count">(<%= submitterCounts[post.submitterId] %> posts)</span><% } %></span>
+                    <span class="badge-submitter">User #<%= post.submitter.id %><% if (submitterCounts[post.submitterId] > 1) { %> <span class="submitter-count">(<%= submitterCounts[post.submitterId] %> posts)</span><% } %></span>
                   <% } %>
                 </div>
                 <div style="display: flex; gap: 6px;">
-                  <form method="POST" action="/admin/restore/<%= post.id %>" style="display:inline;">
-                    <button class="action-btn outline success">Restore</button>
-                  </form>
-                  <form method="POST" action="/admin/purge/<%= post.id %>" style="display:inline;"
-                        onsubmit="return confirm('Permanently delete this post? This cannot be undone.')">
-                    <button class="action-btn outline delete">Purge</button>
-                  </form>
+                  <form method="POST" action="/admin/restore/<%= post.id %>" style="display:inline;"><button class="action-btn outline success">Restore</button></form>
+                  <form method="POST" action="/admin/purge/<%= post.id %>" style="display:inline;" onsubmit="return confirm('Permanently delete this post? This cannot be undone.')"><button class="action-btn outline delete">Purge</button></form>
                 </div>
               </div>
               <div class="post-row-desc rich-content" style="margin-top: 4px;"><%- post.desc %></div>
@@ -486,51 +554,388 @@
           <% }) %>
         <% } %>
       </div>
-    </div>
 
-    <!-- ═══ BOARD NOTES COMPOSER ═══ -->
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <span class="admin-section-title">Compose Board Note</span>
-      </div>
-      <div class="composer-card">
-        <p class="composer-hint">Board Notes go live immediately — no review needed. Visible on the public board.</p>
-        <form method="POST" action="/admin/notes" id="notesForm">
-          <div style="margin-bottom: 10px;">
-            <input type="text" name="title" class="vvc-input" placeholder="Note title" maxlength="100" required style="font-size: 0.85rem; padding: 8px 12px;">
+      <!-- ═══════ TAB: BOARD NOTES ═══════ -->
+      <div id="tab-notes" class="tab-panel">
+        <div class="content-header">
+          <div>
+            <h1 class="content-title">Board Notes</h1>
+            <p class="content-subtitle">Compose and manage mod-authored notes</p>
           </div>
-          <div style="margin-bottom: 10px;">
-            <div class="editor-wrapper">
-              <div class="editor-toolbar" id="notesToolbar">
-                <button type="button" data-action="bold"><b>B</b></button>
-                <button type="button" data-action="italic"><i>I</i></button>
-                <div class="sep"></div>
-                <button type="button" data-action="heading2">H2</button>
-                <button type="button" data-action="heading3">H3</button>
-                <div class="sep"></div>
-                <button type="button" data-action="bulletList">• List</button>
-                <button type="button" data-action="orderedList">1. List</button>
-                <button type="button" data-action="blockquote">Quote</button>
-                <div class="sep"></div>
-                <button type="button" data-action="link">Link</button>
-                <button type="button" data-action="image">Image</button>
-                <button type="button" data-action="video">Video</button>
-              </div>
-              <div id="notesEditor" class="tiptap-content admin-editor"></div>
+        </div>
+
+        <div class="composer-card" style="margin-bottom: 1.5rem;">
+          <p class="composer-hint">Board Notes go live immediately — no review needed. Visible on the public board.</p>
+          <form method="POST" action="/admin/notes" id="notesForm">
+            <div style="margin-bottom: 10px;">
+              <input type="text" name="title" class="vvc-input" placeholder="Note title" maxlength="100" required style="font-size: 0.85rem; padding: 8px 12px;">
             </div>
-            <input type="hidden" name="desc" id="notesHidden">
+            <div style="margin-bottom: 10px;">
+              <div class="editor-wrapper">
+                <div class="editor-toolbar" id="notesToolbar">
+                  <button type="button" data-action="bold"><b>B</b></button><button type="button" data-action="italic"><i>I</i></button>
+                  <div class="sep"></div>
+                  <button type="button" data-action="heading2">H2</button><button type="button" data-action="heading3">H3</button>
+                  <div class="sep"></div>
+                  <button type="button" data-action="bulletList">• List</button><button type="button" data-action="orderedList">1. List</button><button type="button" data-action="blockquote">Quote</button>
+                  <div class="sep"></div>
+                  <button type="button" data-action="link">Link</button><button type="button" data-action="image">Image</button><button type="button" data-action="video">Video</button>
+                </div>
+                <div id="notesEditor" class="tiptap-content admin-editor"></div>
+              </div>
+              <input type="hidden" name="desc" id="notesHidden">
+            </div>
+            <button type="submit" class="panel-btn-primary">Publish Board Note</button>
+          </form>
+        </div>
+
+        <% if (boardNotes.length > 0) { %>
+          <div class="admin-section-header" style="margin-top: 1rem;">
+            <span class="admin-section-title">Published Notes</span>
+            <span class="admin-section-count"><%= boardNotes.length %></span>
           </div>
-          <button type="submit" class="panel-btn-primary">Publish Board Note</button>
-        </form>
+          <% boardNotes.forEach((post) => { %>
+            <div class="post-row">
+              <div class="post-row-header">
+                <span class="post-row-title"><%= post.title %></span>
+                <span class="badge badge-mod">mod post</span>
+              </div>
+              <div class="post-row-desc rich-content"><%- post.desc %></div>
+              <div class="post-row-meta">
+                <span>Published <%= post.approvedAt ? new Date(post.approvedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'n/a' %></span>
+              </div>
+              <div class="actions-row">
+                <form method="POST" action="/admin/expire/<%= post.id %>" style="display:inline;" onsubmit="return confirm('Expire this note?')"><button type="submit" class="action-btn outline">Expire</button></form>
+                <form method="POST" action="/admin/delete/<%= post.id %>" style="display:inline;" onsubmit="return confirm('Delete this note?')"><button type="submit" class="action-btn outline delete">Delete</button></form>
+              </div>
+            </div>
+          <% }) %>
+        <% } %>
       </div>
-    </div>
+
+      <!-- ═══════ TAB: BLOCK LIST ═══════ -->
+      <div id="tab-blocklist" class="tab-panel">
+        <div class="content-header">
+          <div>
+            <h1 class="content-title">Block List</h1>
+            <p class="content-subtitle">Manage blocked community submitters</p>
+          </div>
+        </div>
+
+        <% if (!hasHashSalt) { %>
+          <div class="alert-banner warning">
+            <span>⚠</span> <strong>Submitter tracking is disabled.</strong> Set <code>AUTHOR_HASH_SALT</code> env var to enable anonymous submitter tracking and blocking.
+          </div>
+        <% } else { %>
+          <!-- Blocked Users -->
+          <% if (blockedUsers.length === 0) { %>
+            <div class="panel-card" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+              No blocked users. You can block a user from the list below.
+            </div>
+          <% } else { %>
+            <div class="panel-card" style="margin-bottom: 1.5rem;">
+              <h6 style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.75rem;">Currently Blocked (<%= blockedUsers.length %>)</h6>
+              <table class="blocklist-table">
+                <thead><tr><th>User</th><th>Posts</th><th>Action</th><th>Reason</th><th>Blocked By</th><th></th></tr></thead>
+                <tbody>
+                  <% blockedUsers.forEach(s => { %>
+                    <tr>
+                      <td><strong>User #<%= s.id %></strong></td>
+                      <td><%= blockedPostCounts[s.id] || 0 %></td>
+                      <td><span class="block-action-badge <%= s.blockAction === 'REJECT' ? 'reject' : 'flag' %>"><%= s.blockAction %></span></td>
+                      <td><%= s.blockReason || '—' %></td>
+                      <td style="font-size: 0.75rem; color: var(--text-muted);"><%= s.blockedBy || '—' %></td>
+                      <td>
+                        <form method="POST" action="/admin/unblock/<%= s.id %>" style="display:inline;">
+                          <button type="submit" class="action-btn outline success" onclick="return confirm('Unblock User #<%= s.id %>?')">Unblock</button>
+                        </form>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+
+          <!-- All Submitters (for blocking) -->
+          <div class="panel-card">
+            <h6 style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.75rem;">All Submitters (<%= allSubmitters.length %>)</h6>
+            <% if (allSubmitters.length === 0) { %>
+              <p style="color: var(--text-muted); font-size: 0.85rem;">No submitters yet.</p>
+            <% } else { %>
+              <table class="blocklist-table">
+                <thead><tr><th>User</th><th>Posts</th><th>Status</th><th>First Seen</th><th></th></tr></thead>
+                <tbody>
+                  <% allSubmitters.forEach(s => { %>
+                    <tr>
+                      <td><strong>User #<%= s.id %></strong></td>
+                      <td><%= allSubmitterPostCounts[s.id] || 0 %></td>
+                      <td>
+                        <% if (s.blocked) { %>
+                          <span class="block-action-badge reject">Blocked</span>
+                        <% } else { %>
+                          <span style="font-size: 0.75rem; color: var(--accent-success);">Active</span>
+                        <% } %>
+                      </td>
+                      <td style="font-size: 0.75rem; color: var(--text-muted);"><%= new Date(s.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %></td>
+                      <td>
+                        <% if (!s.blocked) { %>
+                          <button type="button" class="action-btn outline delete" onclick="document.getElementById('blockForm-<%= s.id %>').style.display = document.getElementById('blockForm-<%= s.id %>').style.display === 'none' ? 'flex' : 'none'">Block</button>
+                          <form id="blockForm-<%= s.id %>" method="POST" action="/admin/block/<%= s.id %>" style="display: none; margin-top: 6px; gap: 6px; flex-wrap: wrap; align-items: flex-end;">
+                            <select name="blockAction" class="vvc-select" style="font-size: 0.78rem; padding: 4px 8px; width: auto;">
+                              <option value="REJECT">Auto-Reject</option>
+                              <option value="FLAG">Auto-Flag</option>
+                            </select>
+                            <input type="text" name="blockReason" class="vvc-input" placeholder="Reason (optional)" maxlength="200" style="font-size: 0.78rem; padding: 4px 8px; width: 160px;">
+                            <button type="submit" class="action-btn reject" style="font-size: 0.72rem;">Confirm Block</button>
+                          </form>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- ═══════ TAB: MODERATORS (super only) ═══════ -->
+      <% if (isSuperAdmin) { %>
+        <div id="tab-moderators" class="tab-panel">
+          <div class="content-header">
+            <div>
+              <h1 class="content-title">Moderators</h1>
+              <p class="content-subtitle">Manage mod accounts</p>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <% if (mods.length === 0) { %>
+              <p style="text-align: center; padding: 0.75rem 0; color: var(--text-muted); font-size: 0.85rem;">No moderators yet. Create one below.</p>
+            <% } else { %>
+              <% mods.forEach(mod => { %>
+                <div class="mod-row">
+                  <div style="flex: 1;">
+                    <strong style="font-size: 0.9rem; color: var(--text-primary);"><%= mod.username %></strong>
+                    <span class="<%= mod.active ? 'status-active' : 'status-disabled' %>" style="margin-left: 8px;"><%= mod.active ? 'Active' : 'Disabled' %></span>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">
+                      Created <%= new Date(mod.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                      <% if (modRewriteStats && modRewriteStats[mod.id]) { %>
+                        · <span><%= modRewriteStats[mod.id].total || 0 %> rewrites</span>
+                        (<%= modRewriteStats[mod.id].lastHour || 0 %> in last hour)
+                      <% } %>
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">
+                      Rewrite: <span style="color: <%= mod.rewriteEnabled ? 'var(--accent-success)' : 'var(--accent-warning)' %>;"><%= mod.rewriteEnabled ? 'Enabled' : 'Disabled' %></span>
+                      · Limits: <%= mod.rewriteLimitPerPost %>/post, <%= mod.rewriteLimitPerHour %>/hour
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 6px; flex-direction: column; align-items: flex-end;">
+                    <div style="display: flex; gap: 6px;">
+                      <form method="POST" action="/super/mods/<%= mod.id %>/toggle" style="display:inline;">
+                        <button type="submit" class="action-btn outline <%= mod.active ? '' : 'success' %>" style="<%= mod.active ? 'border-color: var(--accent-warning-soft); color: var(--accent-warning);' : '' %>"><%= mod.active ? 'Disable' : 'Enable' %></button>
+                      </form>
+                      <button type="button" class="action-btn outline" onclick="toggleModRewriteForm('<%= mod.id %>')">Rewrite Settings</button>
+                      <form method="POST" action="/super/mods/<%= mod.id %>/delete" style="display:inline;" onsubmit="return confirm('Delete mod &quot;<%= mod.username %>&quot; permanently?')">
+                        <button type="submit" class="action-btn outline delete">Delete</button>
+                      </form>
+                    </div>
+                    <div id="modRewriteForm-<%= mod.id %>" style="display: none; margin-top: 8px; padding: 12px; background: var(--surface-inset); border-radius: 8px; width: 300px;">
+                      <form method="POST" action="/super/mods/<%= mod.id %>/rewrite-settings">
+                        <div style="margin-bottom: 8px;">
+                          <label style="font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+                            <input type="checkbox" name="rewriteEnabled" <%= mod.rewriteEnabled ? 'checked' : '' %> style="width: auto;"> Enable AI Rewrite
+                          </label>
+                        </div>
+                        <div style="margin-bottom: 8px;">
+                          <label style="font-size: 0.75rem; color: var(--text-secondary);">Per-Post Limit</label>
+                          <input type="number" name="rewriteLimitPerPost" value="<%= mod.rewriteLimitPerPost %>" min="1" max="50" class="vvc-input" style="font-size: 0.85rem; padding: 6px 10px;">
+                        </div>
+                        <div style="margin-bottom: 8px;">
+                          <label style="font-size: 0.75rem; color: var(--text-secondary);">Per-Hour Limit</label>
+                          <input type="number" name="rewriteLimitPerHour" value="<%= mod.rewriteLimitPerHour %>" min="1" max="100" class="vvc-input" style="font-size: 0.85rem; padding: 6px 10px;">
+                        </div>
+                        <div style="display: flex; gap: 6px;">
+                          <button type="submit" class="action-btn outline success" style="flex: 1;">Save</button>
+                          <button type="button" class="action-btn outline" style="flex: 1;" onclick="toggleModRewriteForm('<%= mod.id %>')">Cancel</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+
+          <!-- Create Mod Form -->
+          <div class="panel-card" style="margin-top: 1rem;">
+            <h6 style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.75rem;">Create New Mod</h6>
+            <form method="POST" action="/super/mods/create" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+              <div>
+                <label class="vvc-label" style="font-size: 0.75rem;">Username</label>
+                <input type="text" name="username" class="vvc-input" placeholder="lowercase, 3-30 chars" required pattern="[a-z0-9_]{3,30}" style="font-size: 0.85rem; padding: 8px 12px; width: auto;">
+              </div>
+              <div>
+                <label class="vvc-label" style="font-size: 0.75rem;">Password</label>
+                <input type="password" name="password" class="vvc-input" placeholder="8+ characters" required minlength="8" style="font-size: 0.85rem; padding: 8px 12px; width: auto;">
+              </div>
+              <button type="submit" class="panel-btn-primary">Create Mod</button>
+            </form>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- ═══════ TAB: SETTINGS (super only) ═══════ -->
+      <% if (isSuperAdmin) { %>
+        <div id="tab-settings" class="tab-panel">
+          <div class="content-header">
+            <div>
+              <h1 class="content-title">Settings</h1>
+              <p class="content-subtitle">LLM configuration and site settings</p>
+            </div>
+          </div>
+
+          <!-- LLM Config -->
+          <div class="admin-section">
+            <div class="admin-section-header">
+              <span class="admin-section-title">LLM Configuration</span>
+            </div>
+
+            <% if (!hasApiKey) { %>
+              <div class="alert-banner warning">
+                <span>⚠</span> <strong>No API key set.</strong> Add <code>OPENROUTER_API_KEY</code> to enable AI features.
+              </div>
+            <% } %>
+
+            <div class="panel-card">
+              <form method="POST" action="/super/settings/llm">
+                <div class="row mb-3">
+                  <div class="col-md-6 mb-2">
+                    <label class="vvc-label" style="font-size: 0.8rem;">Analysis Model</label>
+                    <select name="analysisModel" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
+                      <% models.forEach(m => { %>
+                        <option value="<%= m.id %>" <%= settings && settings.analysisModel === m.id ? 'selected' : '' %>><%= m.name %> (<%= m.note %>)</option>
+                      <% }) %>
+                    </select>
+                    <p class="model-note">Used for auto-analyzing submitted tips</p>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <label class="vvc-label" style="font-size: 0.8rem;">Rewrite Model</label>
+                    <select name="rewriteModel" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
+                      <% models.forEach(m => { %>
+                        <option value="<%= m.id %>" <%= settings && settings.rewriteModel === m.id ? 'selected' : '' %>><%= m.name %> (<%= m.note %>)</option>
+                      <% }) %>
+                    </select>
+                    <p class="model-note">Used for on-demand tip rewrites</p>
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-md-6 mb-2">
+                    <label class="vvc-label" style="font-size: 0.8rem;">Custom Analysis Model ID <span class="optional">(optional)</span></label>
+                    <input type="text" name="customAnalysisModel" class="vvc-input" value="<%= settings && settings.customAnalysisModel ? settings.customAnalysisModel : '' %>" placeholder="e.g. org/model-name" style="font-size: 0.85rem; padding: 8px 12px;">
+                    <p class="model-note">Overrides the dropdown above if set. Use any OpenRouter model ID.</p>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <label class="vvc-label" style="font-size: 0.8rem;">Custom Rewrite Model ID <span class="optional">(optional)</span></label>
+                    <input type="text" name="customRewriteModel" class="vvc-input" value="<%= settings && settings.customRewriteModel ? settings.customRewriteModel : '' %>" placeholder="e.g. org/model-name" style="font-size: 0.85rem; padding: 8px 12px;">
+                    <p class="model-note">Overrides the dropdown above if set. Use any OpenRouter model ID.</p>
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <label class="vvc-label" style="font-size: 0.8rem;">In-Editor Rewrite Prompt</label>
+                  <textarea name="rewritePrompt" class="vvc-textarea" rows="4" placeholder="Custom prompt for AI Rewrite button (leave blank for default)" style="font-size: 0.85rem; font-family: monospace;"><%= settings && settings.rewritePrompt ? settings.rewritePrompt : '' %></textarea>
+                  <p class="model-note">Leave blank for default: "Rewrite this text to be clear, concise, and factual..."</p>
+                </div>
+
+                <button type="submit" class="panel-btn-primary">Save LLM Settings</button>
+              </form>
+
+              <hr style="border-color: var(--surface-border); margin: 1rem 0;">
+
+              <form method="POST" action="/super/settings/llm-test" style="display: flex; align-items: center; gap: 10px;">
+                <button type="submit" class="action-btn outline" <%= !hasApiKey ? 'disabled' : '' %>>Test LLM Connection</button>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Sends a test prompt to the analysis model</span>
+              </form>
+            </div>
+          </div>
+
+          <!-- Site Settings -->
+          <div class="admin-section">
+            <div class="admin-section-header">
+              <span class="admin-section-title">Site Settings</span>
+            </div>
+            <div class="panel-card">
+              <form method="POST" action="/super/settings/site">
+                <div class="field-group">
+                  <label class="vvc-label" style="font-size: 0.8rem;">Board Name</label>
+                  <input type="text" name="boardName" class="vvc-input" value="<%= settings ? settings.boardName : 'Valle Vista Commons' %>" maxlength="100" style="font-size: 0.85rem; padding: 8px 12px;">
+                </div>
+                <div class="field-group">
+                  <label class="vvc-label" style="font-size: 0.8rem;">Tagline</label>
+                  <input type="text" name="boardTagline" class="vvc-input" value="<%= settings ? settings.boardTagline : 'Your neighborhood board' %>" maxlength="200" style="font-size: 0.85rem; padding: 8px 12px;">
+                </div>
+                <div class="field-group">
+                  <label class="vvc-label" style="font-size: 0.8rem;">About Text</label>
+                  <textarea name="aboutText" class="vvc-textarea" rows="4" maxlength="2000" placeholder="Shown at the bottom of the public board" style="font-size: 0.85rem;"><%= settings ? settings.aboutText || '' : '' %></textarea>
+                </div>
+                <button type="submit" class="panel-btn-primary">Save Site Settings</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- ═══════ TAB: ACTIVITY LOG ═══════ -->
+      <div id="tab-activity" class="tab-panel">
+        <div class="content-header">
+          <div>
+            <h1 class="content-title">Activity Log</h1>
+            <p class="content-subtitle">Recent moderator actions</p>
+          </div>
+        </div>
+
+        <% if (recentAudit.length === 0) { %>
+          <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <div class="empty-state-text">No activity recorded yet</div>
+            <div class="empty-state-sub">Mod actions will appear here as they happen.</div>
+          </div>
+        <% } else { %>
+          <div class="panel-card">
+            <div class="audit-log-list">
+              <% recentAudit.forEach(entry => { %>
+                <div class="audit-log-entry">
+                  <span class="audit-log-action <%= ['approve'].includes(entry.action) ? 'approve' : ['reject', 'delete', 'purge', 'block'].includes(entry.action) ? 'reject' : ['edit', 'rewrite', 'undo'].includes(entry.action) ? 'edit' : ['pin', 'urgent'].includes(entry.action) ? 'pin' : 'default' %>"><%= entry.action %></span>
+                  <div class="audit-log-details">
+                    <span class="audit-user"><%= entry.modUser %></span>
+                    <% if (entry.details) { %> — <%= entry.details %><% } %>
+                  </div>
+                  <span class="audit-log-time"><%= new Date(entry.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) %></span>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/theme.js"></script>
   <script src="/js/lightbox.js"></script>
+  <script src="/js/admin-sidebar.js"></script>
   <script type="module" src="/js/admin-init.js"></script>
   <script type="module" src="/js/admin-maps.js"></script>
+  <script>
+    // Mod rewrite form toggle (for moderators tab)
+    function toggleModRewriteForm(modId) {
+      var form = document.getElementById('modRewriteForm-' + modId);
+      if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+  </script>
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
 </body>
 </html>

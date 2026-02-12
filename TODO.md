@@ -3,7 +3,7 @@
 > Actionable items for the current/next work session. Not a roadmap — these are things that need doing NOW.
 > For project overview and status, see [PROJECT.md](./PROJECT.md).
 
-*Last updated: February 11, 2026*
+*Last updated: February 12, 2026*
 
 ---
 
@@ -70,7 +70,7 @@
 ### Map Picker for Posts (Location Pin Feature)
 **Added:** 2026-02-12
 **Completed:** 2026-02-12
-**Context:** Implemented interactive map picker using Leaflet + OpenStreetMap. Users can drop pins on submit form, mini-maps display on board postcards, mods can edit/remove pins in admin dashboard. Includes reverse geocoding via Nominatim and "Copy Address" button in map popups. Database migration added `latitude`, `longitude`, and `locationName` fields to Post model. Privacy-first: manual pin drop only, no auto-geolocation.
+**Context:** Implemented interactive map picker using Leaflet + OpenStreetMap with Valle Vista bounds (45.487792, -122.445500). Submit form shows inline map (280px height, always visible) with discreet Feather icon pin button for geocoding addresses. Board mini-maps are clickable thumbnails that expand to interactive modal. Admin edit forms have same pin button + geocoding. Includes forward + reverse geocoding via Nominatim. Database migration added `latitude`, `longitude`, and `locationName` fields to Post model. Privacy-first: manual pin drop only, no auto-geolocation. Added `PATTERNS.md` documenting Feather Icons (inline SVG) system, map integration patterns, and all code conventions.
 **Status:** DONE
 
 ### Anonymous Submitter Tracking (User Numbers)

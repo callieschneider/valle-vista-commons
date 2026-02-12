@@ -26,23 +26,37 @@ const submitLimiter = new RateLimiterMemory({
  * Find or create a Submitter record from the request IP.
  * Returns submitterId (Int) or null if feature is disabled.
  */
+/**
+ * Find or create a Submitter record from the request IP.
+ * Returns { submitterId, blocked, blockAction } or { submitterId: null } if feature is disabled.
+ */
 async function resolveSubmitter(req) {
-  if (!AUTHOR_HASH_SALT) return null;
+  if (!AUTHOR_HASH_SALT) return { submitterId: null, blocked: false, blockAction: null };
   const ip = req.ip || 'unknown';
   const hash = crypto.createHash('sha256').update(ip + AUTHOR_HASH_SALT).digest('hex');
   try {
-    const existing = await prisma.submitter.findUnique({ where: { hash } });
-    if (existing) return existing.id;
-    const created = await prisma.submitter.create({ data: { hash } });
-    return created.id;
-  } catch (err) {
-    // Race condition: another request created it between findUnique and create
-    if (err.code === 'P2002') {
-      const found = await prisma.submitter.findUnique({ where: { hash } });
-      return found ? found.id : null;
+    let submitter = await prisma.submitter.findUnique({ where: { hash } });
+    if (!submitter) {
+      try {
+        submitter = await prisma.submitter.create({ data: { hash } });
+      } catch (err) {
+        // Race condition: another request created it between findUnique and create
+        if (err.code === 'P2002') {
+          submitter = await prisma.submitter.findUnique({ where: { hash } });
+        } else {
+          throw err;
+        }
+      }
     }
+    if (!submitter) return { submitterId: null, blocked: false, blockAction: null };
+    return {
+      submitterId: submitter.id,
+      blocked: submitter.blocked,
+      blockAction: submitter.blockAction,
+    };
+  } catch (err) {
     console.error('Submitter resolve error:', err.message);
-    return null;
+    return { submitterId: null, blocked: false, blockAction: null };
   }
 }
 
@@ -265,12 +279,26 @@ router.post('/submit', async (req, res) => {
     }
 
     // Resolve anonymous submitter (salted IP hash → sequential user number)
-    const submitterId = await resolveSubmitter(req);
+    const { submitterId, blocked, blockAction } = await resolveSubmitter(req);
+
+    // Check if submitter is blocked
+    if (blocked && blockAction === 'REJECT') {
+      // Silent reject: create as REJECTED, show success to user
+      await prisma.post.create({
+        data: { title, desc, location, latitude, longitude, locationName, section, status: 'REJECTED', submitterId, modNote: '[Auto-rejected: blocked submitter]' },
+      });
+      return res.render('submit', { ...renderOpts, error: null, success: true, values: {} });
+    }
 
     // Create post (pending moderation)
-    const post = await prisma.post.create({
-      data: { title, desc, location, latitude, longitude, locationName, section, status: 'PENDING', submitterId },
-    });
+    const postData = { title, desc, location, latitude, longitude, locationName, section, status: 'PENDING', submitterId };
+
+    // If blocked with FLAG action, add mod note but still go to pending
+    if (blocked && blockAction === 'FLAG') {
+      postData.modNote = '[Auto-flagged: blocked submitter]';
+    }
+
+    const post = await prisma.post.create({ data: postData });
 
     res.render('submit', { ...renderOpts, error: null, success: true, values: {} });
 

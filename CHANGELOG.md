@@ -29,30 +29,35 @@ Improved submit form with required field indicators and inline validation. Users
 
 ---
 
-## 2026-02-12 - Interactive Map Picker
+## 2026-02-12 - Interactive Map Picker (Updated)
 
 ### Summary
-Added optional interactive map picker for posts using Leaflet + OpenStreetMap. Users can drop pins on an interactive map when submitting tips. Posts with coordinates display mini-maps on the public board. Mods can edit/remove pins via the admin dashboard. No API key required, fully privacy-first.
+Added optional interactive map picker for posts using Leaflet + OpenStreetMap with Valle Vista Commons-specific bounds and geocoding. Submit form shows inline compact map (always visible) with discreet pin button for address lookup. Board mini-maps are clickable thumbnails that expand to interactive modal. Feather Icons (inline SVG) established as the standard icon system.
 
 ### Added
-- **Map picker on submit form** — collapsible interactive map where users drop pins manually
-- **Mini-maps on board** — posts with coordinates show embedded 180px maps with pin markers
-- **Map popup with "Copy Address" button** — clicking pin shows location name and coordinates
+- **Inline map on submit form** — 280px height compact map (always visible, no toggle)
+- **Pin button with geocoding** — discreet Feather icon button (map pin) to left of location field
+- **Forward geocoding** — type address, click pin button, map centers and drops pin automatically
+- **Clickable mini-maps on board** — posts with coordinates show 180px thumbnail maps
+- **Modal expansion** — clicking board mini-map opens full interactive modal with pan/zoom
+- **Valle Vista bounds** — map restricted to area: center (45.487792, -122.445500), zoom 14-19
+- **Admin map editor with pin button** — edit forms include same pin button + geocoding workflow
+- **Wide container on submit** — submit page now uses `vvc-container--wide` matching admin width
 - **Reverse geocoding** — coordinates automatically resolved to nearest address via Nominatim
-- **Admin map editor** — edit forms in admin dashboard include map picker to move/remove pins
 - **Three new Post fields** — `latitude` (Float?), `longitude` (Float?), `locationName` (VarChar 200?)
 - **Leaflet 1.9.4** — loaded via unpkg CDN, no npm dependency
 - **OpenStreetMap tiles** — free map tiles from OSM, no API key required
 - **Coordinate validation** — server validates lat (-90 to 90) and lng (-180 to 180)
-- **Map utility module** (`public/js/map-picker.js`) — reusable ES module for map initialization
+- **Map utility module** (`public/js/map-picker.js`) — reusable ES module with `geocodeAndCenter()`
 - **Three map scripts** — `submit-map.js`, `board-maps.js`, `admin-maps.js`
+- **PATTERNS.md** — comprehensive documentation of code patterns, Feather Icons system, map integration
 
 ### Changed
 - **CSP updated** — added `unpkg.com` (Leaflet), `tile.openstreetmap.org` (tiles), `nominatim.openstreetmap.org` (geocoding)
-- **CSS** — added map styles for `.map-toggle`, `.post-mini-map`, `.admin-map-container`, `.copy-address-btn`
+- **CSS** — added `.map-pin-btn`, `.submit-map-container`, `.map-modal`, modal styles
 - **Submit route** — saves latitude, longitude, locationName fields
 - **Admin edit route** — saves latitude, longitude, locationName fields with validation
-- **PROJECT.md** — updated status to v1.3.0, added map features to tech stack
+- **PROJECT.md** — updated status to v1.3.0, added Feather Icons + forward geocoding to tech stack
 
 ### Privacy
 - **No auto-geolocation** — users must manually drop a pin (no location permission requested)
@@ -61,6 +66,10 @@ Added optional interactive map picker for posts using Leaflet + OpenStreetMap. U
 
 ### Database Migration
 - `20260212035516_add_map_coordinates` — added `latitude`, `longitude`, `locationName` to Post model
+
+### Icon System
+- **Feather Icons (inline SVG)** — established as standard, documented in PATTERNS.md
+- **Map pin icon** — `<svg viewBox="0 0 24 24">` with path for pin shape, used on submit + admin forms
 
 ---
 

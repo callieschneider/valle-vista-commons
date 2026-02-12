@@ -6,55 +6,15 @@ const prisma = require('../lib/db');
 const { requireSuperAdmin, hashPassword } = require('../lib/auth');
 const { chatCompletion } = require('../lib/openrouter');
 const { upload, UPLOAD_DIR } = require('../lib/upload');
+const { AVAILABLE_MODELS } = require('./admin');
 
 // Apply super admin auth to all routes
 router.use(requireSuperAdmin);
 
-// ─── Available LLM Models ───────────────────────────────
+// ─── Dashboard → Redirect to consolidated admin ─────────
 
-const AVAILABLE_MODELS = [
-  { id: 'anthropic/claude-3.5-haiku', name: 'Claude 3.5 Haiku', note: 'Fast, cheap' },
-  { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4', note: 'High quality' },
-  { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini', note: 'Fast, cheap' },
-  { id: 'openai/gpt-4o', name: 'GPT-4o', note: 'High quality' },
-  { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash', note: 'Fast, cheap' },
-  { id: 'google/gemini-2.5-pro-preview-06-05', name: 'Gemini 2.5 Pro', note: 'High quality' },
-  { id: 'mistralai/mistral-small-3.1-24b-instruct', name: 'Mistral Small', note: 'Fast, cheap' },
-  { id: 'deepseek/deepseek-chat-v3-0324', name: 'DeepSeek Chat v3', note: 'Very cheap' },
-];
-
-// ─── Dashboard ──────────────────────────────────────────
-
-router.get('/', async (req, res) => {
-  try {
-    const mods = await prisma.mod.findMany({ orderBy: { createdAt: 'desc' } });
-    const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-    const hasApiKey = !!process.env.OPENROUTER_API_KEY;
-
-    // Fetch rewrite stats for all mods
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    const modRewriteStats = {};
-    for (const mod of mods) {
-      const total = await prisma.rewriteLog.count({ where: { modId: mod.id } });
-      const lastHour = await prisma.rewriteLog.count({
-        where: { modId: mod.id, createdAt: { gte: oneHourAgo } },
-      });
-      modRewriteStats[mod.id] = { total, lastHour };
-    }
-
-    res.render('super', {
-      mods,
-      settings,
-      models: AVAILABLE_MODELS,
-      hasApiKey,
-      modRewriteStats,
-      error: req.query.error || null,
-      msg: req.query.msg || null,
-    });
-  } catch (err) {
-    console.error('Super admin error:', err.message);
-    res.render('super', { mods: [], settings: null, models: AVAILABLE_MODELS, hasApiKey: false, error: 'Failed to load panel', msg: null });
-  }
+router.get('/', (req, res) => {
+  res.redirect('/admin?tab=moderators');
 });
 
 // ─── Mod CRUD ───────────────────────────────────────────
@@ -64,49 +24,65 @@ router.post('/mods/create', async (req, res) => {
     const username = (req.body.username || '').trim().toLowerCase();
     const password = req.body.password || '';
 
-    // Validate username: alphanumeric + underscore, 3-30 chars
     if (!/^[a-z0-9_]{3,30}$/.test(username)) {
-      return res.redirect('/super?error=invalid_username');
+      return res.redirect('/admin?error=invalid_username&tab=moderators');
     }
-
-    // Validate password: 8+ chars
     if (password.length < 8) {
-      return res.redirect('/super?error=password_short');
+      return res.redirect('/admin?error=password_short&tab=moderators');
     }
 
-    // Check uniqueness
     const existing = await prisma.mod.findUnique({ where: { username } });
-    if (existing) return res.redirect('/super?error=username_taken');
+    if (existing) return res.redirect('/admin?error=username_taken&tab=moderators');
 
     await prisma.mod.create({
       data: { username, passHash: hashPassword(password) },
     });
 
-    res.redirect('/super?msg=mod_created');
+    // Audit log
+    try {
+      await prisma.auditLog.create({
+        data: { action: 'create_mod', modUser: 'super', details: `Created mod "${username}"` },
+      });
+    } catch (e) { /* non-critical */ }
+
+    res.redirect('/admin?tab=moderators&msg=mod_created');
   } catch (err) {
     console.error('Create mod error:', err.message);
-    res.redirect('/super?error=mod_create_failed');
+    res.redirect('/admin?error=mod_create_failed&tab=moderators');
   }
 });
 
 router.post('/mods/:id/toggle', async (req, res) => {
   try {
     const mod = await prisma.mod.findUnique({ where: { id: req.params.id } });
-    if (!mod) return res.redirect('/super?error=mod_not_found');
+    if (!mod) return res.redirect('/admin?error=mod_not_found&tab=moderators');
     await prisma.mod.update({ where: { id: mod.id }, data: { active: !mod.active } });
+
+    try {
+      await prisma.auditLog.create({
+        data: { action: 'toggle_mod', modUser: 'super', targetId: mod.id, details: `${mod.active ? 'Disabled' : 'Enabled'} mod "${mod.username}"` },
+      });
+    } catch (e) { /* non-critical */ }
   } catch (err) {
     console.error('Toggle mod error:', err.message);
   }
-  res.redirect('/super');
+  res.redirect('/admin?tab=moderators');
 });
 
 router.post('/mods/:id/delete', async (req, res) => {
   try {
+    const mod = await prisma.mod.findUnique({ where: { id: req.params.id } });
     await prisma.mod.delete({ where: { id: req.params.id } });
+
+    try {
+      await prisma.auditLog.create({
+        data: { action: 'delete_mod', modUser: 'super', targetId: req.params.id, details: mod ? `Deleted mod "${mod.username}"` : 'Deleted mod' },
+      });
+    } catch (e) { /* non-critical */ }
   } catch (err) {
     console.error('Delete mod error:', err.message);
   }
-  res.redirect('/super');
+  res.redirect('/admin?tab=moderators');
 });
 
 router.post('/mods/:id/rewrite-settings', async (req, res) => {
@@ -126,32 +102,59 @@ router.post('/mods/:id/rewrite-settings', async (req, res) => {
   } catch (err) {
     console.error('Update rewrite settings error:', err.message);
   }
-  res.redirect('/super');
+  res.redirect('/admin?tab=moderators');
 });
 
 // ─── LLM Settings ───────────────────────────────────────
 
 router.post('/settings/llm', async (req, res) => {
   try {
-    const analysisModel = req.body.analysisModel;
-    const rewriteModel = req.body.rewriteModel;
+    let analysisModel = req.body.analysisModel;
+    let rewriteModel = req.body.rewriteModel;
     const rewritePrompt = (req.body.rewritePrompt || '').trim() || null;
 
-    // Validate models are in allowed list
+    // Custom model override
+    const customAnalysis = (req.body.customAnalysisModel || '').trim();
+    const customRewrite = (req.body.customRewriteModel || '').trim();
+
+    // If custom model provided and looks valid (contains /), use it
+    if (customAnalysis && customAnalysis.includes('/')) {
+      analysisModel = customAnalysis;
+    }
+    if (customRewrite && customRewrite.includes('/')) {
+      rewriteModel = customRewrite;
+    }
+
+    // Validate: either in curated list or a custom model (contains /)
     const validIds = AVAILABLE_MODELS.map(m => m.id);
-    if (!validIds.includes(analysisModel) || !validIds.includes(rewriteModel)) {
-      return res.redirect('/super?error=invalid_model');
+    if (!validIds.includes(analysisModel) && !analysisModel.includes('/')) {
+      return res.redirect('/admin?error=invalid_model&tab=settings');
+    }
+    if (!validIds.includes(rewriteModel) && !rewriteModel.includes('/')) {
+      return res.redirect('/admin?error=invalid_model&tab=settings');
     }
 
     await prisma.siteSettings.update({
       where: { id: 'default' },
-      data: { analysisModel, rewriteModel, rewritePrompt },
+      data: {
+        analysisModel,
+        rewriteModel,
+        rewritePrompt,
+        customAnalysisModel: customAnalysis || null,
+        customRewriteModel: customRewrite || null,
+      },
     });
 
-    res.redirect('/super?msg=llm_saved');
+    try {
+      await prisma.auditLog.create({
+        data: { action: 'update_llm', modUser: 'super', details: `Analysis: ${analysisModel}, Rewrite: ${rewriteModel}` },
+      });
+    } catch (e) { /* non-critical */ }
+
+    res.redirect('/admin?tab=settings&msg=llm_saved');
   } catch (err) {
     console.error('Save LLM settings error:', err.message);
-    res.redirect('/super?error=save_failed');
+    res.redirect('/admin?error=save_failed&tab=settings');
   }
 });
 
@@ -165,13 +168,13 @@ router.post('/settings/llm-test', async (req, res) => {
     });
 
     if (result) {
-      res.redirect('/super?msg=llm_ok');
+      res.redirect('/admin?tab=settings&msg=llm_ok');
     } else {
-      res.redirect('/super?error=llm_failed');
+      res.redirect('/admin?error=llm_failed&tab=settings');
     }
   } catch (err) {
     console.error('LLM test error:', err.message);
-    res.redirect('/super?error=llm_failed');
+    res.redirect('/admin?error=llm_failed&tab=settings');
   }
 });
 
@@ -188,15 +191,20 @@ router.post('/settings/site', async (req, res) => {
       data: { boardName, boardTagline, aboutText },
     });
 
-    res.redirect('/super?msg=site_saved');
+    try {
+      await prisma.auditLog.create({
+        data: { action: 'update_site', modUser: 'super', details: `Updated site: "${boardName}"` },
+      });
+    } catch (e) { /* non-critical */ }
+
+    res.redirect('/admin?tab=settings&msg=site_saved');
   } catch (err) {
     console.error('Site settings error:', err.message);
-    res.redirect('/super?error=site_save_failed');
+    res.redirect('/admin?error=site_save_failed&tab=settings');
   }
 });
 
 // ─── File Sync (upload with exact filename) ─────────────
-// Super-admin-protected — used to sync local files to Railway volume
 
 router.post('/sync-upload', upload.single('file'), (req, res) => {
   try {
@@ -204,7 +212,6 @@ router.post('/sync-upload', upload.single('file'), (req, res) => {
     if (!filename || !req.file) {
       return res.status(400).json({ error: 'file and ?filename= required' });
     }
-    // Sanitize filename — only allow uuid-style names with extension
     if (!/^[a-f0-9\-]+\.\w+$/.test(filename)) {
       return res.status(400).json({ error: 'Invalid filename' });
     }

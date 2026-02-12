@@ -1,7 +1,10 @@
 import { initMapPicker } from '/js/map-picker.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize maps for all edit forms when they're shown
+  // Track initialized map instances
+  const mapInstances = {};
+
+  // Initialize maps for pending edit forms
   document.querySelectorAll('[id^="edit-"]').forEach(editSection => {
     editSection.addEventListener('shown.bs.collapse', () => {
       const idx = editSection.id.replace('edit-', '');
@@ -38,12 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
         mapInstance.removePin();
       });
       
+      mapInstances[`p${idx}`] = mapInstance;
       container.dataset.initialized = 'true';
       setTimeout(() => mapInstance.map.invalidateSize(), 100);
     });
   });
 
-  // Same for liveEdit forms
+  // Same for live edit forms
   document.querySelectorAll('[id^="liveEdit-"]').forEach(editSection => {
     editSection.addEventListener('shown.bs.collapse', () => {
       const idx = editSection.id.replace('liveEdit-', '');
@@ -80,8 +84,40 @@ document.addEventListener('DOMContentLoaded', () => {
         mapInstance.removePin();
       });
       
+      mapInstances[`l${idx}`] = mapInstance;
       container.dataset.initialized = 'true';
       setTimeout(() => mapInstance.map.invalidateSize(), 100);
+    });
+  });
+
+  // Pin button handlers (geocode and center)
+  document.querySelectorAll('.map-pin-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const target = btn.dataset.target; // e.g., "p0" or "l3"
+      const mapInstance = mapInstances[target];
+      
+      if (!mapInstance) return;
+      
+      // Find the location input in the same form
+      const form = btn.closest('form');
+      const locationInput = form.querySelector('input[name="location"]');
+      const address = locationInput?.value.trim();
+      
+      if (!address) {
+        alert('Enter a location first');
+        locationInput?.focus();
+        return;
+      }
+      
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      
+      if (mapInstance.geocodeAndCenter) {
+        await mapInstance.geocodeAndCenter(address);
+      }
+      
+      btn.disabled = false;
+      btn.style.opacity = '1';
     });
   });
 });

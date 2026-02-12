@@ -37,10 +37,15 @@ model Post {
 }
 
 model Submitter {
-  id        Int      @id @default(autoincrement())
-  hash      String   @unique @db.VarChar(64)
-  createdAt DateTime @default(now()) @map("created_at")
-  posts     Post[]
+  id          Int       @id @default(autoincrement())
+  hash        String    @unique @db.VarChar(64)
+  blocked     Boolean   @default(false)
+  blockAction String?   @db.VarChar(10)   // "REJECT" or "FLAG"
+  blockedAt   DateTime? @map("blocked_at")
+  blockedBy   String?   @db.VarChar(50)   // mod username who blocked
+  blockReason String?   @db.VarChar(200)  @map("block_reason")
+  createdAt   DateTime  @default(now())   @map("created_at")
+  posts       Post[]
 
   @@map("submitters")
 }
@@ -60,14 +65,16 @@ model Mod {
 }
 
 model SiteSettings {
-  id              String   @id @default("default")
-  boardName       String   @default("Valle Vista Commons")
-  boardTagline    String   @default("Your neighborhood board")
-  analysisModel   String   @default("anthropic/claude-3.5-haiku")
-  rewriteModel    String   @default("anthropic/claude-3.5-haiku")
-  rewritePrompt   String?  @db.Text // Custom prompt template for in-editor AI rewrite
-  aboutText       String?  @db.Text
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id                   String   @id @default("default")
+  boardName            String   @default("Valle Vista Commons")
+  boardTagline         String   @default("Your neighborhood board")
+  analysisModel        String   @default("anthropic/claude-3.5-haiku")
+  rewriteModel         String   @default("anthropic/claude-3.5-haiku")
+  customAnalysisModel  String?  @db.VarChar(100)
+  customRewriteModel   String?  @db.VarChar(100)
+  rewritePrompt        String?  @db.Text // Custom prompt template for in-editor AI rewrite
+  aboutText            String?  @db.Text
+  updatedAt            DateTime @updatedAt @map("updated_at")
 
   @@map("site_settings")
 }
@@ -84,6 +91,20 @@ model RewriteLog {
   @@index([modId])
   @@index([createdAt])
   @@map("rewrite_logs")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String   @db.VarChar(50)   // "approve", "reject", "block", "edit", etc.
+  postId    String?  @map("post_id")
+  targetId  String?  @map("target_id") // submitter ID for block actions, mod ID for mod actions
+  modUser   String   @db.VarChar(50)   // username of mod who performed action
+  details   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([modUser])
+  @@map("audit_logs")
 }
 
 enum Section {

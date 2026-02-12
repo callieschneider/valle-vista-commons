@@ -12,9 +12,9 @@ No accounts. No tracking. No personal information collected. Ever.
 |---------|--------|
 | Sectioned public board (Alerts, Happenings, Lost & Found, Neighbors, Board Notes) | ✅ |
 | Anonymous tip submission with section picker | ✅ |
-| **Interactive map picker on submit form (optional)** | ✅ |
-| **Mini-maps on board postcards with pin markers** | ✅ |
-| **Map pin editor in admin dashboard** | ✅ |
+| **Interactive map picker on submit form with geocoding** | ✅ |
+| **Clickable mini-maps on board postcards (expand to modal)** | ✅ |
+| **Map pin editor in admin dashboard with geocoding** | ✅ |
 | hCaptcha + honeypot spam protection | ✅ |
 | Two-tier auth: Super admin (env vars) + Mods (DB) | ✅ |
 | Admin dashboard with review queue, AI analysis, edit, pin, urgent, expire | ✅ |
@@ -36,6 +36,7 @@ No accounts. No tracking. No personal information collected. Ever.
 | Video upload (MP4, WebM) | ✅ |
 | HTML sanitization + safe rendering | ✅ |
 | Railway volume for persistent uploads | ✅ |
+| **Feather Icons (inline SVG) for consistent UI** | ✅ |
 
 ---
 
@@ -56,7 +57,8 @@ No accounts. No tracking. No personal information collected. Ever.
 | AI | OpenRouter API (configurable models) |
 | Rich Text | Tiptap 2 (CDN via esm.sh) |
 | Maps | Leaflet 1.9.4 + OpenStreetMap tiles (CDN via unpkg) |
-| Geocoding | Nominatim (reverse geocoding only, client-side) |
+|| Icons | Feather Icons (inline SVG) |
+| Geocoding | Nominatim (forward + reverse geocoding, client-side) |
 | Uploads | multer (multipart), sharp (image processing) |
 | Hosting | Railway (+ volume for uploads) |
 
@@ -90,10 +92,16 @@ public/
     style.css                -- shared design system (schemes, dark mode, all components)
   js/
     theme.js                 -- dark/light mode + color scheme controller (localStorage)
+    map-picker.js            -- Leaflet map picker utility (ESM, geocoding, bounds)
+    submit-map.js            -- submit page map initialization (ESM)
+    admin-maps.js            -- admin page map initialization (ESM)
+    board-maps.js            -- board mini-map modal (ESM)
     editor.js                -- Tiptap editor module (ESM, CDN imports from esm.sh)
     submit-init.js           -- submit page editor initialization
     admin-init.js            -- admin page editor initialization
     board-search.js          -- client-side search filter
+    category-select.js       -- category selection handler
+    lightbox.js              -- image lightbox viewer
 uploads/                     -- uploaded images/videos (gitignored, Railway volume)
 views/
   board.ejs                  -- public board (sectioned)
@@ -104,6 +112,7 @@ views/
 prisma/
   schema.prisma              -- Post, Mod, SiteSettings models
   seed.js                    -- seeds SiteSettings default row
+PATTERNS.md                  -- code patterns, conventions, and design decisions
 ```
 
 ### Routes
