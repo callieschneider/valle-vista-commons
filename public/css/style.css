@@ -1421,7 +1421,7 @@ a:hover { color: var(--primary-600); }
 /* ─── Mobile Sidebar Toggle ──────────────────────────────── */
 .admin-sidebar-toggle {
   display: none; /* hidden on desktop */
-  position: fixed; top: 12px; left: 12px; z-index: 300;
+  position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: calc(12px + env(safe-area-inset-left, 0px)); z-index: 300;
   width: 40px; height: 40px; border-radius: var(--radius-sm);
   border: 1.5px solid var(--surface-border); background: var(--surface-card);
   color: var(--text-secondary); cursor: pointer;
@@ -1453,7 +1453,7 @@ a:hover { color: var(--primary-600); }
   .admin-sidebar-toggle { display: flex; }
   .admin-content {
     margin-left: 0; padding: 1.25rem 1rem 3rem;
-    padding-top: calc(1.25rem + 52px); /* room for hamburger */
+    padding-top: calc(1.25rem + 52px + env(safe-area-inset-top, 0px)); /* room for hamburger + notch */
   }
 }
 
