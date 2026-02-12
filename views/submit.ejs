@@ -24,7 +24,7 @@
   <% } %>
 </head>
 <body>
-  <div class="vvc-container vvc-container--narrow">
+  <div class="vvc-container vvc-container--wide">
     <!-- Back -->
     <a href="/" class="back-link">
       <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
@@ -94,26 +94,28 @@
 
           <div class="field-group">
             <label class="vvc-label" for="location">Location <span class="optional">(optional)</span></label>
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" class="map-pin-btn" id="findOnMapBtn" title="Find this location on the map" aria-label="Find location on map">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </button>
               <input type="text" class="vvc-input" id="location" name="location"
                      maxlength="100" placeholder="e.g. Near Elm St & Oak Ave"
                      value="<%= values.location || '' %>" style="flex: 1;">
-              <button type="button" class="btn-outline-vvc" id="findOnMapBtn" title="Find this location on the map">
-                📍 Find on Map
-              </button>
             </div>
             <p class="vvc-hint">Be vague — street name or intersection is enough.</p>
           </div>
 
           <div class="field-group">
-            <div class="map-toggle" id="mapToggle">
-              <span>📍 Drop a pin on the map</span>
-              <span class="optional">(optional)</span>
-            </div>
-            <div id="mapContainer" style="display: none;"></div>
-            <div class="map-helper" id="mapHelper" style="display: none;">
-              <strong>Selected:</strong> <span id="mapDisplay">No location selected</span>
-              <button type="button" class="btn-link-vvc" id="removePin" style="display: none;">Remove pin</button>
+            <label style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">Map Pin (optional)</label>
+            <div id="mapContainer" class="submit-map-container"></div>
+            <div class="map-coord-display">
+              <span id="mapDisplay">Click map to drop a pin</span>
+              <button type="button" class="btn-link-vvc" id="removePin" style="font-size: 0.75rem; margin-left: 8px;">
+                Remove pin
+              </button>
             </div>
             <input type="hidden" name="latitude" id="latitude">
             <input type="hidden" name="longitude" id="longitude">
