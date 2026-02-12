@@ -51,8 +51,9 @@ async function uploadFile(file) {
 export function initEditor({ element, hiddenInput, toolbar, content = '', mode = 'full' }) {
   const extensions = [
     StarterKit.configure({
-      heading: mode === 'full' ? { levels: [2, 3] } : false,
+      heading: mode === 'full' ? { levels: [1, 2, 3, 4] } : false,
       blockquote: mode === 'full',
+      strike: true, // Enable strikethrough
     }),
     ImageResize.configure({
       inline: true,
@@ -143,11 +144,20 @@ function setupToolbar(toolbar, editor) {
         case 'italic':
           editor.chain().focus().toggleItalic().run();
           break;
+        case 'strike':
+          editor.chain().focus().toggleStrike().run();
+          break;
+        case 'heading1':
+          editor.chain().focus().toggleHeading({ level: 1 }).run();
+          break;
         case 'heading2':
           editor.chain().focus().toggleHeading({ level: 2 }).run();
           break;
         case 'heading3':
           editor.chain().focus().toggleHeading({ level: 3 }).run();
+          break;
+        case 'heading4':
+          editor.chain().focus().toggleHeading({ level: 4 }).run();
           break;
         case 'bulletList':
           editor.chain().focus().toggleBulletList().run();
@@ -223,8 +233,11 @@ function updateToolbarState(toolbar, editor) {
     switch (action) {
       case 'bold': isActive = editor.isActive('bold'); break;
       case 'italic': isActive = editor.isActive('italic'); break;
+      case 'strike': isActive = editor.isActive('strike'); break;
+      case 'heading1': isActive = editor.isActive('heading', { level: 1 }); break;
       case 'heading2': isActive = editor.isActive('heading', { level: 2 }); break;
       case 'heading3': isActive = editor.isActive('heading', { level: 3 }); break;
+      case 'heading4': isActive = editor.isActive('heading', { level: 4 }); break;
       case 'bulletList': isActive = editor.isActive('bulletList'); break;
       case 'orderedList': isActive = editor.isActive('orderedList'); break;
       case 'blockquote': isActive = editor.isActive('blockquote'); break;
