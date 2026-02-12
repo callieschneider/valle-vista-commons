@@ -91,7 +91,7 @@
       </nav>
 
       <div class="admin-sidebar-footer">
-        <a href="/admin/logout" class="nav-btn" style="flex: 1; text-align: center;">Sign Out</a>
+        <a href="/admin/logout" class="nav-btn" style="flex: 1; text-align: center;" onclick="try{localStorage.removeItem('vvc-admin')}catch(e){}">Sign Out</a>
         <a href="/" class="nav-btn" style="flex: 1; text-align: center;">View Board</a>
         <div class="theme-menu">
           <button class="theme-trigger" aria-label="Appearance" title="Appearance">
@@ -948,6 +948,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/theme.js"></script>
+  <script>try{localStorage.setItem('vvc-admin','1')}catch(e){}</script>
   <script src="/js/lightbox.js"></script>
   <script src="/js/admin-sidebar.js"></script>
   <script type="module" src="/js/admin-init.js"></script>
