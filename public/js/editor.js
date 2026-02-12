@@ -51,9 +51,9 @@ async function uploadFile(file) {
 export function initEditor({ element, hiddenInput, toolbar, content = '', mode = 'full', postId = null, enableAiRewrite = false }) {
   const extensions = [
     StarterKit.configure({
-      heading: mode === 'full' ? { levels: [1, 2, 3, 4] } : false,
+      heading: false,
       blockquote: mode === 'full',
-      strike: true, // Enable strikethrough
+      strike: true,
     }),
     ImageResize.configure({
       inline: true,
@@ -73,7 +73,6 @@ export function initEditor({ element, hiddenInput, toolbar, content = '', mode =
     editorProps: {
       attributes: {
         class: 'tiptap-content',
-        style: 'min-height: 120px; outline: none; padding: 10px;',
       },
     },
     onUpdate: ({ editor }) => {
@@ -83,6 +82,9 @@ export function initEditor({ element, hiddenInput, toolbar, content = '', mode =
       }
     },
   });
+
+  // Store hidden input ref on editor so rewrite handler can force-sync
+  editor._hiddenInput = hiddenInput;
 
   // Set up toolbar buttons
   if (toolbar) {
@@ -260,7 +262,11 @@ async function handleAiRewrite(editor, postId, btn) {
     }
 
     // Replace editor content with rewritten text
-    editor.commands.setContent(`<p>${data.rewritten}</p>`);
+    editor.commands.setContent(data.rewritten);
+    // Force-sync hidden input (don't rely on emitUpdate flag)
+    if (editor._hiddenInput) {
+      editor._hiddenInput.value = editor.getHTML();
+    }
   } catch (err) {
     alert('Rewrite failed: ' + err.message);
   } finally {

@@ -63,6 +63,14 @@
     // Scroll content to top
     var content = document.querySelector('.admin-content');
     if (content) content.scrollTop = 0;
+
+    // Notify maps and other components that a tab became visible
+    var activePanel = document.getElementById('tab-' + tabId);
+    if (activePanel) {
+      setTimeout(function () {
+        activePanel.dispatchEvent(new CustomEvent('tab:shown', { bubbles: true }));
+      }, 50); // Small delay to let display:block take effect
+    }
   }
 
   // ─── Sidebar click handlers ────────────────────────────
@@ -135,6 +143,84 @@
       }
     });
   });
+
+  // ─── Scroll edit/mod-note panels into view when opened ──
+  document.addEventListener('shown.bs.collapse', function (e) {
+    var panel = e.target;
+    if (!panel || (!panel.id.startsWith('liveEdit-') && !panel.id.startsWith('modNote-'))) return;
+    // Short delay to let Bootstrap finish layout
+    setTimeout(function () {
+      // Scroll the bottom of the panel into view so Save/Discard buttons are visible
+      panel.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 80);
+  });
+
+  // ─── AJAX mod actions (prevent scroll-to-top on POST) ──
+  // Intercept quick-action button clicks, POST via fetch, update DOM in-place
+  var AJAX_PATTERN = /\/admin\/(approve|reject|delete|expire|pin|urgent)\//;
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[type="submit"]');
+    if (!btn) return;
+    var form = btn.closest('form');
+    if (!form) return;
+    var action = form.getAttribute('action') || '';
+    var m = action.match(AJAX_PATTERN);
+    if (!m) return;
+
+    // Let the confirm dialog run first (from inline onsubmit)
+    var onsubmit = form.getAttribute('onsubmit');
+    if (onsubmit && onsubmit.indexOf('confirm') !== -1) {
+      // Extract the confirm message
+      var msgMatch = onsubmit.match(/confirm\(['"](.+?)['"]\)/);
+      if (msgMatch && !confirm(msgMatch[1])) return; // User cancelled
+    }
+
+    // Prevent the normal form submission
+    e.preventDefault();
+    e.stopPropagation();
+
+    var type = m[1];
+    var formData = new FormData(form);
+    var body = new URLSearchParams(formData).toString();
+    var card = form.closest('.post-row');
+
+    // Disable all buttons in the card
+    var allBtns = card ? card.querySelectorAll('.actions-row button') : form.querySelectorAll('button');
+    allBtns.forEach(function (b) { b.disabled = true; });
+
+    fetch(action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      credentials: 'include',
+      body: body,
+      redirect: 'manual',
+    }).then(function (res) {
+      if (type === 'delete' || type === 'reject' || type === 'expire' || type === 'approve') {
+        if (card) {
+          card.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+          card.style.opacity = '0';
+          card.style.transform = 'translateX(-20px)';
+          setTimeout(function () { card.remove(); }, 260);
+        }
+      } else if (type === 'pin' || type === 'urgent') {
+        if (type === 'pin') {
+          var wasPinned = btn.classList.contains('active');
+          btn.classList.toggle('active', !wasPinned);
+          btn.textContent = wasPinned ? 'Pin' : 'Unpin';
+        } else {
+          var wasUrgent = btn.classList.contains('active');
+          btn.classList.toggle('active', !wasUrgent);
+          btn.textContent = wasUrgent ? 'Urgent' : 'Not Urgent';
+        }
+        allBtns.forEach(function (b) { b.disabled = false; });
+      }
+    }).catch(function () {
+      allBtns.forEach(function (b) { b.disabled = false; });
+      // Fallback: do a normal navigation
+      window.location.href = action;
+    });
+  }, true); // useCapture = true to fire before inline handlers
 
   // ─── Initialize ───────────────────────────────────────
   var initialTab = getInitialTab();

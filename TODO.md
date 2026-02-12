@@ -3,7 +3,7 @@
 > Actionable items for the current/next work session. Not a roadmap — these are things that need doing NOW.
 > For project overview and status, see [PROJECT.md](./PROJECT.md).
 
-*Last updated: February 12, 2026 (post-sidebar)*
+*Last updated: February 12, 2026 (linter error fixes)*
 
 ---
 
@@ -60,6 +60,18 @@
 ---
 
 ## DONE
+
+### EJS Linter Errors Fixed
+**Added:** 2026-02-12
+**Completed:** 2026-02-12
+**Context:** Fixed 9 linter errors in `admin.ejs` and `super.ejs`. Issues were caused by EJS template syntax embedded in JavaScript and CSS contexts. Solutions: (1) Moved dynamic JS value from inline EJS expression to data attribute (`data-is-custom`) and read via `getAttribute()`. (2) Replaced inline style with EJS ternary with CSS utility classes (`text-success`, `text-warning`). (3) Fixed button style attribute to conditionally render entire attribute block instead of empty CSS ruleset. All linter errors now resolved.
+**Status:** DONE
+
+### Admin Polish & Bug Fixes
+**Added:** 2026-02-12
+**Completed:** 2026-02-12
+**Context:** Fixed AI rewrite not persisting (hidden input sync), wrong OpenRouter model IDs (Grok dot vs dash, stale Gemini IDs), LLM returning markdown instead of HTML (added mdToHtml converter), page scroll-to-top on mod actions (AJAX click interception), theme popover clipped by sidebar overflow. Improved rewrite prompt UX to show default prompt with custom/reset toggle. Refactored rewrite endpoint into shared helper.
+**Status:** DONE
 
 ### Submit Form Validation UX
 **Added:** 2026-02-11

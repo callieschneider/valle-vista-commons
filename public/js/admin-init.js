@@ -1,18 +1,23 @@
 import { initEditor } from '/js/editor.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Track all editor instances for form-submit sync
+  const editors = [];
+
   // Initialize board notes composer editor
   const notesEl = document.getElementById('notesEditor');
   if (notesEl) {
-    initEditor({
+    const notesHidden = document.getElementById('notesHidden');
+    const ed = initEditor({
       element: notesEl,
-      hiddenInput: document.getElementById('notesHidden'),
+      hiddenInput: notesHidden,
       toolbar: document.getElementById('notesToolbar'),
       content: '',
       mode: 'full',
       postId: null,
-      enableAiRewrite: true, // Enable for board notes (no rate limits)
+      enableAiRewrite: true,
     });
+    editors.push({ editor: ed, hidden: notesHidden, el: notesEl });
   }
 
   // Initialize all admin edit editors
@@ -32,10 +37,22 @@ document.addEventListener('DOMContentLoaded', () => {
         content: content,
         mode: 'full',
         postId: postId,
-        enableAiRewrite: !!postId, // Enable if editing a post
+        enableAiRewrite: !!postId,
       });
       // Sync initial content
       hidden.value = content;
+      editors.push({ editor, hidden, el });
     }
+  });
+
+  // Safety net: on ANY form submit, force-sync the editor's current HTML
+  // to its hidden input. Catches all edge cases (AI rewrite, paste, etc.)
+  document.addEventListener('submit', (e) => {
+    const form = e.target;
+    editors.forEach(({ editor, hidden, el }) => {
+      if (form.contains(hidden)) {
+        hidden.value = editor.getHTML();
+      }
+    });
   });
 });

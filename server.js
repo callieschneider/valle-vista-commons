@@ -78,8 +78,14 @@ app.use(async (req, res, next) => {
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Static files
-app.use(express.static(path.join(__dirname, 'public')));
+// Static files (no-cache in dev to prevent stale JS)
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, filePath) => {
+    if (process.env.NODE_ENV !== 'production') {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+  }
+}));
 
 // Uploaded media (images/videos)
 app.use('/uploads', express.static(UPLOAD_DIR));

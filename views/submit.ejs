@@ -114,9 +114,7 @@
             <div id="mapContainer" class="submit-map-container"></div>
             <div class="map-coord-display">
               <span id="mapDisplay">Click map to drop a pin</span>
-              <button type="button" class="btn-link-vvc" id="removePin" style="font-size: 0.75rem; margin-left: 8px;">
-                Remove pin
-              </button>
+              <button type="button" class="action-btn outline delete" id="removePin" style="margin-left: 8px;">Remove pin</button>
             </div>
             <input type="hidden" name="latitude" id="latitude">
             <input type="hidden" name="longitude" id="longitude">
@@ -177,6 +175,11 @@
   <script src="/js/category-select.js"></script>
   <script type="module" src="/js/submit-init.js"></script>
   <script type="module" src="/js/submit-map.js"></script>
+  <script>
+  // #region agent log
+  fetch('http://127.0.0.1:7248/ingest/89effa18-af19-4d13-bfa1-6d51b425f190',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'submit.ejs:inline',message:'page loaded, checking L and map module',data:{hasL:typeof L !== 'undefined',hasLmap:typeof L !== 'undefined' && typeof L.map === 'function'},timestamp:Date.now(),hypothesisId:'H-E'})}).catch(function(){});
+  // #endregion
+  </script>
   <% } %>
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
 </body>

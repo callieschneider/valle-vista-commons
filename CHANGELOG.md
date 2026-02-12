@@ -6,6 +6,62 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-02-12 - EJS Linter Errors Fixed
+
+### Fixed
+- **JavaScript linter errors in admin.ejs** — EJS template syntax inside `<script>` tag was causing "Expression expected" errors. Moved dynamic `isCustom` value from inline EJS expression to `data-is-custom` attribute on textarea element, read via `getAttribute()` in JavaScript.
+- **CSS linter errors in super.ejs** — EJS ternary operator inside inline `style` attribute was causing "property value expected" error. Replaced inline style with existing CSS utility classes (`text-success`, `text-warning`).
+- **Empty CSS ruleset in super.ejs** — Button with conditional style attribute that could evaluate to empty string. Fixed by conditionally rendering the entire `style` attribute using EJS conditionals instead of ternary inside the attribute value.
+
+### Changed
+- `views/admin.ejs` — Added `data-is-custom` attribute to `#rewritePromptField`, updated JavaScript to read from data attribute
+- `views/super.ejs` — Replaced inline style with class-based approach for mod rewrite status, fixed button style conditional rendering
+
+---
+
+## 2026-02-12 - leaflet-rotate Double-Click Zoom Fix
+
+### Fixed
+- **Double-click zoom shift on rotated maps** — leaflet-rotate v0.2.8 has a known CSS `transform-origin` bug that miscalculates pixel offsets during zoom animation when `bearing != 0`. Double-clicking to zoom caused the map to visually jump sideways. Fixed by disabling native `doubleClickZoom`, adding a capture-phase dblclick handler that calls `setView(center, zoom+1, { animate: false })` to bypass the animation entirely. Also added 300ms click debounce on pin-drop maps to prevent the two `click` events from a double-click from triggering the pin handler.
+
+### Changed
+- **Service worker cache** — bumped from `vvc-v3` to `vvc-v8` to ensure stale JS files are replaced. The SW's cache-first strategy for static assets was serving old code through multiple fix iterations.
+- **CSP cleanup** — removed debug endpoint `http://127.0.0.1:7248` from `connect-src` directive.
+
+### Files Changed
+- `public/js/map-picker.js` — `animate: false` dblclick handler, `_dblClickGuard` + click debounce
+- `public/js/board-maps.js` — `animate: false` dblclick handler for modal maps
+- `public/sw.js` — cache version bump `vvc-v3` → `vvc-v8`
+- `server.js` — removed debug endpoint from CSP `connect-src`
+- `KNOWN_ISSUES.md` — documented leaflet-rotate zoom bug and workaround
+
+---
+
+## 2026-02-12 - Admin Polish & Bug Fixes
+
+### Fixed
+- **AI rewrite not saving** — Tiptap `setContent()` doesn't fire `onUpdate` by default; hidden form input was never synced with rewritten text. Fixed by storing hidden input ref on editor instance and explicitly syncing after `setContent()`. Added form-submit safety net in `admin-init.js` that force-syncs all editors before any form submission.
+- **Grok 4.1 Fast model failing** — Model ID was `x-ai/grok-4-1-fast` (dash) instead of correct `x-ai/grok-4.1-fast` (dot). Also fixed stale Gemini model IDs.
+- **LLM rewrite returning raw markdown** — Added `mdToHtml()` server-side converter that transforms LLM markdown output (bold, italic, headings, lists) to Tiptap-compatible HTML. If LLM already returns HTML, passes through untouched.
+- **Admin page scroll-to-top on actions** — Delete, expire, approve, reject, pin, and urgent actions caused full page reload. Converted to AJAX via click interception on submit buttons; post cards now fade out in-place, pin/urgent toggle without reload.
+- **Theme popover clipped by sidebar** — Sidebar `overflow-y: auto` created a clipping boundary. Moved scroll to `.admin-sidebar-nav` only; sidebar itself now `overflow: visible` so the popover escapes.
+
+### Changed
+- **Rewrite prompt UX** — Settings textarea now shows the actual default prompt instead of being empty. Status line indicates "default" or "custom" with a reset link. On save, if text matches default, stores `null` in DB.
+- **Model list updated** — Fixed `x-ai/grok-4.1-fast`, replaced `google/gemini-2.0-flash-001` with `google/gemini-2.5-flash`, replaced expired `google/gemini-2.5-pro-preview-06-05` with `google/gemini-2.5-pro`.
+- **Refactored rewrite endpoint** — Extracted `performRewrite()` helper, eliminating 3 duplicated prompt-building blocks in `/admin/api/rewrite-editor`.
+
+### Files Changed
+- `public/js/editor.js` — `_hiddenInput` ref on editor, explicit sync after `setContent()`
+- `public/js/admin-init.js` — form submit safety net, force-syncs all editors
+- `public/js/admin-sidebar.js` — AJAX click interceptor for mod action buttons
+- `public/css/style.css` — sidebar overflow fix, nav scrollbar, popover positioning
+- `routes/admin.js` — fixed model IDs, `mdToHtml()` converter, `performRewrite()` helper
+- `views/admin.ejs` — rewrite prompt shows default, status line with reset link
+- `views/super.ejs` — same rewrite prompt UX update
+
+---
+
 ## 2026-02-12 - Tiptap Enhanced Toolbar & In-Editor AI Rewrite with Rate Limits
 
 ### Added

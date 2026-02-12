@@ -9,6 +9,80 @@ const { sanitizeRichText } = require('../lib/sanitize');
 const SUPER_USER = process.env.SUPER_ADMIN_USER || 'super';
 const SUPER_PASS = process.env.SUPER_ADMIN_PASS;
 
+// ─── Markdown → HTML converter (for LLM rewrite output) ─
+function mdToHtml(text) {
+  if (!text) return text;
+  // Strip wrapping code fences if LLM returns ```html ... ```
+  text = text.replace(/^```(?:html)?\n?/i, '').replace(/\n?```$/i, '').trim();
+  // If it already looks like HTML (starts with a tag), return as-is
+  if (/^\s*<[a-z][\s\S]*>/i.test(text)) return text;
+
+  const lines = text.split('\n');
+  const result = [];
+  let inList = null; // 'ul' or 'ol'
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+
+    // Headings: ## text
+    const headingMatch = line.match(/^(#{1,4})\s+(.+)/);
+    if (headingMatch) {
+      if (inList) { result.push(`</${inList}>`); inList = null; }
+      const level = headingMatch[1].length;
+      result.push(`<h${level}>${inlineFormat(headingMatch[2])}</h${level}>`);
+      continue;
+    }
+
+    // Unordered list: - item or * item
+    const ulMatch = line.match(/^[\-\*]\s+(.+)/);
+    if (ulMatch) {
+      if (inList !== 'ul') {
+        if (inList) result.push(`</${inList}>`);
+        result.push('<ul>');
+        inList = 'ul';
+      }
+      result.push(`<li>${inlineFormat(ulMatch[1])}</li>`);
+      continue;
+    }
+
+    // Ordered list: 1. item
+    const olMatch = line.match(/^\d+\.\s+(.+)/);
+    if (olMatch) {
+      if (inList !== 'ol') {
+        if (inList) result.push(`</${inList}>`);
+        result.push('<ol>');
+        inList = 'ol';
+      }
+      result.push(`<li>${inlineFormat(olMatch[1])}</li>`);
+      continue;
+    }
+
+    // Close any open list
+    if (inList) { result.push(`</${inList}>`); inList = null; }
+
+    // Blank line — skip (paragraph break)
+    if (!line.trim()) continue;
+
+    // Regular paragraph
+    result.push(`<p>${inlineFormat(line)}</p>`);
+  }
+
+  if (inList) result.push(`</${inList}>`);
+  return result.join('');
+}
+
+function inlineFormat(text) {
+  // Bold: **text** or __text__
+  text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/__(.+?)__/g, '<strong>$1</strong>');
+  // Italic: *text* or _text_
+  text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  text = text.replace(/(?<!\w)_(.+?)_(?!\w)/g, '<em>$1</em>');
+  // Strikethrough: ~~text~~
+  text = text.replace(/~~(.+?)~~/g, '<s>$1</s>');
+  return text;
+}
+
 // ─── Login / Logout (before auth middleware) ─────────────
 router.get('/login', (req, res) => {
   res.render('login', { error: null });
@@ -50,13 +124,13 @@ router.use(requireMod);
 
 // ─── Available LLM Models (shared with settings tab) ─────
 const AVAILABLE_MODELS = [
-  { id: 'x-ai/grok-4-1-fast', name: 'Grok 4.1 Fast', note: 'Very fast, great value' },
+  { id: 'x-ai/grok-4.1-fast', name: 'Grok 4.1 Fast', note: 'Very fast, great value' },
   { id: 'anthropic/claude-3.5-haiku', name: 'Claude 3.5 Haiku', note: 'Fast, cheap' },
   { id: 'anthropic/claude-sonnet-4.5', name: 'Claude Sonnet 4.5', note: 'High quality' },
   { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini', note: 'Fast, cheap' },
   { id: 'openai/gpt-4o', name: 'GPT-4o', note: 'High quality' },
-  { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash', note: 'Fast, cheap' },
-  { id: 'google/gemini-2.5-pro-preview-06-05', name: 'Gemini 2.5 Pro', note: 'High quality' },
+  { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash', note: 'Fast, cheap' },
+  { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro', note: 'High quality' },
   { id: 'deepseek/deepseek-chat-v3-0324', name: 'DeepSeek Chat v3', note: 'Very cheap' },
 ];
 
@@ -326,7 +400,7 @@ router.post('/edit/:id', async (req, res) => {
   } catch (err) {
     console.error('Edit error:', err.message);
   }
-  res.redirect('/admin');
+  res.redirect('/admin?tab=board');
 });
 
 // ─── AI Rewrite ─────────────────────────────────────────
@@ -365,9 +439,9 @@ router.post('/rewrite/:id', async (req, res) => {
     await logAction('rewrite', req.authUser, { postId: post.id, details: `AI rewrite (${action}) on "${post.title}"` });
   } catch (err) {
     console.error('Rewrite error:', err.message);
-    return res.redirect('/admin?error=rewrite_failed');
+    return res.redirect('/admin?tab=board&error=rewrite_failed');
   }
-  res.redirect('/admin');
+  res.redirect('/admin?tab=board');
 });
 
 // ─── Reanalyze ──────────────────────────────────────────
@@ -381,7 +455,7 @@ router.post('/reanalyze/:id', async (req, res) => {
   } catch (err) {
     console.error('Reanalyze error:', err.message);
   }
-  res.redirect('/admin');
+  res.redirect('/admin?tab=board');
 });
 
 // ─── Pin/Unpin ──────────────────────────────────────────
@@ -470,7 +544,7 @@ router.post('/modnote/:id', async (req, res) => {
   } catch (err) {
     console.error('Mod note error:', err.message);
   }
-  res.redirect('/admin');
+  res.redirect('/admin?tab=board');
 });
 
 // ─── Undo ───────────────────────────────────────────────
@@ -492,29 +566,35 @@ router.post('/undo/:id', async (req, res) => {
   } catch (err) {
     console.error('Undo error:', err.message);
   }
-  res.redirect('/admin');
+  res.redirect('/admin?tab=board');
 });
 
 // ─── In-Editor AI Rewrite (API endpoint for Tiptap button) ─
+
+// Shared helper: call LLM for rewrite, convert result to HTML
+async function performRewrite(content) {
+  const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  const basePrompt = settings?.rewritePrompt || 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
+  const prompt = `${basePrompt}\n\nIMPORTANT: Respond with ONLY the rewritten text. Do not add explanations, commentary, or notes about what you changed. Do not wrap your response in code fences.\n\nText to rewrite:\n${content}`;
+
+  const result = await require('../lib/openrouter').chatCompletion({
+    model: settings?.rewriteModel || 'anthropic/claude-3.5-haiku',
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.3,
+  });
+
+  if (!result) return null;
+  // Convert markdown → HTML for Tiptap compatibility
+  return mdToHtml(result);
+}
 
 router.post('/api/rewrite-editor', async (req, res) => {
   try {
     // Super admin bypass (no limits)
     if (req.isSuperAdmin) {
       const content = req.body.content || '';
-      const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-      const basePrompt = settings?.rewritePrompt || 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
-      const prompt = `${basePrompt}\n\nIMPORTANT: Respond with ONLY the rewritten text. Do not add explanations, commentary, or notes about what you changed.\n\nText to rewrite:\n${content}`;
-      
-      const result = await require('../lib/openrouter').chatCompletion({
-        model: settings?.rewriteModel || 'anthropic/claude-3.5-haiku',
-        messages: [
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.3,
-      });
-      
-      return res.json({ success: true, rewritten: result || content });
+      const rewritten = await performRewrite(content);
+      return res.json({ success: true, rewritten: rewritten || content });
     }
 
     // Regular mod: check limits
@@ -532,27 +612,12 @@ router.post('/api/rewrite-editor', async (req, res) => {
     // If no postId, this is new content (board notes or submit) - no rate limiting, no logging
     if (!postId) {
       const content = req.body.content || '';
-      const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-      const basePrompt = settings?.rewritePrompt || 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
-      const prompt = `${basePrompt}\n\nIMPORTANT: Respond with ONLY the rewritten text. Do not add explanations, commentary, or notes about what you changed.\n\nText to rewrite:\n${content}`;
-      
-      const result = await require('../lib/openrouter').chatCompletion({
-        model: settings?.rewriteModel || 'anthropic/claude-3.5-haiku',
-        messages: [
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.3,
-      });
-
-      if (!result) {
-        return res.status(500).json({ error: 'LLM rewrite failed' });
-      }
-
-      return res.json({ success: true, rewritten: result });
+      const rewritten = await performRewrite(content);
+      if (!rewritten) return res.status(500).json({ error: 'LLM rewrite failed' });
+      return res.json({ success: true, rewritten });
     }
 
     // If postId provided, enforce limits
-    // Check per-post limit
     const post = await prisma.post.findUnique({ where: { id: postId } });
     if (!post) {
       return res.status(404).json({ error: 'Post not found' });
@@ -574,21 +639,8 @@ router.post('/api/rewrite-editor', async (req, res) => {
 
     // Perform rewrite
     const content = req.body.content || '';
-    const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-    const basePrompt = settings?.rewritePrompt || 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
-    const prompt = `${basePrompt}\n\nIMPORTANT: Respond with ONLY the rewritten text. Do not add explanations, commentary, or notes about what you changed.\n\nText to rewrite:\n${content}`;
-    
-    const result = await require('../lib/openrouter').chatCompletion({
-      model: settings?.rewriteModel || 'anthropic/claude-3.5-haiku',
-      messages: [
-        { role: 'user', content: prompt }
-      ],
-      temperature: 0.3,
-    });
-
-    if (!result) {
-      return res.status(500).json({ error: 'LLM rewrite failed' });
-    }
+    const rewritten = await performRewrite(content);
+    if (!rewritten) return res.status(500).json({ error: 'LLM rewrite failed' });
 
     // Log rewrite and increment post counter
     await prisma.$transaction([
@@ -596,7 +648,7 @@ router.post('/api/rewrite-editor', async (req, res) => {
       prisma.post.update({ where: { id: post.id }, data: { rewriteCount: { increment: 1 } } }),
     ]);
 
-    res.json({ success: true, rewritten: result });
+    res.json({ success: true, rewritten });
   } catch (err) {
     console.error('Editor rewrite error:', err.message);
     res.status(500).json({ error: 'Rewrite failed' });

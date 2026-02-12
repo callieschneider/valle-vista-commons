@@ -90,7 +90,7 @@
 
       <div class="panel-card">
         <% if (mods.length === 0) { %>
-          <p style="text-align: center; padding: 0.75rem 0; color: var(--text-muted); font-size: 0.85rem;">No moderators yet. Create one below.</p>
+          <p style="text-align: center; padding: 0.75rem 0; color: var(--text-muted); font-size: 0.8rem;">No moderators yet. Create one below.</p>
         <% } else { %>
           <% mods.forEach(mod => { %>
             <div class="mod-row">
@@ -105,14 +105,14 @@
                   <% } %>
                 </div>
                 <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">
-                  Rewrite: <span style="color: <%= mod.rewriteEnabled ? 'var(--accent-success)' : 'var(--accent-warning)' %>;"><%= mod.rewriteEnabled ? 'Enabled' : 'Disabled' %></span>
+                  Rewrite: <span class="<%= mod.rewriteEnabled ? 'text-success' : 'text-warning' %>"><%= mod.rewriteEnabled ? 'Enabled' : 'Disabled' %></span>
                   · Limits: <%= mod.rewriteLimitPerPost %>/post, <%= mod.rewriteLimitPerHour %>/hour
                 </div>
               </div>
               <div style="display: flex; gap: 6px; flex-direction: column; align-items: flex-end;">
                 <div style="display: flex; gap: 6px;">
                   <form method="POST" action="/super/mods/<%= mod.id %>/toggle" style="display:inline;">
-                    <button type="submit" class="action-btn outline <%= mod.active ? '' : 'success' %>" style="<%= mod.active ? 'border-color: var(--accent-warning-soft); color: var(--accent-warning);' : '' %>">
+                    <button type="submit" class="action-btn outline <%= mod.active ? '' : 'success' %>"<% if (mod.active) { %> style="border-color: var(--accent-warning-soft); color: var(--accent-warning);"<% } %>>
                       <%= mod.active ? 'Disable' : 'Enable' %>
                     </button>
                   </form>
@@ -134,11 +134,11 @@
                     </div>
                     <div style="margin-bottom: 8px;">
                       <label style="font-size: 0.75rem; color: var(--text-secondary);">Per-Post Limit</label>
-                      <input type="number" name="rewriteLimitPerPost" value="<%= mod.rewriteLimitPerPost %>" min="1" max="50" class="vvc-input" style="font-size: 0.85rem; padding: 6px 10px;">
+                      <input type="number" name="rewriteLimitPerPost" value="<%= mod.rewriteLimitPerPost %>" min="1" max="50" class="vvc-input">
                     </div>
                     <div style="margin-bottom: 8px;">
                       <label style="font-size: 0.75rem; color: var(--text-secondary);">Per-Hour Limit</label>
-                      <input type="number" name="rewriteLimitPerHour" value="<%= mod.rewriteLimitPerHour %>" min="1" max="100" class="vvc-input" style="font-size: 0.85rem; padding: 6px 10px;">
+                      <input type="number" name="rewriteLimitPerHour" value="<%= mod.rewriteLimitPerHour %>" min="1" max="100" class="vvc-input">
                     </div>
                     <div style="display: flex; gap: 6px;">
                       <button type="submit" class="action-btn outline success" style="flex: 1; font-size: 0.8rem;">Save</button>
@@ -154,15 +154,15 @@
 
       <!-- Create Mod Form -->
       <div class="panel-card">
-        <h6 style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.75rem;">Create New Mod</h6>
+        <h6 style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary); margin-bottom: 0.75rem;">Create New Mod</h6>
         <form method="POST" action="/super/mods/create" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
           <div>
             <label class="vvc-label" style="font-size: 0.75rem;">Username</label>
-            <input type="text" name="username" class="vvc-input" placeholder="lowercase, 3-30 chars" required pattern="[a-z0-9_]{3,30}" style="font-size: 0.85rem; padding: 8px 12px; width: auto;">
+            <input type="text" name="username" class="vvc-input" placeholder="lowercase, 3-30 chars" required pattern="[a-z0-9_]{3,30}" style="width: auto;">
           </div>
           <div>
             <label class="vvc-label" style="font-size: 0.75rem;">Password</label>
-            <input type="password" name="password" class="vvc-input" placeholder="8+ characters" required minlength="8" style="font-size: 0.85rem; padding: 8px 12px; width: auto;">
+            <input type="password" name="password" class="vvc-input" placeholder="8+ characters" required minlength="8" style="width: auto;">
           </div>
           <button type="submit" class="panel-btn-primary">Create Mod</button>
         </form>
@@ -186,7 +186,7 @@
           <div class="row mb-3">
             <div class="col-md-6 mb-2">
               <label class="vvc-label" style="font-size: 0.8rem;">Analysis Model</label>
-              <select name="analysisModel" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
+              <select name="analysisModel" class="vvc-select">
                 <% models.forEach(m => { %>
                   <option value="<%= m.id %>" <%= settings && settings.analysisModel === m.id ? 'selected' : '' %>>
                     <%= m.name %> <% if (m.note) { %>(<%- m.note %>)<% } %>
@@ -197,7 +197,7 @@
             </div>
             <div class="col-md-6 mb-2">
               <label class="vvc-label" style="font-size: 0.8rem;">Rewrite Model</label>
-              <select name="rewriteModel" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
+              <select name="rewriteModel" class="vvc-select">
                 <% models.forEach(m => { %>
                   <option value="<%= m.id %>" <%= settings && settings.rewriteModel === m.id ? 'selected' : '' %>>
                     <%= m.name %> <% if (m.note) { %>(<%- m.note %>)<% } %>
@@ -209,9 +209,15 @@
 
             <div class="field-group">
               <label class="model-label">In-Editor Rewrite Prompt</label>
-              <textarea name="rewritePrompt" class="vvc-textarea" rows="6" placeholder="Custom prompt template for AI Rewrite button in editor (leave blank for default)"
-                        style="font-size: 0.85rem; padding: 8px 12px; font-family: monospace;"><%= settings && settings.rewritePrompt ? settings.rewritePrompt : '' %></textarea>
-              <p class="model-note">Leave blank for default: "Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning."</p>
+              <textarea name="rewritePrompt" id="rewritePromptField" class="vvc-textarea" rows="6"
+                        style="font-family: monospace;"><%= settings && settings.rewritePrompt ? settings.rewritePrompt : 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.' %></textarea>
+              <p class="model-note" id="rewritePromptStatus">
+                <% if (settings && settings.rewritePrompt) { %>
+                  Using <strong>custom</strong> prompt. <a href="#" id="rewritePromptReset" style="color: var(--accent); text-decoration: underline; cursor: pointer;">Reset to default</a>
+                <% } else { %>
+                  Using <strong>default</strong> prompt. Edit above to customize.
+                <% } %>
+              </p>
             </div>
           </div>
           <button type="submit" class="panel-btn-primary">Save LLM Settings</button>
@@ -236,15 +242,15 @@
         <form method="POST" action="/super/settings/site">
           <div class="field-group">
             <label class="vvc-label" style="font-size: 0.8rem;">Board Name</label>
-            <input type="text" name="boardName" class="vvc-input" value="<%= settings ? settings.boardName : 'Valle Vista Commons' %>" maxlength="100" style="font-size: 0.85rem; padding: 8px 12px;">
+            <input type="text" name="boardName" class="vvc-input" value="<%= settings ? settings.boardName : 'Valle Vista Commons' %>" maxlength="100">
           </div>
           <div class="field-group">
             <label class="vvc-label" style="font-size: 0.8rem;">Tagline</label>
-            <input type="text" name="boardTagline" class="vvc-input" value="<%= settings ? settings.boardTagline : 'Your neighborhood board' %>" maxlength="200" style="font-size: 0.85rem; padding: 8px 12px;">
+            <input type="text" name="boardTagline" class="vvc-input" value="<%= settings ? settings.boardTagline : 'Your neighborhood board' %>" maxlength="200">
           </div>
           <div class="field-group">
             <label class="vvc-label" style="font-size: 0.8rem;">About Text</label>
-            <textarea name="aboutText" class="vvc-textarea" rows="4" maxlength="2000" placeholder="Shown at the bottom of the public board" style="font-size: 0.85rem;"><%= settings ? settings.aboutText || '' : '' %></textarea>
+            <textarea name="aboutText" class="vvc-textarea" rows="4" maxlength="2000" placeholder="Shown at the bottom of the public board"><%= settings ? settings.aboutText || '' : '' %></textarea>
           </div>
           <button type="submit" class="panel-btn-primary">Save Site Settings</button>
         </form>
@@ -260,6 +266,49 @@
       const form = document.getElementById('modRewriteForm-' + modId);
       form.style.display = form.style.display === 'none' ? 'block' : 'none';
     }
+
+    // Rewrite prompt: default/custom logic
+    (function() {
+      var DEFAULT_PROMPT = 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
+      var field = document.getElementById('rewritePromptField');
+      var status = document.getElementById('rewritePromptStatus');
+      var resetLink = document.getElementById('rewritePromptReset');
+      if (!field || !status) return;
+
+      function updateStatus(custom) {
+        if (custom) {
+          status.innerHTML = 'Using <strong>custom</strong> prompt. <a href="#" id="rewritePromptReset" style="color: var(--accent); text-decoration: underline; cursor: pointer;">Reset to default</a>';
+          var link = document.getElementById('rewritePromptReset');
+          if (link) link.addEventListener('click', function(e) { e.preventDefault(); resetToDefault(); });
+        } else {
+          status.innerHTML = 'Using <strong>default</strong> prompt. Edit above to customize.';
+        }
+      }
+
+      function resetToDefault() {
+        field.value = DEFAULT_PROMPT;
+        updateStatus(false);
+      }
+
+      field.addEventListener('input', function() {
+        var val = field.value.trim();
+        if (val === '' || val === DEFAULT_PROMPT) {
+          if (val === '') field.value = DEFAULT_PROMPT;
+          updateStatus(false);
+        } else {
+          updateStatus(true);
+        }
+      });
+
+      var form = field.closest('form');
+      if (form) {
+        form.addEventListener('submit', function() {
+          if (field.value.trim() === DEFAULT_PROMPT) field.value = '';
+        });
+      }
+
+      if (resetLink) resetLink.addEventListener('click', function(e) { e.preventDefault(); resetToDefault(); });
+    })();
   </script>
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
 </body>

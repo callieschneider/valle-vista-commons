@@ -90,9 +90,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Board Notes composer map (always visible, initialize on DOMContentLoaded)
-  const notesMapContainer = document.getElementById('notesMapContainer');
-  if (notesMapContainer) {
+  // Board Notes composer map — deferred until the notes tab is visible
+  // (Leaflet needs a visible container to calculate dimensions)
+  let notesMapInitialized = false;
+  function initNotesMap() {
+    if (notesMapInitialized) return;
+    const notesMapContainer = document.getElementById('notesMapContainer');
+    if (!notesMapContainer) return;
+    // Only init if the container is actually visible (offsetParent !== null)
+    if (!notesMapContainer.offsetParent) return;
+
+    notesMapInitialized = true;
     const notesMapInstance = initMapPicker({
       containerId: 'notesMapContainer',
       latInput: document.getElementById('notesLatitude'),
@@ -107,13 +115,26 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('notesMapDisplay').textContent = 'Click map to drop a pin';
       }
     });
-    
+
     document.getElementById('notesRemovePin').addEventListener('click', () => {
       notesMapInstance.removePin();
     });
-    
+
+    mapInstances['notes'] = notesMapInstance;
     setTimeout(() => notesMapInstance.map.invalidateSize(), 100);
   }
+
+  // Try on load (in case notes tab is the initial tab)
+  initNotesMap();
+
+  // Listen for tab:shown events to init the notes map when its tab becomes visible
+  document.addEventListener('tab:shown', () => {
+    initNotesMap();
+    // Invalidate all tracked map instances (fixes half-loaded tiles)
+    Object.values(mapInstances).forEach(inst => {
+      if (inst && inst.map) inst.map.invalidateSize();
+    });
+  });
 
   // Pin button handlers (geocode and center)
   document.querySelectorAll('.map-pin-btn').forEach(btn => {

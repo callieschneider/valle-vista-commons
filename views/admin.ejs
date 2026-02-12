@@ -321,15 +321,13 @@
               <!-- Edit Form (collapsed) -->
               <div class="collapse mt-2" id="edit-p<%= idx %>">
                 <form method="POST" action="/admin/edit/<%= post.id %>" class="inline-panel">
-                  <div style="margin-bottom: 8px;"><input type="text" name="title" class="vvc-input" value="<%= post.title %>" maxlength="100" style="font-size: 0.85rem; padding: 8px 12px;"></div>
-                  <div style="margin-bottom: 8px;">
+                  <div style="margin-bottom: 6px;"><input type="text" name="title" class="vvc-input" value="<%= post.title %>" maxlength="100"></div>
+                  <div style="margin-bottom: 6px;">
                     <div class="editor-wrapper">
                       <div class="editor-toolbar" id="editToolbar-p<%= idx %>">
                         <button type="button" data-action="bold"><b>B</b></button>
                         <button type="button" data-action="italic"><i>I</i></button>
                         <button type="button" data-action="strike"><s>S</s></button>
-                        <div class="sep"></div>
-                        <button type="button" data-action="heading1">H1</button><button type="button" data-action="heading2">H2</button><button type="button" data-action="heading3">H3</button><button type="button" data-action="heading4">H4</button>
                         <div class="sep"></div>
                         <button type="button" data-action="bulletList">• List</button><button type="button" data-action="link">Link</button>
                         <div class="sep"></div>
@@ -340,25 +338,25 @@
                     </div>
                     <input type="hidden" name="desc" id="editHidden-p<%= idx %>">
                   </div>
-                  <div style="margin-bottom: 8px;">
+                  <div style="margin-bottom: 6px;">
                     <label class="vvc-label">Location <span class="optional">(optional)</span></label>
                     <div style="display: flex; gap: 8px; align-items: center;">
                       <button type="button" class="map-pin-btn" data-target="p<%= idx %>" title="Find location on map"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
-                      <input type="text" name="location" class="vvc-input" value="<%= post.location || '' %>" maxlength="100" placeholder="Location (optional)" style="font-size: 0.85rem; padding: 8px 12px; flex: 1;">
+                      <input type="text" name="location" class="vvc-input" value="<%= post.location || '' %>" maxlength="100" placeholder="Location (optional)" style="flex: 1;">
                     </div>
                   </div>
-                  <div style="margin-bottom: 8px;">
+                  <div style="margin-bottom: 6px;">
                     <div id="adminMap-p<%= idx %>" class="admin-map-container"></div>
                     <div class="map-coord-display">
                       <span id="coordDisplay-p<%= idx %>"><% if (post.latitude && post.longitude) { %>📍 <%= post.latitude.toFixed(5) %>, <%= post.longitude.toFixed(5) %><% } else { %>Click map to drop a pin<% } %></span>
-                      <button type="button" class="btn-link-vvc" id="removeMapPin-p<%= idx %>" style="font-size: 0.75rem; margin-left: 8px;">Remove pin</button>
+                      <button type="button" class="action-btn outline delete" id="removeMapPin-p<%= idx %>" style="margin-left: 8px;">Remove pin</button>
                     </div>
                     <input type="hidden" name="latitude" id="adminLat-p<%= idx %>" value="<%= post.latitude || '' %>">
                     <input type="hidden" name="longitude" id="adminLng-p<%= idx %>" value="<%= post.longitude || '' %>">
                     <input type="hidden" name="locationName" id="adminName-p<%= idx %>" value="<%= post.locationName || '' %>">
                   </div>
-                  <div style="margin-bottom: 8px;">
-                    <select name="section" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
+                  <div style="margin-bottom: 6px;">
+                    <select name="section" class="vvc-select">
                       <% ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS'].forEach(s => { %><option value="<%= s %>" <%= post.section === s ? 'selected' : '' %>><%= s.replace('_', ' ') %></option><% }) %>
                     </select>
                   </div>
@@ -374,7 +372,7 @@
                 <div class="collapse mt-2" id="customRewrite-p<%= idx %>">
                   <form method="POST" action="/admin/rewrite/<%= post.id %>" class="inline-panel">
                     <input type="hidden" name="action" value="custom">
-                    <div style="margin-bottom: 8px;"><input type="text" name="instructions" class="vvc-input" placeholder="e.g. Make shorter, remove location details" required style="font-size: 0.85rem; padding: 8px 12px;"></div>
+                    <div style="margin-bottom: 6px;"><input type="text" name="instructions" class="vvc-input" placeholder="e.g. Make shorter, remove location details" required "></div>
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <button type="submit" class="panel-btn-primary">Rewrite with AI</button>
                       <span style="font-size: 0.72rem; color: var(--text-muted);">(takes a few seconds)</span>
@@ -452,13 +450,11 @@
               <!-- Live Edit Form -->
               <div class="collapse mt-2" id="liveEdit-<%= idx %>">
                 <form method="POST" action="/admin/edit/<%= post.id %>" class="inline-panel">
-                  <div style="margin-bottom: 8px;"><input type="text" name="title" class="vvc-input" value="<%= post.title %>" maxlength="100" style="font-size: 0.85rem; padding: 8px 12px;"></div>
-                  <div style="margin-bottom: 8px;">
+                  <div style="margin-bottom: 6px;"><input type="text" name="title" class="vvc-input" value="<%= post.title %>" maxlength="100"></div>
+                  <div style="margin-bottom: 6px;">
                     <div class="editor-wrapper">
                       <div class="editor-toolbar" id="editToolbar-l<%= idx %>">
                         <button type="button" data-action="bold"><b>B</b></button><button type="button" data-action="italic"><i>I</i></button><button type="button" data-action="strike"><s>S</s></button>
-                        <div class="sep"></div>
-                        <button type="button" data-action="heading1">H1</button><button type="button" data-action="heading2">H2</button><button type="button" data-action="heading3">H3</button><button type="button" data-action="heading4">H4</button>
                         <div class="sep"></div>
                         <button type="button" data-action="bulletList">• List</button><button type="button" data-action="link">Link</button>
                         <div class="sep"></div>
@@ -469,25 +465,25 @@
                     </div>
                     <input type="hidden" name="desc" id="editHidden-l<%= idx %>">
                   </div>
-                  <div style="margin-bottom: 8px;">
+                  <div style="margin-bottom: 6px;">
                     <label class="vvc-label">Location <span class="optional">(optional)</span></label>
                     <div style="display: flex; gap: 8px; align-items: center;">
                       <button type="button" class="map-pin-btn" data-target="l<%= idx %>" title="Find location on map"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
-                      <input type="text" name="location" class="vvc-input" value="<%= post.location || '' %>" maxlength="100" placeholder="Location (optional)" style="font-size: 0.85rem; padding: 8px 12px; flex: 1;">
+                      <input type="text" name="location" class="vvc-input" value="<%= post.location || '' %>" maxlength="100" placeholder="Location (optional)" style="flex: 1;">
                     </div>
                   </div>
-                  <div style="margin-bottom: 8px;">
+                  <div style="margin-bottom: 6px;">
                     <div id="adminMap-l<%= idx %>" class="admin-map-container"></div>
                     <div class="map-coord-display">
                       <span id="coordDisplay-l<%= idx %>"><% if (post.latitude && post.longitude) { %>📍 <%= post.latitude.toFixed(5) %>, <%= post.longitude.toFixed(5) %><% } else { %>Click map to drop a pin<% } %></span>
-                      <button type="button" class="btn-link-vvc" id="removeMapPin-l<%= idx %>" style="font-size: 0.75rem; margin-left: 8px;">Remove pin</button>
+                      <button type="button" class="action-btn outline delete" id="removeMapPin-l<%= idx %>" style="margin-left: 8px;">Remove pin</button>
                     </div>
                     <input type="hidden" name="latitude" id="adminLat-l<%= idx %>" value="<%= post.latitude || '' %>">
                     <input type="hidden" name="longitude" id="adminLng-l<%= idx %>" value="<%= post.longitude || '' %>">
                     <input type="hidden" name="locationName" id="adminName-l<%= idx %>" value="<%= post.locationName || '' %>">
                   </div>
-                  <div style="margin-bottom: 8px;">
-                    <select name="section" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
+                  <div style="margin-bottom: 6px;">
+                    <select name="section" class="vvc-select">
                       <% ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS', 'BOARD_NOTES'].forEach(s => { %><option value="<%= s %>" <%= post.section === s ? 'selected' : '' %>><%= s.replace('_', ' ') %></option><% }) %>
                     </select>
                   </div>
@@ -498,7 +494,7 @@
               <!-- Mod Note Form -->
               <div class="collapse mt-2" id="modNote-<%= idx %>">
                 <form method="POST" action="/admin/modnote/<%= post.id %>" class="inline-panel">
-                  <textarea name="modNote" class="vvc-textarea" rows="2" maxlength="1000" placeholder="Internal mod note (not visible to public)" style="font-size: 0.82rem; min-height: 60px;"><%= post.modNote || '' %></textarea>
+                  <textarea name="modNote" class="vvc-textarea" rows="2" maxlength="1000" placeholder="Internal mod note (not visible to public)" style="min-height: 60px;"><%= post.modNote || '' %></textarea>
                   <div class="panel-actions"><button type="submit" class="panel-btn-primary">Save Note</button></div>
                 </form>
               </div>
@@ -534,9 +530,9 @@
             <div class="post-row archive-post-row" data-status="<%= post.status %>" style="opacity: 0.85;">
               <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1;">
-                  <span class="post-row-title" style="font-size: 0.85rem;"><%= post.title %></span>
+                  <span class="post-row-title"><%= post.title %></span>
                   <span class="badge badge-section-<%= post.section %>"><%= post.section.replace('_', ' ') %></span>
-                  <span class="badge" style="background: var(--accent-<%= post.status === 'REJECTED' ? 'danger' : post.status === 'DELETED' ? 'danger' : 'warning' %>-soft); color: var(--accent-<%= post.status === 'REJECTED' ? 'danger' : post.status === 'DELETED' ? 'danger' : 'warning' %>);"><%= post.status %></span>
+                  <span class="badge badge-status-<%= (post.status === 'REJECTED' || post.status === 'DELETED') ? 'danger' : 'warning' %>"><%= post.status %></span>
                   <% if (post.submitter) { %>
                     <span class="badge-submitter">User #<%= post.submitter.id %><% if (submitterCounts[post.submitterId] > 1) { %> <span class="submitter-count">(<%= submitterCounts[post.submitterId] %> posts)</span><% } %></span>
                   <% } %>
@@ -570,7 +566,7 @@
           <p class="composer-hint">Board Notes go live immediately — no review needed. Visible on the public board.</p>
           <form method="POST" action="/admin/notes" id="notesForm">
             <div style="margin-bottom: 10px;">
-              <input type="text" name="title" class="vvc-input" placeholder="Note title" maxlength="100" required style="font-size: 0.85rem; padding: 8px 12px;">
+              <input type="text" name="title" class="vvc-input" placeholder="Note title" maxlength="100" required>
             </div>
             <div style="margin-bottom: 10px;">
               <div class="editor-wrapper">
@@ -578,11 +574,6 @@
                   <button type="button" data-action="bold"><b>B</b></button>
                   <button type="button" data-action="italic"><i>I</i></button>
                   <button type="button" data-action="strike"><s>S</s></button>
-                  <div class="sep"></div>
-                  <button type="button" data-action="heading1">H1</button>
-                  <button type="button" data-action="heading2">H2</button>
-                  <button type="button" data-action="heading3">H3</button>
-                  <button type="button" data-action="heading4">H4</button>
                   <div class="sep"></div>
                   <button type="button" data-action="bulletList">• List</button>
                   <button type="button" data-action="orderedList">1. List</button>
@@ -605,7 +596,7 @@
               <div id="notesMapContainer" class="submit-map-container"></div>
               <div class="map-coord-display">
                 <span id="notesMapDisplay">Click map to drop a pin</span>
-                <button type="button" class="btn-link-vvc" id="notesRemovePin" style="font-size: 0.75rem; margin-left: 8px;">Remove pin</button>
+                <button type="button" class="action-btn outline delete" id="notesRemovePin" style="margin-left: 8px;">Remove pin</button>
               </div>
               <input type="hidden" name="latitude" id="notesLatitude">
               <input type="hidden" name="longitude" id="notesLongitude">
@@ -660,7 +651,7 @@
             </div>
           <% } else { %>
             <div class="panel-card" style="margin-bottom: 1.5rem;">
-              <h6 style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.75rem;">Currently Blocked (<%= blockedUsers.length %>)</h6>
+              <h6 style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary); margin-bottom: 0.75rem;">Currently Blocked (<%= blockedUsers.length %>)</h6>
               <table class="blocklist-table">
                 <thead><tr><th>User</th><th>Posts</th><th>Action</th><th>Reason</th><th>Blocked By</th><th></th></tr></thead>
                 <tbody>
@@ -685,9 +676,9 @@
 
           <!-- All Submitters (for blocking) -->
           <div class="panel-card">
-            <h6 style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.75rem;">All Submitters (<%= allSubmitters.length %>)</h6>
+            <h6 style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary); margin-bottom: 0.75rem;">All Submitters (<%= allSubmitters.length %>)</h6>
             <% if (allSubmitters.length === 0) { %>
-              <p style="color: var(--text-muted); font-size: 0.85rem;">No submitters yet.</p>
+              <p style="color: var(--text-muted); font-size: 0.8rem;">No submitters yet.</p>
             <% } else { %>
               <table class="blocklist-table">
                 <thead><tr><th>User</th><th>Posts</th><th>Status</th><th>First Seen</th><th></th></tr></thead>
@@ -738,12 +729,12 @@
 
           <div class="panel-card">
             <% if (mods.length === 0) { %>
-              <p style="text-align: center; padding: 0.75rem 0; color: var(--text-muted); font-size: 0.85rem;">No moderators yet. Create one below.</p>
+              <p style="text-align: center; padding: 0.75rem 0; color: var(--text-muted); font-size: 0.8rem;">No moderators yet. Create one below.</p>
             <% } else { %>
               <% mods.forEach(mod => { %>
                 <div class="mod-row">
                   <div style="flex: 1;">
-                    <strong style="font-size: 0.9rem; color: var(--text-primary);"><%= mod.username %></strong>
+                    <strong style="font-size: 0.84rem; color: var(--text-primary);"><%= mod.username %></strong>
                     <span class="<%= mod.active ? 'status-active' : 'status-disabled' %>" style="margin-left: 8px;"><%= mod.active ? 'Active' : 'Disabled' %></span>
                     <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">
                       Created <%= new Date(mod.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
@@ -753,14 +744,14 @@
                       <% } %>
                     </div>
                     <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">
-                      Rewrite: <span style="color: <%= mod.rewriteEnabled ? 'var(--accent-success)' : 'var(--accent-warning)' %>;"><%= mod.rewriteEnabled ? 'Enabled' : 'Disabled' %></span>
+                      Rewrite: <span class="<%= mod.rewriteEnabled ? 'text-success' : 'text-warning' %>"><%= mod.rewriteEnabled ? 'Enabled' : 'Disabled' %></span>
                       · Limits: <%= mod.rewriteLimitPerPost %>/post, <%= mod.rewriteLimitPerHour %>/hour
                     </div>
                   </div>
                   <div style="display: flex; gap: 6px; flex-direction: column; align-items: flex-end;">
                     <div style="display: flex; gap: 6px;">
                       <form method="POST" action="/super/mods/<%= mod.id %>/toggle" style="display:inline;">
-                        <button type="submit" class="action-btn outline <%= mod.active ? '' : 'success' %>" style="<%= mod.active ? 'border-color: var(--accent-warning-soft); color: var(--accent-warning);' : '' %>"><%= mod.active ? 'Disable' : 'Enable' %></button>
+                        <button type="submit" class="action-btn outline <%= mod.active ? 'warning' : 'success' %>"><%= mod.active ? 'Disable' : 'Enable' %></button>
                       </form>
                       <button type="button" class="action-btn outline" onclick="toggleModRewriteForm('<%= mod.id %>')">Rewrite Settings</button>
                       <form method="POST" action="/super/mods/<%= mod.id %>/delete" style="display:inline;" onsubmit="return confirm('Delete mod &quot;<%= mod.username %>&quot; permanently?')">
@@ -769,18 +760,18 @@
                     </div>
                     <div id="modRewriteForm-<%= mod.id %>" style="display: none; margin-top: 8px; padding: 12px; background: var(--surface-inset); border-radius: 8px; width: 300px;">
                       <form method="POST" action="/super/mods/<%= mod.id %>/rewrite-settings">
-                        <div style="margin-bottom: 8px;">
+                        <div style="margin-bottom: 6px;">
                           <label style="font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
                             <input type="checkbox" name="rewriteEnabled" <%= mod.rewriteEnabled ? 'checked' : '' %> style="width: auto;"> Enable AI Rewrite
                           </label>
                         </div>
-                        <div style="margin-bottom: 8px;">
+                        <div style="margin-bottom: 6px;">
                           <label style="font-size: 0.75rem; color: var(--text-secondary);">Per-Post Limit</label>
-                          <input type="number" name="rewriteLimitPerPost" value="<%= mod.rewriteLimitPerPost %>" min="1" max="50" class="vvc-input" style="font-size: 0.85rem; padding: 6px 10px;">
+                          <input type="number" name="rewriteLimitPerPost" value="<%= mod.rewriteLimitPerPost %>" min="1" max="50" class="vvc-input">
                         </div>
-                        <div style="margin-bottom: 8px;">
+                        <div style="margin-bottom: 6px;">
                           <label style="font-size: 0.75rem; color: var(--text-secondary);">Per-Hour Limit</label>
-                          <input type="number" name="rewriteLimitPerHour" value="<%= mod.rewriteLimitPerHour %>" min="1" max="100" class="vvc-input" style="font-size: 0.85rem; padding: 6px 10px;">
+                          <input type="number" name="rewriteLimitPerHour" value="<%= mod.rewriteLimitPerHour %>" min="1" max="100" class="vvc-input">
                         </div>
                         <div style="display: flex; gap: 6px;">
                           <button type="submit" class="action-btn outline success" style="flex: 1;">Save</button>
@@ -796,15 +787,15 @@
 
           <!-- Create Mod Form -->
           <div class="panel-card" style="margin-top: 1rem;">
-            <h6 style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.75rem;">Create New Mod</h6>
+            <h6 style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary); margin-bottom: 0.75rem;">Create New Mod</h6>
             <form method="POST" action="/super/mods/create" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
               <div>
-                <label class="vvc-label" style="font-size: 0.75rem;">Username</label>
-                <input type="text" name="username" class="vvc-input" placeholder="lowercase, 3-30 chars" required pattern="[a-z0-9_]{3,30}" style="font-size: 0.85rem; padding: 8px 12px; width: auto;">
+                <label class="vvc-label">Username</label>
+                <input type="text" name="username" class="vvc-input" placeholder="lowercase, 3-30 chars" required pattern="[a-z0-9_]{3,30}" style="width: auto;">
               </div>
               <div>
-                <label class="vvc-label" style="font-size: 0.75rem;">Password</label>
-                <input type="password" name="password" class="vvc-input" placeholder="8+ characters" required minlength="8" style="font-size: 0.85rem; padding: 8px 12px; width: auto;">
+                <label class="vvc-label">Password</label>
+                <input type="password" name="password" class="vvc-input" placeholder="8+ characters" required minlength="8" style="width: auto;">
               </div>
               <button type="submit" class="panel-btn-primary">Create Mod</button>
             </form>
@@ -838,8 +829,8 @@
               <form method="POST" action="/super/settings/llm">
                 <div class="row mb-3">
                   <div class="col-md-6 mb-2">
-                    <label class="vvc-label" style="font-size: 0.8rem;">Analysis Model</label>
-                    <select name="analysisModel" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
+                    <label class="vvc-label">Analysis Model</label>
+                    <select name="analysisModel" class="vvc-select">
                       <% models.forEach(m => { %>
                         <option value="<%= m.id %>" <%= settings && settings.analysisModel === m.id ? 'selected' : '' %>><%= m.name %> (<%= m.note %>)</option>
                       <% }) %>
@@ -847,8 +838,8 @@
                     <p class="model-note">Used for auto-analyzing submitted tips</p>
                   </div>
                   <div class="col-md-6 mb-2">
-                    <label class="vvc-label" style="font-size: 0.8rem;">Rewrite Model</label>
-                    <select name="rewriteModel" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
+                    <label class="vvc-label">Rewrite Model</label>
+                    <select name="rewriteModel" class="vvc-select">
                       <% models.forEach(m => { %>
                         <option value="<%= m.id %>" <%= settings && settings.rewriteModel === m.id ? 'selected' : '' %>><%= m.name %> (<%= m.note %>)</option>
                       <% }) %>
@@ -859,21 +850,27 @@
 
                 <div class="row mb-3">
                   <div class="col-md-6 mb-2">
-                    <label class="vvc-label" style="font-size: 0.8rem;">Custom Analysis Model ID <span class="optional">(optional)</span></label>
-                    <input type="text" name="customAnalysisModel" class="vvc-input" value="<%= settings && settings.customAnalysisModel ? settings.customAnalysisModel : '' %>" placeholder="e.g. org/model-name" style="font-size: 0.85rem; padding: 8px 12px;">
+                    <label class="vvc-label">Custom Analysis Model ID <span class="optional">(optional)</span></label>
+                    <input type="text" name="customAnalysisModel" class="vvc-input" value="<%= settings && settings.customAnalysisModel ? settings.customAnalysisModel : '' %>" placeholder="e.g. org/model-name">
                     <p class="model-note">Overrides the dropdown above if set. Use any OpenRouter model ID.</p>
                   </div>
                   <div class="col-md-6 mb-2">
-                    <label class="vvc-label" style="font-size: 0.8rem;">Custom Rewrite Model ID <span class="optional">(optional)</span></label>
-                    <input type="text" name="customRewriteModel" class="vvc-input" value="<%= settings && settings.customRewriteModel ? settings.customRewriteModel : '' %>" placeholder="e.g. org/model-name" style="font-size: 0.85rem; padding: 8px 12px;">
+                    <label class="vvc-label">Custom Rewrite Model ID <span class="optional">(optional)</span></label>
+                    <input type="text" name="customRewriteModel" class="vvc-input" value="<%= settings && settings.customRewriteModel ? settings.customRewriteModel : '' %>" placeholder="e.g. org/model-name">
                     <p class="model-note">Overrides the dropdown above if set. Use any OpenRouter model ID.</p>
                   </div>
                 </div>
 
                 <div class="field-group">
-                  <label class="vvc-label" style="font-size: 0.8rem;">In-Editor Rewrite Prompt</label>
-                  <textarea name="rewritePrompt" class="vvc-textarea" rows="4" placeholder="Custom prompt for AI Rewrite button (leave blank for default)" style="font-size: 0.85rem; font-family: monospace;"><%= settings && settings.rewritePrompt ? settings.rewritePrompt : '' %></textarea>
-                  <p class="model-note">Leave blank for default: "Rewrite this text to be clear, concise, and factual..."</p>
+                  <label class="vvc-label">In-Editor Rewrite Prompt</label>
+                  <textarea name="rewritePrompt" id="rewritePromptField" class="vvc-textarea" rows="4" style="font-family: monospace;" data-is-custom="<%= settings && settings.rewritePrompt ? 'true' : 'false' %>"><%= settings && settings.rewritePrompt ? settings.rewritePrompt : 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.' %></textarea>
+                  <p class="model-note" id="rewritePromptStatus">
+                    <% if (settings && settings.rewritePrompt) { %>
+                      Using <strong>custom</strong> prompt. <a href="#" id="rewritePromptReset" style="color: var(--accent); text-decoration: underline; cursor: pointer;">Reset to default</a>
+                    <% } else { %>
+                      Using <strong>default</strong> prompt. Edit above to customize.
+                    <% } %>
+                  </p>
                 </div>
 
                 <button type="submit" class="panel-btn-primary">Save LLM Settings</button>
@@ -896,16 +893,16 @@
             <div class="panel-card">
               <form method="POST" action="/super/settings/site">
                 <div class="field-group">
-                  <label class="vvc-label" style="font-size: 0.8rem;">Board Name</label>
-                  <input type="text" name="boardName" class="vvc-input" value="<%= settings ? settings.boardName : 'Valle Vista Commons' %>" maxlength="100" style="font-size: 0.85rem; padding: 8px 12px;">
+                  <label class="vvc-label">Board Name</label>
+                  <input type="text" name="boardName" class="vvc-input" value="<%= settings ? settings.boardName : 'Valle Vista Commons' %>" maxlength="100">
                 </div>
                 <div class="field-group">
-                  <label class="vvc-label" style="font-size: 0.8rem;">Tagline</label>
-                  <input type="text" name="boardTagline" class="vvc-input" value="<%= settings ? settings.boardTagline : 'Your neighborhood board' %>" maxlength="200" style="font-size: 0.85rem; padding: 8px 12px;">
+                  <label class="vvc-label">Tagline</label>
+                  <input type="text" name="boardTagline" class="vvc-input" value="<%= settings ? settings.boardTagline : 'Your neighborhood board' %>" maxlength="200">
                 </div>
                 <div class="field-group">
-                  <label class="vvc-label" style="font-size: 0.8rem;">About Text</label>
-                  <textarea name="aboutText" class="vvc-textarea" rows="4" maxlength="2000" placeholder="Shown at the bottom of the public board" style="font-size: 0.85rem;"><%= settings ? settings.aboutText || '' : '' %></textarea>
+                  <label class="vvc-label">About Text</label>
+                  <textarea name="aboutText" class="vvc-textarea" rows="4" maxlength="2000" placeholder="Shown at the bottom of the public board"><%= settings ? settings.aboutText || '' : '' %></textarea>
                 </div>
                 <button type="submit" class="panel-btn-primary">Save Site Settings</button>
               </form>
@@ -961,6 +958,58 @@
       var form = document.getElementById('modRewriteForm-' + modId);
       if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
     }
+
+    // Rewrite prompt: default/custom logic
+    (function() {
+      var DEFAULT_PROMPT = 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
+      var field = document.getElementById('rewritePromptField');
+      var status = document.getElementById('rewritePromptStatus');
+      var resetLink = document.getElementById('rewritePromptReset');
+      if (!field || !status) return;
+
+      var isCustom = field.getAttribute('data-is-custom') === 'true';
+
+      function updateStatus(custom) {
+        if (custom) {
+          status.innerHTML = 'Using <strong>custom</strong> prompt. <a href="#" id="rewritePromptReset" style="color: var(--accent); text-decoration: underline; cursor: pointer;">Reset to default</a>';
+          var link = document.getElementById('rewritePromptReset');
+          if (link) link.addEventListener('click', function(e) { e.preventDefault(); resetToDefault(); });
+        } else {
+          status.innerHTML = 'Using <strong>default</strong> prompt. Edit above to customize.';
+        }
+      }
+
+      function resetToDefault() {
+        field.value = DEFAULT_PROMPT;
+        updateStatus(false);
+        isCustom = false;
+      }
+
+      field.addEventListener('input', function() {
+        var val = field.value.trim();
+        if (val === '' || val === DEFAULT_PROMPT) {
+          isCustom = false;
+          if (val === '') { field.value = DEFAULT_PROMPT; }
+          updateStatus(false);
+        } else {
+          isCustom = true;
+          updateStatus(true);
+        }
+      });
+
+      // On form submit: if value matches default, send empty so DB stores null
+      var form = field.closest('form');
+      if (form) {
+        form.addEventListener('submit', function() {
+          if (field.value.trim() === DEFAULT_PROMPT) {
+            field.value = '';
+          }
+        });
+      }
+
+      // Wire up initial reset link if present
+      if (resetLink) resetLink.addEventListener('click', function(e) { e.preventDefault(); resetToDefault(); });
+    })();
   </script>
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
 </body>

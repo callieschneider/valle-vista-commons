@@ -105,11 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add marker
     const thumbnailMarker = L.marker([lat, lng], { icon: PIN_ICON }).addTo(thumbnailMap);
     
-    // Make thumbnail clickable
-    el.style.cursor = 'pointer';
-    el.title = 'Click to expand map';
+    // Make thumbnail clickable via wrapper overlay
+    const wrap = el.closest('.post-mini-map-wrap');
+    if (wrap) {
+      wrap.title = 'Click to expand map';
+    }
     
-    el.addEventListener('click', () => {
+    (wrap || el).addEventListener('click', () => {
       // Show modal
       modal.classList.add('show');
       
@@ -133,7 +135,19 @@ document.addEventListener('DOMContentLoaded', () => {
         zoomControl: true,
         maxZoom: 19
       });
-      
+
+      // Double-click zoom — bypass CSS animation to avoid leaflet-rotate transform-origin bug
+      // See KNOWN_ISSUES.md: "leaflet-rotate double-click zoom shift"
+      modalMapContainer.addEventListener('dblclick', function(e) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        if (activeModalMap) {
+          const center = activeModalMap.getCenter();
+          const newZoom = Math.min(activeModalMap.getZoom() + 1, activeModalMap.getMaxZoom());
+          activeModalMap.setView(center, newZoom, { animate: false });
+        }
+      }, true);
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OSM',
         maxZoom: 19

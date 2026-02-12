@@ -4,7 +4,7 @@
  * Uses stale-while-revalidate for pages, cache-first for static assets.
  */
 
-const CACHE_NAME = 'vvc-v1';
+const CACHE_NAME = 'vvc-v9';
 const SHELL_ASSETS = [
   '/',
   '/css/style.css',

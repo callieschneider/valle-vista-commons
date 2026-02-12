@@ -111,7 +111,22 @@ export function initMapPicker(options) {
     doubleClickZoom: false,
     maxZoom: 19
   }).setView(center, DEFAULT_ZOOM);
-  
+
+  // Flag to suppress click events during double-click
+  let _dblClickGuard = false;
+
+  // Double-click zoom — bypass CSS animation to avoid leaflet-rotate transform-origin bug
+  // See KNOWN_ISSUES.md: "leaflet-rotate double-click zoom shift"
+  container.addEventListener('dblclick', function(e) {
+    _dblClickGuard = true;
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    const center = map.getCenter();
+    const newZoom = Math.min(map.getZoom() + 1, map.getMaxZoom());
+    map.setView(center, newZoom, { animate: false });
+    setTimeout(function(){ _dblClickGuard = false; }, 400);
+  }, true);
+
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 19
@@ -128,18 +143,23 @@ export function initMapPicker(options) {
     setupMarkerDrag(marker);
   }
 
-  // Click to drop/move pin
-  map.on('click', async (e) => {
-    const { lat, lng } = e.latlng;
-    
-    if (marker) {
-      marker.setLatLng([lat, lng]);
-    } else {
-      marker = L.marker([lat, lng], { draggable: true, icon: PIN_ICON }).addTo(map);
-      setupMarkerDrag(marker);
-    }
+  // Click to drop/move pin — delayed 300ms to distinguish from double-click
+  let _clickTimeout = null;
+  map.on('click', (e) => {
+    if (_clickTimeout) clearTimeout(_clickTimeout);
+    _clickTimeout = setTimeout(async () => {
+      if (_dblClickGuard) return;
+      const { lat, lng } = e.latlng;
+      
+      if (marker) {
+        marker.setLatLng([lat, lng]);
+      } else {
+        marker = L.marker([lat, lng], { draggable: true, icon: PIN_ICON }).addTo(map);
+        setupMarkerDrag(marker);
+      }
 
-    await updateCoordinates(lat, lng);
+      await updateCoordinates(lat, lng);
+    }, 300);
   });
 
   function setupMarkerDrag(m) {
