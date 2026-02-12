@@ -56,9 +56,10 @@
 Before making ANY code changes, you MUST:
 
 1. **Read** `PROJECT.md` (project overview, tech stack, status)
-2. **Read** `server.js` + the relevant `routes/*.js` and `lib/*.js` files
-3. **Read** `prisma/schema.prisma` (database schema)
-4. **Check** `CHANGELOG.md` for recent changes
+2. **Read** `TODO.md` (current work items — check for in-progress tasks)
+3. **Read** `server.js` + the relevant `routes/*.js` and `lib/*.js` files
+4. **Read** `prisma/schema.prisma` (database schema)
+5. **Check** `CHANGELOG.md` for recent changes
 
 Then respond with:
 
@@ -167,12 +168,42 @@ Ask the user before proceeding when:
 
 ---
 
+## Working Documents — How to Use Them
+
+Three documents track ongoing work. **Read all three at the start of every session.**
+
+| Document | What It Tracks | When to Update |
+|----------|---------------|----------------|
+| `TODO.md` | Actionable items for now/next session | Add items as discovered. Update status when starting/finishing work. Move completed items to DONE section. |
+| `PLANNING.md` | Planning protocol for larger features | Reference before creating any plan. Follow the structure defined there. |
+| `CHANGELOG.md` | Version history of shipped changes | Add an entry every time you complete work — no exceptions. |
+
+### TODO.md Workflow
+1. **Start of session:** Read `TODO.md`. Look for `IN PROGRESS` items first (pick up where last session left off), then `PENDING` items by priority (HIGH → MEDIUM → LOW).
+2. **Starting work:** Update the item's status to `IN PROGRESS`.
+3. **Finishing work:** Move the item to the DONE section with a `Completed` date.
+4. **Discovered work:** Add new items in the appropriate priority tier as you find them.
+5. **Update the `Last updated` date** at the top of the file whenever you modify it.
+
+### PLANNING.md Workflow
+- **Before creating any plan**, read `PLANNING.md` for the required structure and rules.
+- Plans are for multi-file features, schema changes, or anything the user explicitly asks to plan.
+- Skip planning for single-file fixes, copy changes, or simple styling.
+
+### CHANGELOG.md Workflow
+- **Every completed piece of work** gets a changelog entry — no exceptions.
+- Follow the [Keep a Changelog](https://keepachangelog.com/) format already in use.
+- Group entries by date. Use Added/Changed/Fixed/Removed/Schema sections as appropriate.
+
+---
+
 ## After Completing Work (REQUIRED)
 
-1. **Update `CHANGELOG.md`** with what changed
-2. **Update `PROJECT.md`** if features or schema changed
-3. **Test locally** — `npm run dev` and verify the change works
-4. **Verify the build** — the app must start without errors
+1. **Update `TODO.md`** — mark items done, add any new items discovered
+2. **Update `CHANGELOG.md`** with what changed
+3. **Update `PROJECT.md`** if features or schema changed
+4. **Test locally** — `npm run dev` and verify the change works
+5. **Verify the build** — the app must start without errors
 
 ---
 
@@ -186,7 +217,7 @@ Ask the user before proceeding when:
 - Hardcode secrets
 - Create new PrismaClient instances (use `lib/db.js`)
 - Add dependencies without asking
-- Skip `CHANGELOG.md` updates
+- Skip `TODO.md` or `CHANGELOG.md` updates
 - Run `prisma db push --force-reset`
 - Claim something works without testing
 - Modify AI prompts without user review
@@ -199,7 +230,8 @@ Ask the user before proceeding when:
 |----------|---------|--------------|
 | `PROJECT.md` | Project overview, tech stack, status | **Always read first** |
 | `AGENTS.md` | Agent guidelines (this file) | Before any code changes |
-| `CHANGELOG.md` | Version history | Check recent changes |
+| `TODO.md` | Actionable items for current/next session | **Every session** — check for in-progress and pending work |
+| `CHANGELOG.md` | Version history | Check recent changes; update after every completed task |
 | `PLANNING.md` | Planning protocol for larger features | Before creating any plan |
 | `README.md` | Setup & deploy instructions | Reference |
 

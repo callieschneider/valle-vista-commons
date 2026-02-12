@@ -89,6 +89,7 @@
         <% if (error === 'not_found') { %>Post not found.
         <% } else if (error === 'no_rewrite') { %>No AI rewrite available for this post.
         <% } else if (error === 'rewrite_failed') { %>AI rewrite failed. Check API key and try again.
+        <% } else if (error === 'no_undo') { %>No undo history for this post.
         <% } else if (error === 'notes_empty') { %>Title and description are required for Board Notes.
         <% } else { %><%= error %><% } %>
         <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
@@ -184,15 +185,30 @@
               </form>
 
               <!-- Reject -->
-              <form method="POST" action="/admin/reject/<%= post.id %>" onsubmit="return confirm('Reject and delete this tip?')">
+              <form method="POST" action="/admin/reject/<%= post.id %>" onsubmit="return confirm('Reject this tip? It will move to archive.')">
                 <button type="submit" class="btn btn-danger btn-xs">✗ Reject</button>
               </form>
 
-              <!-- Apply AI Rewrite -->
+              <!-- Apply AI Rewrite (from analysis) -->
               <% if (post.aiAnalysis?.rewrite) { %>
-                <form method="POST" action="/admin/rewrite/<%= post.id %>">
+                <form method="POST" action="/admin/rewrite/<%= post.id %>" style="display:inline;">
                   <input type="hidden" name="action" value="apply">
                   <button type="submit" class="btn btn-outline-primary btn-xs">Apply AI Rewrite</button>
+                </form>
+              <% } %>
+
+              <!-- Quick AI Rewrite (always available) -->
+              <% if (hasApiKey) { %>
+                <form method="POST" action="/admin/rewrite/<%= post.id %>" style="display:inline;">
+                  <input type="hidden" name="action" value="quick">
+                  <button type="submit" class="btn btn-outline-info btn-xs">🤖 Rewrite</button>
+                </form>
+              <% } %>
+
+              <!-- Undo -->
+              <% if (post.descHistory && post.descHistory.length > 0) { %>
+                <form method="POST" action="/admin/undo/<%= post.id %>" style="display:inline;">
+                  <button type="submit" class="btn btn-outline-warning btn-xs">↩ Undo (<%= post.descHistory.length %>)</button>
                 </form>
               <% } %>
 
@@ -314,9 +330,22 @@
                 <button type="submit" class="btn btn-outline-secondary btn-xs">⏰ Expire</button>
               </form>
 
-              <form method="POST" action="/admin/delete/<%= post.id %>" style="display:inline;" onsubmit="return confirm('Delete this post permanently?')">
+              <form method="POST" action="/admin/delete/<%= post.id %>" style="display:inline;" onsubmit="return confirm('Remove this post? It will move to archive.')">
                 <button type="submit" class="btn btn-outline-danger btn-xs">🗑 Delete</button>
               </form>
+
+              <% if (hasApiKey) { %>
+                <form method="POST" action="/admin/rewrite/<%= post.id %>" style="display:inline;">
+                  <input type="hidden" name="action" value="quick">
+                  <button type="submit" class="btn btn-outline-info btn-xs">🤖 Rewrite</button>
+                </form>
+              <% } %>
+
+              <% if (post.descHistory && post.descHistory.length > 0) { %>
+                <form method="POST" action="/admin/undo/<%= post.id %>" style="display:inline;">
+                  <button type="submit" class="btn btn-outline-warning btn-xs">↩ Undo (<%= post.descHistory.length %>)</button>
+                </form>
+              <% } %>
 
               <span class="collapse-toggle" data-bs-toggle="collapse" data-bs-target="#liveEdit-<%= idx %>">Edit ✏️</span>
               <span class="collapse-toggle" data-bs-toggle="collapse" data-bs-target="#modNote-<%= idx %>">Mod Note 📝</span>
@@ -376,39 +405,44 @@
       <% } %>
     </div>
 
-    <!-- ═══ ARCHIVE (REJECTED) ═══ -->
+    <!-- ═══ ARCHIVE ═══ -->
     <div class="mb-4">
-      <h2 class="section-title">Archive <span class="counter"><%= rejected.length %></span></h2>
-      <% if (rejected.length === 0) { %>
-        <p class="text-muted" style="font-size: 0.82rem;">No rejected posts.</p>
-      <% } else { %>
-        <p class="text-muted" style="font-size: 0.78rem; margin-bottom: 8px;">Rejected posts are kept here for review. Restore to move back to pending queue.</p>
-        <% rejected.forEach((post, idx) => { %>
-          <div class="post-row">
-            <div class="d-flex justify-content-between align-items-start">
-              <div style="flex: 1;">
-                <span class="post-title"><%= post.title %></span>
-                <span class="section-badge section-<%= post.section %>"><%= post.section.replace('_', ' ') %></span>
+      <h2 class="section-title" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#archiveSection">
+        Archive <span class="counter"><%= archived.length %></span> <small style="font-size: 0.7rem; font-weight: 400; color: #888;">▸ click to expand</small>
+      </h2>
+      <div class="collapse" id="archiveSection">
+        <% if (archived.length === 0) { %>
+          <p class="text-muted" style="font-size: 0.82rem;">Archive is empty.</p>
+        <% } else { %>
+          <p class="text-muted" style="font-size: 0.78rem; margin-bottom: 8px;">All rejected, deleted, and expired posts live here. Restore moves back to pending.</p>
+          <% archived.forEach((post, idx) => { %>
+            <div class="post-row">
+              <div class="d-flex justify-content-between align-items-start">
+                <div style="flex: 1;">
+                  <span class="post-title"><%= post.title %></span>
+                  <span class="section-badge section-<%= post.section %>"><%= post.section.replace('_', ' ') %></span>
+                  <span class="badge bg-<%= post.status === 'REJECTED' ? 'danger' : post.status === 'DELETED' ? 'dark' : 'secondary' %>" style="font-size: 0.6rem;"><%= post.status %></span>
+                </div>
+                <div class="d-flex gap-1">
+                  <form method="POST" action="/admin/restore/<%= post.id %>" style="display:inline;">
+                    <button class="btn btn-outline-success btn-xs" title="Restore to pending">↩ Restore</button>
+                  </form>
+                  <form method="POST" action="/admin/purge/<%= post.id %>" style="display:inline;"
+                        onsubmit="return confirm('Permanently delete this post? This cannot be undone.')">
+                    <button class="btn btn-outline-danger btn-xs" title="Permanently delete">🗑 Purge</button>
+                  </form>
+                </div>
               </div>
-              <div class="d-flex gap-1">
-                <form method="POST" action="/admin/restore/<%= post.id %>" style="display:inline;">
-                  <button class="btn btn-outline-success btn-xs" title="Restore to pending">↩ Restore</button>
-                </form>
-                <form method="POST" action="/admin/purge/<%= post.id %>" style="display:inline;"
-                      onsubmit="return confirm('Permanently delete this post? This cannot be undone.')">
-                  <button class="btn btn-outline-danger btn-xs" title="Permanently delete">🗑 Delete</button>
-                </form>
+              <div class="post-desc rich-content" style="font-size: 0.8rem; color: #777; margin-top: 4px;"><%- post.desc %></div>
+              <div class="post-meta">
+                <% if (post.location) { %>📍 <%= post.location %> &middot; <% } %>
+                Submitted <%= new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) %>
+                <% if (post.modNote) { %>&middot; <em>Note: <%= post.modNote %></em><% } %>
               </div>
             </div>
-            <div class="post-desc rich-content" style="font-size: 0.8rem; color: #777; margin-top: 4px;"><%- post.desc %></div>
-            <div class="post-meta">
-              <% if (post.location) { %>📍 <%= post.location %> &middot; <% } %>
-              Submitted <%= new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) %>
-              <% if (post.modNote) { %>&middot; <em>Note: <%= post.modNote %></em><% } %>
-            </div>
-          </div>
-        <% }) %>
-      <% } %>
+          <% }) %>
+        <% } %>
+      </div>
     </div>
 
     <!-- ═══ BOARD NOTES COMPOSER ═══ -->

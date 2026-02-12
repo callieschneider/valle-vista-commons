@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valle Vista Commons — Design Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       VALLE VISTA COMMONS — Design System v2
+       "Warm Modern Community"
+       ═══════════════════════════════════════════════════════ */
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      /* Primary palette — forest-to-sage green */
+      --vvc-900: #1b4332;
+      --vvc-800: #2d6a4f;
+      --vvc-700: #40916c;
+      --vvc-600: #52b788;
+      --vvc-500: #74c69d;
+      --vvc-400: #95d5b2;
+      --vvc-300: #b7e4c7;
+      --vvc-200: #d8f3dc;
+      --vvc-100: #edf6f0;
+
+      /* Neutrals — warm gray */
+      --gray-950: #111318;
+      --gray-900: #1a1d23;
+      --gray-800: #2e3039;
+      --gray-700: #44464f;
+      --gray-600: #5c5e66;
+      --gray-500: #797b82;
+      --gray-400: #9d9fa5;
+      --gray-300: #c4c5c9;
+      --gray-200: #e2e3e5;
+      --gray-100: #f1f2f3;
+      --gray-50:  #f8f9fa;
+
+      /* Section accents */
+      --accent-alert: #e63946;
+      --accent-alert-bg: #fef2f2;
+      --accent-happenings: #7c3aed;
+      --accent-happenings-bg: #f5f3ff;
+      --accent-lostfound: #2563eb;
+      --accent-lostfound-bg: #eff6ff;
+      --accent-neighbors: #059669;
+      --accent-neighbors-bg: #ecfdf5;
+      --accent-notes: #64748b;
+      --accent-notes-bg: #f8fafc;
+
+      /* Surface & background */
+      --bg-page: #f6f8f6;
+      --bg-card: #ffffff;
+      --bg-elevated: #ffffff;
+
+      /* Shadows */
+      --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+
+      /* Radii */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-full: 9999px;
+
+      /* Timing */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg-page);
+      color: var(--gray-800);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ─── Page Container ─────────────────────────────── */
+    .page-container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 6rem;
+    }
+
+    /* ─── Header ─────────────────────────────────────── */
+    .site-header {
+      text-align: center;
+      padding: 2.5rem 0 2rem;
+      position: relative;
+    }
+
+    .site-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 48px;
+      height: 3px;
+      background: var(--vvc-600);
+      border-radius: 2px;
+    }
+
+    .site-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0.5rem;
+    }
+
+    .site-logo-mark {
+      width: 40px;
+      height: 40px;
+      background: var(--vvc-800);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: white;
+      font-size: 1rem;
+      letter-spacing: -1px;
+    }
+
+    .site-title {
+      font-size: 1.75rem;
+      font-weight: 900;
+      color: var(--vvc-900);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .site-tagline {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+      font-weight: 500;
+      margin-top: 0.375rem;
+      letter-spacing: 0.01em;
+    }
+
+    /* ─── Search ─────────────────────────────────────── */
+    .search-container {
+      position: relative;
+      margin: 1.75rem 0;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-400);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-full);
+      font-size: 0.875rem;
+      font-family: inherit;
+      background: var(--bg-card);
+      color: var(--gray-800);
+      transition: all 0.2s var(--ease-out);
+      outline: none;
+    }
+
+    .search-input::placeholder {
+      color: var(--gray-400);
+    }
+
+    .search-input:focus {
+      border-color: var(--vvc-600);
+      box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.15);
+    }
+
+    /* ─── Section Blocks ─────────────────────────────── */
+    .section-block {
+      margin-bottom: 2.25rem;
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0.75rem;
+      padding: 0 4px;
+    }
+
+    .section-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .section-name {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray-600);
+    }
+
+    .section-count {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--gray-400);
+      background: var(--gray-100);
+      padding: 1px 7px;
+      border-radius: var(--radius-full);
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--gray-200);
+    }
+
+    /* Section dot colors */
+    .section-ALERT .section-dot { background: var(--accent-alert); }
+    .section-HAPPENINGS .section-dot { background: var(--accent-happenings); }
+    .section-LOST_FOUND .section-dot { background: var(--accent-lostfound); }
+    .section-NEIGHBORS .section-dot { background: var(--accent-neighbors); }
+    .section-BOARD_NOTES .section-dot { background: var(--accent-notes); }
+
+    /* ─── Post Cards ─────────────────────────────────── */
+    .posts-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .post-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.25s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.4s var(--ease-out) backwards;
+    }
+
+    .post-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 100%;
+      border-radius: 0 2px 2px 0;
+      opacity: 0;
+      transition: opacity 0.25s var(--ease-out);
+    }
+
+    .post-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    .post-card:hover::before {
+      opacity: 1;
+    }
+
+    /* Accent bar per section */
+    .section-ALERT .post-card::before { background: var(--accent-alert); }
+    .section-HAPPENINGS .post-card::before { background: var(--accent-happenings); }
+    .section-LOST_FOUND .post-card::before { background: var(--accent-lostfound); }
+    .section-NEIGHBORS .post-card::before { background: var(--accent-neighbors); }
+    .section-BOARD_NOTES .post-card::before { background: var(--accent-notes); }
+
+    /* Urgent card */
+    .post-card.urgent {
+      border-left: 3px solid var(--accent-alert);
+    }
+    .post-card.urgent::before { display: none; }
+
+    .post-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 0.375rem;
+    }
+
+    .post-title {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      line-height: 1.35;
+      letter-spacing: -0.01em;
+    }
+
+    .post-badges {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .badge-urgent {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--accent-alert);
+      color: white;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+    }
+
+    .badge-pinned {
+      font-size: 0.75rem;
+      opacity: 0.6;
+    }
+
+    .post-body {
+      font-size: 0.8375rem;
+      color: var(--gray-700);
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+    }
+
+    .post-body p { margin-bottom: 0.35rem; }
+    .post-body p:last-child { margin-bottom: 0; }
+    .post-body img { max-width: 100%; border-radius: var(--radius-sm); margin: 6px 0; }
+    .post-body a { color: var(--vvc-700); text-decoration: underline; text-underline-offset: 2px; }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--gray-400);
+      font-weight: 500;
+    }
+
+    .post-meta .sep {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--gray-300);
+    }
+
+    /* ─── Empty State ────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.4;
+    }
+
+    .empty-state-text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray-600);
+      margin-bottom: 0.25rem;
+    }
+
+    .empty-state-sub {
+      font-size: 0.8125rem;
+      color: var(--gray-400);
+    }
+
+    /* ─── About Section ──────────────────────────────── */
+    .about-section {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      margin-top: 2rem;
+      border: 1px solid var(--gray-100);
+    }
+
+    .about-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--vvc-800);
+      margin-bottom: 0.5rem;
+    }
+
+    .about-text {
+      font-size: 0.8375rem;
+      color: var(--gray-600);
+      line-height: 1.7;
+    }
+
+    /* ─── Footer ─────────────────────────────────────── */
+    .site-footer {
+      text-align: center;
+      padding: 2rem 0 1rem;
+    }
+
+    .footer-text {
+      font-size: 0.75rem;
+      color: var(--gray-400);
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+
+    .footer-text .dot {
+      display: inline-block;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--gray-300);
+      vertical-align: middle;
+      margin: 0 8px;
+    }
+
+    /* ─── FAB (Submit Button) ────────────────────────── */
+    .fab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, var(--vvc-800), var(--vvc-700));
+      color: white;
+      border: none;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(45, 106, 79, 0.35), 0 2px 4px rgba(0,0,0,0.1);
+      transition: all 0.3s var(--ease-spring);
+      text-decoration: none;
+      z-index: 100;
+    }
+
+    .fab:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 24px rgba(45, 106, 79, 0.45), 0 4px 8px rgba(0,0,0,0.12);
+      background: linear-gradient(135deg, var(--vvc-700), var(--vvc-600));
+      color: white;
+    }
+
+    .fab:active {
+      transform: scale(0.96);
+    }
+
+    .fab svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      fill: none;
+    }
+
+    /* ─── Animations ─────────────────────────────────── */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-block:nth-child(1) .post-card:nth-child(1) { animation-delay: 0.05s; }
+    .section-block:nth-child(1) .post-card:nth-child(2) { animation-delay: 0.1s; }
+    .section-block:nth-child(1) .post-card:nth-child(3) { animation-delay: 0.15s; }
+    .section-block:nth-child(2) .post-card:nth-child(1) { animation-delay: 0.15s; }
+    .section-block:nth-child(2) .post-card:nth-child(2) { animation-delay: 0.2s; }
+    .section-block:nth-child(3) .post-card:nth-child(1) { animation-delay: 0.2s; }
+    .section-block:nth-child(3) .post-card:nth-child(2) { animation-delay: 0.25s; }
+    .section-block:nth-child(4) .post-card:nth-child(1) { animation-delay: 0.25s; }
+    .section-block:nth-child(5) .post-card:nth-child(1) { animation-delay: 0.3s; }
+
+    .site-header { animation: fadeInUp 0.5s var(--ease-out); }
+    .search-container { animation: fadeInUp 0.5s var(--ease-out) 0.05s backwards; }
+    .section-block { animation: fadeInUp 0.4s var(--ease-out) backwards; }
+    .section-block:nth-child(1) { animation-delay: 0.08s; }
+    .section-block:nth-child(2) { animation-delay: 0.14s; }
+    .section-block:nth-child(3) { animation-delay: 0.2s; }
+    .section-block:nth-child(4) { animation-delay: 0.26s; }
+    .section-block:nth-child(5) { animation-delay: 0.32s; }
+
+    /* ─── Responsive ─────────────────────────────────── */
+    @media (max-width: 480px) {
+      .page-container {
+        padding: 1.25rem 1rem 5rem;
+      }
+      .site-title {
+        font-size: 1.5rem;
+      }
+      .post-card {
+        padding: 0.875rem 1rem;
+      }
+      .fab {
+        bottom: 20px;
+        right: 20px;
+        width: 52px;
+        height: 52px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+
+    <!-- ═══ Header ═══ -->
+    <header class="site-header">
+      <div class="site-logo">
+        <div class="site-logo-mark">VV</div>
+        <h1 class="site-title">Valle Vista Commons</h1>
+      </div>
+      <p class="site-tagline">Your neighborhood board — anonymous, moderated, private</p>
+    </header>
+
+    <!-- ═══ Search ═══ -->
+    <div class="search-container">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" class="search-input" placeholder="Search the board...">
+    </div>
+
+    <!-- ═══ Alerts Section ═══ -->
+    <div class="section-block section-ALERT">
+      <div class="section-label">
+        <span class="section-dot"></span>
+        <span class="section-name">Alerts</span>
+        <span class="section-count">2</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="posts-stack">
+        <div class="post-card urgent">
+          <div class="post-header">
+            <div>
+              <span class="post-title">Package thefts on Oak Street</span>
+            </div>
+            <div class="post-badges">
+              <span class="badge-urgent">Urgent</span>
+            </div>
+          </div>
+          <div class="post-body">
+            <p>Multiple residents on Oak St between 3rd and 5th have reported packages stolen from porches this week. Appears to happen between 2-4 PM. Please bring packages inside quickly or consider a lockbox.</p>
+          </div>
+          <div class="post-meta">
+            <span>📍 Oak St &amp; 5th Ave</span>
+            <span class="sep"></span>
+            <span>2h ago</span>
+          </div>
+        </div>
+        <div class="post-card">
+          <div class="post-header">
+            <span class="post-title">Coyote spotted near the wash</span>
+          </div>
+          <div class="post-body">
+            <p>Saw a coyote near the wash trail around dusk yesterday. Keep small pets inside during evenings. Animal control has been notified.</p>
+          </div>
+          <div class="post-meta">
+            <span>📍 Wash Trail</span>
+            <span class="sep"></span>
+            <span>1d ago</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Happenings Section ═══ -->
+    <div class="section-block section-HAPPENINGS">
+      <div class="section-label">
+        <span class="section-dot"></span>
+        <span class="section-name">Happenings</span>
+        <span class="section-count">2</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="posts-stack">
+        <div class="post-card">
+          <div class="post-header">
+            <div>
+              <span class="badge-pinned" title="Pinned">📌</span>
+              <span class="post-title">Spring neighborhood cleanup — March 1st</span>
+            </div>
+          </div>
+          <div class="post-body">
+            <p>Join us for our annual spring cleanup! Meet at the community park pavilion at 9 AM. Gloves and bags provided. Bring your own water. Kids welcome — we'll have face painting.</p>
+          </div>
+          <div class="post-meta">
+            <span>📍 Community Park</span>
+            <span class="sep"></span>
+            <span>3d ago</span>
+            <span class="sep"></span>
+            <span><em>edited</em></span>
+          </div>
+        </div>
+        <div class="post-card">
+          <div class="post-header">
+            <span class="post-title">Farmer's market is back Saturdays</span>
+          </div>
+          <div class="post-body">
+            <p>The Saturday farmer's market resumes this week at the plaza. 8 AM – noon. Local produce, honey, baked goods, and a new tamale vendor everyone's talking about.</p>
+          </div>
+          <div class="post-meta">
+            <span>📍 Valle Vista Plaza</span>
+            <span class="sep"></span>
+            <span>5d ago</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Lost & Found Section ═══ -->
+    <div class="section-block section-LOST_FOUND">
+      <div class="section-label">
+        <span class="section-dot"></span>
+        <span class="section-name">Lost &amp; Found</span>
+        <span class="section-count">1</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="posts-stack">
+        <div class="post-card">
+          <div class="post-header">
+            <span class="post-title">Found: small gray tabby cat, no collar</span>
+          </div>
+          <div class="post-body">
+            <p>Found a friendly gray tabby near the corner of Mesquite and 2nd. Very affectionate, seems well-fed. Currently keeping it safe on our patio. If this is your cat, leave a note at 204 Mesquite.</p>
+          </div>
+          <div class="post-meta">
+            <span>📍 Mesquite &amp; 2nd</span>
+            <span class="sep"></span>
+            <span>6h ago</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Neighbors Section ═══ -->
+    <div class="section-block section-NEIGHBORS">
+      <div class="section-label">
+        <span class="section-dot"></span>
+        <span class="section-name">Neighbors</span>
+        <span class="section-count">2</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="posts-stack">
+        <div class="post-card">
+          <div class="post-header">
+            <span class="post-title">Free moving boxes — come grab them!</span>
+          </div>
+          <div class="post-body">
+            <p>Just finished unpacking. About 20 good-quality boxes, various sizes, on the curb. First come first serve. Will recycle what's left by Sunday.</p>
+          </div>
+          <div class="post-meta">
+            <span>📍 Near Elm &amp; 7th</span>
+            <span class="sep"></span>
+            <span>4h ago</span>
+          </div>
+        </div>
+        <div class="post-card">
+          <div class="post-header">
+            <span class="post-title">Anyone know a good plumber?</span>
+          </div>
+          <div class="post-body">
+            <p>Kitchen sink has been draining slowly and the usual tricks aren't working. Looking for a reliable, fairly-priced plumber. Recommendations welcome!</p>
+          </div>
+          <div class="post-meta">
+            <span>12h ago</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Board Notes Section ═══ -->
+    <div class="section-block section-BOARD_NOTES">
+      <div class="section-label">
+        <span class="section-dot"></span>
+        <span class="section-name">Board Notes</span>
+        <span class="section-count">1</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="posts-stack">
+        <div class="post-card">
+          <div class="post-header">
+            <span class="post-title">Welcome to Valle Vista Commons</span>
+          </div>
+          <div class="post-body">
+            <p>This board is moderated by your neighbors. All posts are reviewed before appearing. No accounts needed — your privacy is our priority. Use the + button to share something with the community.</p>
+          </div>
+          <div class="post-meta">
+            <span>1w ago</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ About ═══ -->
+    <div class="about-section">
+      <h3 class="about-title">About This Board</h3>
+      <p class="about-text">
+        Valle Vista Commons is a privacy-first community board for our neighborhood. No accounts, no tracking, no personal information collected. All submissions are reviewed by volunteer moderators before appearing on the board.
+      </p>
+    </div>
+
+    <!-- ═══ Footer ═══ -->
+    <footer class="site-footer">
+      <p class="footer-text">
+        No accounts, no tracking
+        <span class="dot"></span>
+        All posts reviewed by mods
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- ═══ Floating Submit Button ═══ -->
+  <a href="#" class="fab" title="Submit a tip" aria-label="Submit a tip">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  </a>
+
+</body>
+</html>

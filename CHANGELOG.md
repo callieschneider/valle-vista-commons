@@ -6,6 +6,54 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-02-12 - AI Rewrite, Undo History, Universal Archive
+
+### Added
+- **Quick AI Rewrite button** on every pending and live post (always visible when API key is configured, no prior analysis needed)
+- **Undo system** with 10-level history — every edit and rewrite saves the previous version; undo button shows remaining count
+- **DELETED status** — posts are never hard-deleted; delete button soft-deletes to archive
+- **Universal archive** — houses all rejected, deleted, and expired posts with status badges (REJECTED, DELETED, EXPIRED)
+- Archive is **collapsed by default** with click-to-expand header
+- `descHistory` JSON field on Post model for undo stack
+
+### Changed
+- Delete action now soft-deletes (sets status to DELETED) instead of permanently removing posts
+- Archive section renamed from "Archive (Rejected)" to "Archive" and includes all non-live/non-pending posts
+- Rewrite route now supports `action=quick` (no custom instructions, just clean up)
+- Purge button renamed from "Delete" to "Purge" for clarity in archive
+- Reject confirmation text updated to reflect archive behavior
+
+### Fixed
+- `.env` duplicate `OPENROUTER_API_KEY` causing "no API key configured" warning
+
+### Database Migrations
+- `20260212031445_undo_history_and_deleted_status`: Added `descHistory` JSON field, `DELETED` enum value to Status
+
+---
+
+## 2026-02-11 - Rejected Post Archive, Resizable Images, UX Fixes
+
+### Added
+- **REJECTED status** — rejected posts move to archive instead of being deleted
+- **Archive section** in admin dashboard with restore (back to pending) and permanent delete
+- **Resizable images** in Tiptap editor via `tiptap-extension-resize-image` — drag corners to resize
+- **Inline images** — resized photos can sit side by side
+- **Discard button** on all admin edit forms
+- **Super admin file sync endpoint** (`POST /super/sync-upload`) for migrating uploads to Railway volume
+
+### Fixed
+- Board search CSP violation — moved inline script to external `public/js/board-search.js`
+
+### Changed
+- Reject action: `delete` → `update { status: REJECTED }`
+- Images set to `display: inline-block` for side-by-side layout
+- `reject` confirmation text updated (no longer says "delete")
+
+### Schema
+- Added `REJECTED` to `Status` enum (migration: `add_rejected_status`)
+
+---
+
 ## 2026-02-11 - Rich Text Editor & Media Uploads
 
 ### Added

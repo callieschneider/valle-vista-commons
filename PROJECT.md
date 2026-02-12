@@ -6,7 +6,7 @@ No accounts. No tracking. No personal information collected. Ever.
 
 ---
 
-## Status: v1.1.0 — Rich Text & Media
+## Status: v1.2.0 — AI Rewrite, Undo, Universal Archive
 
 | Feature | Status |
 |---------|--------|
@@ -16,7 +16,11 @@ No accounts. No tracking. No personal information collected. Ever.
 | Two-tier auth: Super admin (env vars) + Mods (DB) | ✅ |
 | Admin dashboard with review queue, AI analysis, edit, pin, urgent, expire | ✅ |
 | AI-powered tip analysis via OpenRouter (background, non-blocking) | ✅ |
-| AI-powered tip rewrite (apply auto or custom instructions) | ✅ |
+| AI-powered tip rewrite (apply auto, quick rewrite, or custom instructions) | ✅ |
+| Quick AI Rewrite button on all posts (pending + live) | ✅ |
+| 10-level undo history for edits and rewrites | ✅ |
+| Universal archive (rejected, deleted, expired — collapsed by default) | ✅ |
+| Soft-delete (no permanent deletion except explicit purge) | ✅ |
 | Board Notes composer (mod-authored, skip review) | ✅ |
 | Super admin panel (mod CRUD, LLM config, site settings) | ✅ |
 | Configurable LLM models (analysis + rewrite) | ✅ |
@@ -101,14 +105,17 @@ prisma/
 | POST | `/submit` | Public + hCaptcha | Create pending tip |
 | GET | `/admin` | Mod (Basic Auth) | Mod dashboard |
 | POST | `/admin/approve/:id` | Mod | Approve pending tip |
-| POST | `/admin/reject/:id` | Mod | Reject (delete) tip |
-| POST | `/admin/edit/:id` | Mod | Edit tip content |
-| POST | `/admin/rewrite/:id` | Mod | AI rewrite (apply or custom) |
+| POST | `/admin/reject/:id` | Mod | Reject tip (moves to archive) |
+| POST | `/admin/edit/:id` | Mod | Edit tip content (saves undo history) |
+| POST | `/admin/rewrite/:id` | Mod | AI rewrite (apply/quick/custom, saves undo) |
 | POST | `/admin/reanalyze/:id` | Mod | Retry AI analysis |
+| POST | `/admin/undo/:id` | Mod | Undo last edit/rewrite (pops from history) |
 | POST | `/admin/pin/:id` | Mod | Toggle pin |
 | POST | `/admin/urgent/:id` | Mod | Toggle urgent |
-| POST | `/admin/expire/:id` | Mod | Expire post |
-| POST | `/admin/delete/:id` | Mod | Delete post |
+| POST | `/admin/expire/:id` | Mod | Expire post (moves to archive) |
+| POST | `/admin/delete/:id` | Mod | Soft-delete post (moves to archive) |
+| POST | `/admin/restore/:id` | Mod | Restore archived post to pending |
+| POST | `/admin/purge/:id` | Mod | Permanently delete from archive |
 | POST | `/admin/notes` | Mod | Publish board note |
 | POST | `/admin/modnote/:id` | Mod | Save internal mod note |
 | GET | `/super` | Super Admin | Super admin panel |
@@ -132,7 +139,7 @@ prisma/
 | desc | Text | Required. Stores sanitized HTML from Tiptap editor |
 | location | VarChar(100)? | Optional, intentionally vague |
 | section | Enum: ALERT, HAPPENINGS, LOST_FOUND, NEIGHBORS, BOARD_NOTES | Board section |
-| status | Enum: PENDING, LIVE, EXPIRED | Moderation state |
+| status | Enum: PENDING, LIVE, EXPIRED, REJECTED, DELETED | Moderation state |
 | pinned | Boolean | Pinned to top of section |
 | urgent | Boolean | Highlighted as urgent |
 | modNote | Text? | Internal mod note (not public) |
@@ -143,6 +150,7 @@ prisma/
 | createdAt | DateTime | Auto-set |
 | approvedAt | DateTime? | Set when approved |
 | aiAnalysis | Json? | AI analysis result |
+| descHistory | Json? | Array of {title, desc, timestamp} — last 10 versions for undo |
 
 ### Mod
 | Column | Type | Notes |

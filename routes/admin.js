@@ -16,6 +16,14 @@ function sanitize(str) {
   return xssFilters.inHTMLData(str.trim());
 }
 
+const MAX_UNDO = 10;
+function pushHistory(post) {
+  const history = Array.isArray(post.descHistory) ? [...post.descHistory] : [];
+  history.push({ title: post.title, desc: post.desc, timestamp: new Date().toISOString() });
+  if (history.length > MAX_UNDO) history.shift();
+  return history;
+}
+
 function computeExpiry(section, eventDate) {
   const now = new Date();
   switch (section) {
@@ -42,8 +50,8 @@ router.get('/', async (req, res) => {
       orderBy: [{ pinned: 'desc' }, { approvedAt: 'desc' }],
     });
 
-    const rejected = await prisma.post.findMany({
-      where: { status: 'REJECTED' },
+    const archived = await prisma.post.findMany({
+      where: { status: { in: ['REJECTED', 'EXPIRED', 'DELETED'] } },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -53,7 +61,7 @@ router.get('/', async (req, res) => {
     res.render('admin', {
       pending,
       live,
-      rejected,
+      archived,
       settings,
       hasApiKey,
       error: req.query.error || null,
@@ -61,7 +69,7 @@ router.get('/', async (req, res) => {
     });
   } catch (err) {
     console.error('Admin error:', err.message);
-    res.render('admin', { pending: [], live: [], settings: null, hasApiKey: false, error: 'Failed to load dashboard', msg: null });
+    res.render('admin', { pending: [], live: [], archived: [], settings: null, hasApiKey: false, error: 'Failed to load dashboard', msg: null });
   }
 });
 
@@ -104,6 +112,9 @@ router.post('/reject/:id', async (req, res) => {
 
 router.post('/edit/:id', async (req, res) => {
   try {
+    const post = await prisma.post.findUnique({ where: { id: req.params.id } });
+    if (!post) return res.redirect('/admin?error=not_found');
+
     const title = sanitize(req.body.title || '').substring(0, 100);
     const desc = sanitizeRichText(req.body.desc || '');
     const location = sanitize(req.body.location || '').substring(0, 100) || null;
@@ -111,7 +122,7 @@ router.post('/edit/:id', async (req, res) => {
 
     await prisma.post.update({
       where: { id: req.params.id },
-      data: { title, desc, location, section, editedAt: new Date() },
+      data: { title, desc, location, section, editedAt: new Date(), descHistory: pushHistory(post) },
     });
   } catch (err) {
     console.error('Edit error:', err.message);
@@ -127,6 +138,7 @@ router.post('/rewrite/:id', async (req, res) => {
     if (!post) return res.redirect('/admin?error=not_found');
 
     const action = req.body.action;
+    const history = pushHistory(post);
 
     if (action === 'apply') {
       // Apply the AI analysis rewrite
@@ -137,8 +149,23 @@ router.post('/rewrite/:id', async (req, res) => {
         where: { id: post.id },
         data: {
           title: rewrite.title.substring(0, 100),
-          desc: rewrite.desc.substring(0, 500),
+          desc: rewrite.desc,
           editedAt: new Date(),
+          descHistory: history,
+        },
+      });
+    } else if (action === 'quick') {
+      // Quick rewrite — no custom instructions, just clean it up
+      const result = await rewriteTip(post, '');
+      if (!result) return res.redirect('/admin?error=rewrite_failed');
+
+      await prisma.post.update({
+        where: { id: post.id },
+        data: {
+          title: result.title.substring(0, 100),
+          desc: result.desc,
+          editedAt: new Date(),
+          descHistory: history,
         },
       });
     } else if (action === 'custom') {
@@ -151,8 +178,9 @@ router.post('/rewrite/:id', async (req, res) => {
         where: { id: post.id },
         data: {
           title: result.title.substring(0, 100),
-          desc: result.desc.substring(0, 500),
+          desc: result.desc,
           editedAt: new Date(),
+          descHistory: history,
         },
       });
     }
@@ -218,7 +246,7 @@ router.post('/expire/:id', async (req, res) => {
 
 router.post('/delete/:id', async (req, res) => {
   try {
-    await prisma.post.delete({ where: { id: req.params.id } });
+    await prisma.post.update({ where: { id: req.params.id }, data: { status: 'DELETED' } });
   } catch (err) {
     console.error('Delete error:', err.message);
   }
@@ -263,7 +291,33 @@ router.post('/modnote/:id', async (req, res) => {
   res.redirect('/admin');
 });
 
-// ─── Archive (Rejected Posts) ───────────────────────────
+// ─── Undo ───────────────────────────────────────────────
+
+router.post('/undo/:id', async (req, res) => {
+  try {
+    const post = await prisma.post.findUnique({ where: { id: req.params.id } });
+    if (!post) return res.redirect('/admin?error=not_found');
+
+    const history = Array.isArray(post.descHistory) ? [...post.descHistory] : [];
+    if (history.length === 0) return res.redirect('/admin?error=no_undo');
+
+    const prev = history.pop();
+    await prisma.post.update({
+      where: { id: post.id },
+      data: {
+        title: prev.title,
+        desc: prev.desc,
+        editedAt: new Date(),
+        descHistory: history,
+      },
+    });
+  } catch (err) {
+    console.error('Undo error:', err.message);
+  }
+  res.redirect('/admin');
+});
+
+// ─── Archive ────────────────────────────────────────────
 
 // Restore rejected post back to pending queue
 router.post('/restore/:id', async (req, res) => {

@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-scheme="forest">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valle Vista Commons — Theme Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ═══════════════════════════════════════════════════════════
+       COLOR SCHEMES — Each defines primary + surface palette
+       ═══════════════════════════════════════════════════════════ */
+
+    /* ─── FOREST GREEN (Original) ────────────────────── */
+    [data-scheme="forest"][data-theme="light"] {
+      --primary-900: #1b4332; --primary-800: #2d6a4f; --primary-700: #40916c;
+      --primary-600: #52b788; --primary-500: #74c69d; --primary-400: #95d5b2;
+      --primary-300: #b7e4c7; --primary-200: #d8f3dc; --primary-100: #edf6f0;
+
+      --surface-bg: #f6f8f6; --surface-card: #ffffff; --surface-elevated: #ffffff;
+      --surface-hover: #f0f2f0; --surface-border: #e2e5e3;
+
+      --text-primary: #1a1d23; --text-secondary: #44464f; --text-tertiary: #797b82;
+      --text-muted: #9d9fa5; --text-inverted: #ffffff;
+
+      --gray-100: #f1f2f3; --gray-200: #e2e3e5; --gray-300: #c4c5c9; --gray-50: #f8f9fa;
+    }
+    [data-scheme="forest"][data-theme="dark"] {
+      --primary-900: #d8f3dc; --primary-800: #b7e4c7; --primary-700: #95d5b2;
+      --primary-600: #74c69d; --primary-500: #52b788; --primary-400: #40916c;
+      --primary-300: #2d6a4f; --primary-200: #1b4332; --primary-100: #132e23;
+
+      --surface-bg: #0f1210; --surface-card: #1a1e1b; --surface-elevated: #222723;
+      --surface-hover: #262b27; --surface-border: #2e3530;
+
+      --text-primary: #e8ebe9; --text-secondary: #b0b5b2; --text-tertiary: #7d847f;
+      --text-muted: #5a615c; --text-inverted: #0f1210;
+
+      --gray-100: #1e2320; --gray-200: #2e3530; --gray-300: #3e4540; --gray-50: #161b17;
+    }
+
+    /* ─── TERRACOTTA (Warm Southwest) ────────────────── */
+    [data-scheme="terracotta"][data-theme="light"] {
+      --primary-900: #6b2c14; --primary-800: #9c4221; --primary-700: #c2592b;
+      --primary-600: #e07040; --primary-500: #ed8a5e; --primary-400: #f4a882;
+      --primary-300: #f8c4a8; --primary-200: #fce0cf; --primary-100: #fef3ec;
+
+      --surface-bg: #faf7f5; --surface-card: #ffffff; --surface-elevated: #ffffff;
+      --surface-hover: #f5f0ec; --surface-border: #e8e0da;
+
+      --text-primary: #2d1f16; --text-secondary: #5c4a3e; --text-tertiary: #8a7a6e;
+      --text-muted: #a99d93; --text-inverted: #ffffff;
+
+      --gray-100: #f3eeea; --gray-200: #e5ddd7; --gray-300: #ccc2ba; --gray-50: #faf7f5;
+    }
+    [data-scheme="terracotta"][data-theme="dark"] {
+      --primary-900: #fce0cf; --primary-800: #f4a882; --primary-700: #ed8a5e;
+      --primary-600: #e07040; --primary-500: #c2592b; --primary-400: #9c4221;
+      --primary-300: #6b2c14; --primary-200: #4a1e0d; --primary-100: #331408;
+
+      --surface-bg: #141110; --surface-card: #1f1b19; --surface-elevated: #2a2523;
+      --surface-hover: #302a27; --surface-border: #3a3330;
+
+      --text-primary: #ede6e2; --text-secondary: #b5aba4; --text-tertiary: #857a73;
+      --text-muted: #5e5550; --text-inverted: #141110;
+
+      --gray-100: #231f1d; --gray-200: #3a3330; --gray-300: #4e4642; --gray-50: #1a1614;
+    }
+
+    /* ─── SLATE BLUE (Cool & Calm) ───────────────────── */
+    [data-scheme="slate"][data-theme="light"] {
+      --primary-900: #1e293b; --primary-800: #334155; --primary-700: #475569;
+      --primary-600: #64748b; --primary-500: #94a3b8; --primary-400: #b0bec9;
+      --primary-300: #cbd5e1; --primary-200: #e2e8f0; --primary-100: #f1f5f9;
+
+      --surface-bg: #f7f8fa; --surface-card: #ffffff; --surface-elevated: #ffffff;
+      --surface-hover: #f0f2f5; --surface-border: #e2e5ea;
+
+      --text-primary: #0f172a; --text-secondary: #334155; --text-tertiary: #64748b;
+      --text-muted: #94a3b8; --text-inverted: #ffffff;
+
+      --gray-100: #f1f5f9; --gray-200: #e2e8f0; --gray-300: #cbd5e1; --gray-50: #f8fafc;
+    }
+    [data-scheme="slate"][data-theme="dark"] {
+      --primary-900: #e2e8f0; --primary-800: #cbd5e1; --primary-700: #94a3b8;
+      --primary-600: #78899e; --primary-500: #64748b; --primary-400: #475569;
+      --primary-300: #334155; --primary-200: #1e293b; --primary-100: #0f172a;
+
+      --surface-bg: #0c0f14; --surface-card: #151a22; --surface-elevated: #1e2430;
+      --surface-hover: #242b38; --surface-border: #283040;
+
+      --text-primary: #e2e8f0; --text-secondary: #94a3b8; --text-tertiary: #64748b;
+      --text-muted: #475569; --text-inverted: #0c0f14;
+
+      --gray-100: #1a2030; --gray-200: #283040; --gray-300: #354050; --gray-50: #111620;
+    }
+
+    /* ─── SAGE (Muted Earthy Green) ──────────────────── */
+    [data-scheme="sage"][data-theme="light"] {
+      --primary-900: #2f3e2e; --primary-800: #4a6348; --primary-700: #5e7d5b;
+      --primary-600: #7a9a76; --primary-500: #97b393; --primary-400: #b3cab0;
+      --primary-300: #cfdecb; --primary-200: #e5efe3; --primary-100: #f2f7f1;
+
+      --surface-bg: #f5f7f4; --surface-card: #ffffff; --surface-elevated: #ffffff;
+      --surface-hover: #eef1ec; --surface-border: #dde3da;
+
+      --text-primary: #1c2119; --text-secondary: #3e4a3b; --text-tertiary: #6b7867;
+      --text-muted: #97a393; --text-inverted: #ffffff;
+
+      --gray-100: #eef1ec; --gray-200: #dde3da; --gray-300: #c2cbbf; --gray-50: #f7f9f6;
+    }
+    [data-scheme="sage"][data-theme="dark"] {
+      --primary-900: #e5efe3; --primary-800: #b3cab0; --primary-700: #97b393;
+      --primary-600: #7a9a76; --primary-500: #5e7d5b; --primary-400: #4a6348;
+      --primary-300: #2f3e2e; --primary-200: #1f2b1e; --primary-100: #141c13;
+
+      --surface-bg: #0e110e; --surface-card: #181c17; --surface-elevated: #212621;
+      --surface-hover: #282d27; --surface-border: #303630;
+
+      --text-primary: #e2e8e0; --text-secondary: #a8b3a5; --text-tertiary: #6e7d6b;
+      --text-muted: #4a5648; --text-inverted: #0e110e;
+
+      --gray-100: #1c211c; --gray-200: #303630; --gray-300: #404640; --gray-50: #141914;
+    }
+
+    /* ─── INDIGO (Modern Tech) ───────────────────────── */
+    [data-scheme="indigo"][data-theme="light"] {
+      --primary-900: #312e81; --primary-800: #3730a3; --primary-700: #4338ca;
+      --primary-600: #6366f1; --primary-500: #818cf8; --primary-400: #a5b4fc;
+      --primary-300: #c7d2fe; --primary-200: #e0e7ff; --primary-100: #eef2ff;
+
+      --surface-bg: #f7f7fb; --surface-card: #ffffff; --surface-elevated: #ffffff;
+      --surface-hover: #f0f0f6; --surface-border: #e0e1ea;
+
+      --text-primary: #1e1b4b; --text-secondary: #3b3766; --text-tertiary: #6b6893;
+      --text-muted: #9b98b8; --text-inverted: #ffffff;
+
+      --gray-100: #f0f0f6; --gray-200: #e0e1ea; --gray-300: #c6c7d6; --gray-50: #f8f8fc;
+    }
+    [data-scheme="indigo"][data-theme="dark"] {
+      --primary-900: #e0e7ff; --primary-800: #c7d2fe; --primary-700: #a5b4fc;
+      --primary-600: #818cf8; --primary-500: #6366f1; --primary-400: #4338ca;
+      --primary-300: #3730a3; --primary-200: #312e81; --primary-100: #1e1b4b;
+
+      --surface-bg: #0c0c14; --surface-card: #14142a; --surface-elevated: #1c1c35;
+      --surface-hover: #22223d; --surface-border: #2a2a48;
+
+      --text-primary: #e0e1f0; --text-secondary: #9b98c8; --text-tertiary: #6b6893;
+      --text-muted: #44416b; --text-inverted: #0c0c14;
+
+      --gray-100: #1a1a30; --gray-200: #2a2a48; --gray-300: #3a3a58; --gray-50: #10101e;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION ACCENTS — Adapt to light/dark
+       ═══════════════════════════════════════════════════════════ */
+    [data-theme="light"] {
+      --accent-alert: #e63946; --accent-alert-bg: #fef2f2;
+      --accent-happenings: #7c3aed; --accent-happenings-bg: #f5f3ff;
+      --accent-lostfound: #2563eb; --accent-lostfound-bg: #eff6ff;
+      --accent-neighbors: var(--primary-700); --accent-neighbors-bg: var(--primary-100);
+      --accent-notes: var(--text-tertiary); --accent-notes-bg: var(--gray-100);
+    }
+    [data-theme="dark"] {
+      --accent-alert: #f87171; --accent-alert-bg: rgba(248,113,113,0.08);
+      --accent-happenings: #a78bfa; --accent-happenings-bg: rgba(167,139,250,0.08);
+      --accent-lostfound: #60a5fa; --accent-lostfound-bg: rgba(96,165,250,0.08);
+      --accent-neighbors: var(--primary-600); --accent-neighbors-bg: rgba(100,200,150,0.06);
+      --accent-notes: var(--text-tertiary); --accent-notes-bg: var(--gray-100);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SHARED DESIGN TOKENS
+       ═══════════════════════════════════════════════════════════ */
+    :root {
+      --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+      --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-full: 9999px;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    [data-theme="dark"] {
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+      --shadow-md: 0 4px 8px rgba(0,0,0,0.3);
+      --shadow-lg: 0 10px 20px rgba(0,0,0,0.35);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       BASE STYLES
+       ═══════════════════════════════════════════════════════════ */
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--surface-bg);
+      color: var(--text-secondary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.35s ease, color 0.35s ease;
+    }
+
+    .page-container { max-width: 640px; margin: 0 auto; padding: 1.5rem 1.25rem 6rem; }
+
+    /* ─── Theme Switcher (Floating Controls) ─────────── */
+    .theme-controls {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    /* Dark/Light Toggle */
+    .mode-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-card);
+      border: 1.5px solid var(--surface-border);
+      border-radius: var(--radius-full);
+      padding: 4px;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+    }
+
+    .mode-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.25s var(--ease-out);
+      color: var(--text-muted);
+    }
+
+    .mode-btn.active {
+      background: var(--primary-800);
+      color: var(--text-inverted);
+      box-shadow: var(--shadow-sm);
+    }
+
+    [data-theme="dark"] .mode-btn.active {
+      background: var(--primary-600);
+      color: var(--surface-bg);
+    }
+
+    /* Scheme Picker */
+    .scheme-picker {
+      display: flex;
+      gap: 6px;
+      background: var(--surface-card);
+      border: 1.5px solid var(--surface-border);
+      border-radius: var(--radius-full);
+      padding: 5px 8px;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+    }
+
+    .scheme-dot {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s var(--ease-out);
+      position: relative;
+    }
+
+    .scheme-dot:hover { transform: scale(1.15); }
+
+    .scheme-dot.active {
+      border-color: var(--text-primary);
+      box-shadow: 0 0 0 2px var(--surface-card);
+    }
+
+    .scheme-dot[data-scheme="forest"] { background: #2d6a4f; }
+    .scheme-dot[data-scheme="terracotta"] { background: #c2592b; }
+    .scheme-dot[data-scheme="slate"] { background: #475569; }
+    .scheme-dot[data-scheme="sage"] { background: #5e7d5b; }
+    .scheme-dot[data-scheme="indigo"] { background: #4338ca; }
+
+    .scheme-label {
+      position: absolute;
+      bottom: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.15s;
+      pointer-events: none;
+    }
+    .scheme-dot:hover .scheme-label,
+    .scheme-dot.active .scheme-label { opacity: 1; }
+
+    /* ─── Header ─────────────────────────────────────── */
+    .site-header {
+      text-align: center;
+      padding: 2.5rem 0 2rem;
+      position: relative;
+    }
+    .site-header::after {
+      content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 48px; height: 3px; background: var(--primary-600); border-radius: 2px;
+      transition: background 0.3s ease;
+    }
+
+    .site-logo {
+      display: inline-flex; align-items: center; gap: 10px; margin-bottom: 0.5rem;
+    }
+    .site-logo-mark {
+      width: 40px; height: 40px; background: var(--primary-800); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; color: var(--text-inverted); font-size: 1rem; letter-spacing: -1px;
+      transition: background 0.3s ease;
+    }
+    [data-theme="dark"] .site-logo-mark {
+      background: var(--primary-600);
+      color: var(--surface-bg);
+    }
+
+    .site-title {
+      font-size: 1.75rem; font-weight: 900; color: var(--text-primary);
+      letter-spacing: -0.03em; line-height: 1.1;
+      transition: color 0.3s ease;
+    }
+    .site-tagline {
+      font-size: 0.875rem; color: var(--text-muted); font-weight: 500;
+      margin-top: 0.375rem; letter-spacing: 0.01em;
+      transition: color 0.3s ease;
+    }
+
+    /* ─── Search ─────────────────────────────────────── */
+    .search-container { position: relative; margin: 1.75rem 0; }
+    .search-icon {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); pointer-events: none; transition: color 0.3s;
+    }
+    .search-input {
+      width: 100%; padding: 12px 16px 12px 44px;
+      border: 1.5px solid var(--surface-border); border-radius: var(--radius-full);
+      font-size: 0.875rem; font-family: inherit;
+      background: var(--surface-card); color: var(--text-primary);
+      transition: all 0.2s var(--ease-out); outline: none;
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-input:focus {
+      border-color: var(--primary-600);
+      box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.12);
+    }
+    [data-theme="dark"] .search-input:focus {
+      box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.08);
+    }
+
+    /* ─── Section Blocks ─────────────────────────────── */
+    .section-block { margin-bottom: 2.25rem; }
+
+    .section-label {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 0.75rem; padding: 0 4px;
+    }
+    .section-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .section-name {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-tertiary);
+      transition: color 0.3s ease;
+    }
+    .section-count {
+      font-size: 0.65rem; font-weight: 600; color: var(--text-muted);
+      background: var(--gray-100); padding: 1px 7px; border-radius: var(--radius-full);
+      transition: all 0.3s ease;
+    }
+    .section-line { flex: 1; height: 1px; background: var(--surface-border); transition: background 0.3s; }
+
+    .section-ALERT .section-dot { background: var(--accent-alert); }
+    .section-HAPPENINGS .section-dot { background: var(--accent-happenings); }
+    .section-LOST_FOUND .section-dot { background: var(--accent-lostfound); }
+    .section-NEIGHBORS .section-dot { background: var(--accent-neighbors); }
+    .section-BOARD_NOTES .section-dot { background: var(--accent-notes); }
+
+    /* ─── Post Cards ─────────────────────────────────── */
+    .posts-stack { display: flex; flex-direction: column; gap: 8px; }
+
+    .post-card {
+      background: var(--surface-card); border-radius: var(--radius-md);
+      padding: 1rem 1.25rem; box-shadow: var(--shadow-sm);
+      transition: all 0.25s var(--ease-out); position: relative; overflow: hidden;
+    }
+    .post-card::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 3px; height: 100%; border-radius: 0 2px 2px 0;
+      opacity: 0; transition: opacity 0.25s var(--ease-out);
+    }
+    .post-card:hover {
+      box-shadow: var(--shadow-md); transform: translateY(-1px);
+    }
+    .post-card:hover::before { opacity: 1; }
+
+    .section-ALERT .post-card::before { background: var(--accent-alert); }
+    .section-HAPPENINGS .post-card::before { background: var(--accent-happenings); }
+    .section-LOST_FOUND .post-card::before { background: var(--accent-lostfound); }
+    .section-NEIGHBORS .post-card::before { background: var(--accent-neighbors); }
+    .section-BOARD_NOTES .post-card::before { background: var(--accent-notes); }
+
+    .post-card.urgent { border-left: 3px solid var(--accent-alert); }
+    .post-card.urgent::before { display: none; }
+
+    .post-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 12px; margin-bottom: 0.375rem;
+    }
+    .post-title {
+      font-size: 0.9375rem; font-weight: 700; color: var(--text-primary);
+      line-height: 1.35; letter-spacing: -0.01em; transition: color 0.3s;
+    }
+    .post-badges { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+    .badge-urgent {
+      font-size: 0.625rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; background: var(--accent-alert); color: white;
+      padding: 2px 8px; border-radius: var(--radius-full);
+    }
+    .badge-pinned { font-size: 0.75rem; opacity: 0.6; }
+
+    .post-body {
+      font-size: 0.8375rem; color: var(--text-secondary); line-height: 1.6;
+      margin-bottom: 0.5rem; transition: color 0.3s;
+    }
+    .post-body p { margin-bottom: 0.35rem; }
+    .post-body p:last-child { margin-bottom: 0; }
+
+    .post-meta {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; color: var(--text-muted); font-weight: 500;
+      transition: color 0.3s;
+    }
+    .post-meta .sep {
+      width: 3px; height: 3px; border-radius: 50%; background: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* ─── About ──────────────────────────────────────── */
+    .about-section {
+      background: var(--surface-card); border-radius: var(--radius-lg);
+      padding: 1.5rem; box-shadow: var(--shadow-sm); margin-top: 2rem;
+      border: 1px solid var(--surface-border); transition: all 0.3s;
+    }
+    .about-title {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--primary-800); margin-bottom: 0.5rem;
+      transition: color 0.3s;
+    }
+    [data-theme="dark"] .about-title { color: var(--primary-600); }
+    .about-text {
+      font-size: 0.8375rem; color: var(--text-tertiary); line-height: 1.7;
+      transition: color 0.3s;
+    }
+
+    /* ─── Footer ─────────────────────────────────────── */
+    .site-footer { text-align: center; padding: 2rem 0 1rem; }
+    .footer-text {
+      font-size: 0.75rem; color: var(--text-muted); font-weight: 500;
+      transition: color 0.3s;
+    }
+    .footer-text .dot {
+      display: inline-block; width: 3px; height: 3px; border-radius: 50%;
+      background: var(--text-muted); vertical-align: middle; margin: 0 8px;
+      opacity: 0.5;
+    }
+
+    /* ─── FAB ────────────────────────────────────────── */
+    .fab {
+      position: fixed; bottom: 28px; right: 28px;
+      width: 56px; height: 56px; border-radius: var(--radius-full);
+      background: linear-gradient(135deg, var(--primary-800), var(--primary-700));
+      color: var(--text-inverted); border: none; font-size: 1.5rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      transition: all 0.3s var(--ease-spring);
+      text-decoration: none; z-index: 100;
+    }
+    [data-theme="dark"] .fab {
+      background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+      color: var(--surface-bg);
+    }
+    .fab:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+    }
+    .fab svg {
+      width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; fill: none;
+    }
+
+    /* ─── Animations ─────────────────────────────────── */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Scheme info banner ─────────────────────────── */
+    .scheme-info {
+      text-align: center;
+      padding: 12px 16px;
+      background: var(--primary-100);
+      border-radius: var(--radius-md);
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--primary-200);
+      transition: all 0.3s ease;
+    }
+    .scheme-info-name {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--primary-800);
+      transition: color 0.3s;
+    }
+    [data-theme="dark"] .scheme-info-name { color: var(--primary-600); }
+    .scheme-info-desc {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      margin-top: 2px;
+    }
+
+    /* ─── Responsive ─────────────────────────────────── */
+    @media (max-width: 480px) {
+      .page-container { padding: 1.25rem 1rem 5rem; }
+      .site-title { font-size: 1.5rem; }
+      .post-card { padding: 0.875rem 1rem; }
+      .theme-controls { top: 8px; right: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ Theme Controls ═══ -->
+  <div class="theme-controls">
+    <div class="mode-toggle" role="group" aria-label="Color mode">
+      <button class="mode-btn active" data-mode="light" onclick="setTheme('light')" title="Light mode">☀️</button>
+      <button class="mode-btn" data-mode="dark" onclick="setTheme('dark')" title="Dark mode">🌙</button>
+    </div>
+    <div class="scheme-picker" role="group" aria-label="Color scheme">
+      <button class="scheme-dot active" data-scheme="forest" onclick="setScheme('forest')" title="Forest Green">
+        <span class="scheme-label">Forest</span>
+      </button>
+      <button class="scheme-dot" data-scheme="terracotta" onclick="setScheme('terracotta')" title="Terracotta">
+        <span class="scheme-label">Terracotta</span>
+      </button>
+      <button class="scheme-dot" data-scheme="slate" onclick="setScheme('slate')" title="Slate Blue">
+        <span class="scheme-label">Slate</span>
+      </button>
+      <button class="scheme-dot" data-scheme="sage" onclick="setScheme('sage')" title="Sage">
+        <span class="scheme-label">Sage</span>
+      </button>
+      <button class="scheme-dot" data-scheme="indigo" onclick="setScheme('indigo')" title="Indigo">
+        <span class="scheme-label">Indigo</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="page-container">
+
+    <!-- ═══ Header ═══ -->
+    <header class="site-header">
+      <div class="site-logo">
+        <div class="site-logo-mark">VV</div>
+        <h1 class="site-title">Valle Vista Commons</h1>
+      </div>
+      <p class="site-tagline">Your neighborhood board — anonymous, moderated, private</p>
+    </header>
+
+    <!-- ═══ Scheme Info ═══ -->
+    <div class="scheme-info" id="schemeInfo">
+      <div class="scheme-info-name" id="schemeName">Forest Green</div>
+      <div class="scheme-info-desc" id="schemeDesc">Rich forest tones — the original VVC palette</div>
+    </div>
+
+    <!-- ═══ Search ═══ -->
+    <div class="search-container">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" class="search-input" placeholder="Search the board...">
+    </div>
+
+    <!-- ═══ Alerts ═══ -->
+    <div class="section-block section-ALERT">
+      <div class="section-label">
+        <span class="section-dot"></span>
+        <span class="section-name">Alerts</span>
+        <span class="section-count">2</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="posts-stack">
+        <div class="post-card urgent">
+          <div class="post-header">
+            <span class="post-title">Package thefts on Oak Street</span>
+            <div class="post-badges"><span class="badge-urgent">Urgent</span></div>
+          </div>
+          <div class="post-body">
+            <p>Multiple residents on Oak St between 3rd and 5th have reported packages stolen from porches this week. Appears to happen between 2-4 PM. Please bring packages inside quickly or consider a lockbox.</p>
+          </div>
+          <div class="post-meta">
+            <span>📍 Oak St & 5th Ave</span><span class="sep"></span><span>2h ago</span>
+          </div>
+        </div>
+        <div class="post-card">
+          <div class="post-header"><span class="post-title">Coyote spotted near the wash</span></div>
+          <div class="post-body">
+            <p>Saw a coyote near the wash trail around dusk yesterday. Keep small pets inside during evenings.</p>
+          </div>
+          <div class="post-meta">
+            <span>📍 Wash Trail</span><span class="sep"></span><span>1d ago</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Happenings ═══ -->
+    <div class="section-block section-HAPPENINGS">
+      <div class="section-label">
+        <span class="section-dot"></span>
+        <span class="section-name">Happenings</span>
+        <span class="section-count">2</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="posts-stack">
+        <div class="post-card">
+          <div class="post-header">
+            <div>
+              <span class="badge-pinned">📌</span>
+              <span class="post-title">Spring neighborhood cleanup — March 1st</span>
+            </div>
+          </div>
+          <div class="post-body">
+            <p>Join us for our annual spring cleanup! Meet at the community park pavilion at 9 AM. Gloves and bags provided. Bring your own water.</p>
+          </div>
+          <div class="post-meta">
+            <span>📍 Community Park</span><span class="sep"></span><span>3d ago</span><span class="sep"></span><span><em>edited</em></span>
+          </div>
+        </div>
+        <div class="post-card">
+          <div class="post-header"><span class="post-title">Farmer's market is back Saturdays</span></div>
+          <div class="post-body">
+            <p>The Saturday farmer's market resumes this week at the plaza. 8 AM – noon. Local produce, honey, baked goods.</p>
+          </div>
+          <div class="post-meta">
+            <span>📍 Valle Vista Plaza</span><span class="sep"></span><span>5d ago</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Lost & Found ═══ -->
+    <div class="section-block section-LOST_FOUND">
+      <div class="section-label">
+        <span class="section-dot"></span>
+        <span class="section-name">Lost & Found</span>
+        <span class="section-count">1</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="posts-stack">
+        <div class="post-card">
+          <div class="post-header"><span class="post-title">Found: small gray tabby cat, no collar</span></div>
+          <div class="post-body">
+            <p>Found a friendly gray tabby near the corner of Mesquite and 2nd. Very affectionate, seems well-fed.</p>
+          </div>
+          <div class="post-meta">
+            <span>📍 Mesquite & 2nd</span><span class="sep"></span><span>6h ago</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Neighbors ═══ -->
+    <div class="section-block section-NEIGHBORS">
+      <div class="section-label">
+        <span class="section-dot"></span>
+        <span class="section-name">Neighbors</span>
+        <span class="section-count">1</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="posts-stack">
+        <div class="post-card">
+          <div class="post-header"><span class="post-title">Free moving boxes — come grab them!</span></div>
+          <div class="post-body">
+            <p>Just finished unpacking. About 20 good-quality boxes, various sizes, on the curb. First come first serve.</p>
+          </div>
+          <div class="post-meta">
+            <span>📍 Near Elm & 7th</span><span class="sep"></span><span>4h ago</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Board Notes ═══ -->
+    <div class="section-block section-BOARD_NOTES">
+      <div class="section-label">
+        <span class="section-dot"></span>
+        <span class="section-name">Board Notes</span>
+        <span class="section-count">1</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="posts-stack">
+        <div class="post-card">
+          <div class="post-header"><span class="post-title">Welcome to Valle Vista Commons</span></div>
+          <div class="post-body">
+            <p>This board is moderated by your neighbors. All posts are reviewed before appearing. No accounts needed — your privacy is our priority.</p>
+          </div>
+          <div class="post-meta"><span>1w ago</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ About ═══ -->
+    <div class="about-section">
+      <h3 class="about-title">About This Board</h3>
+      <p class="about-text">Valle Vista Commons is a privacy-first community board for our neighborhood. No accounts, no tracking, no personal information collected.</p>
+    </div>
+
+    <!-- ═══ Footer ═══ -->
+    <footer class="site-footer">
+      <p class="footer-text">No accounts, no tracking <span class="dot"></span> All posts reviewed by mods</p>
+    </footer>
+  </div>
+
+  <!-- ═══ FAB ═══ -->
+  <a href="#" class="fab" title="Submit a tip">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  </a>
+
+  <script>
+    const schemeInfo = {
+      forest:     { name: 'Forest Green',  desc: 'Rich forest tones — the original VVC palette' },
+      terracotta: { name: 'Terracotta',    desc: 'Warm Southwest clay — earthy, inviting, bold' },
+      slate:      { name: 'Slate Blue',    desc: 'Cool professional — calm, clean, neutral' },
+      sage:       { name: 'Sage',          desc: 'Muted earthy green — soft, organic, understated' },
+      indigo:     { name: 'Indigo',        desc: 'Modern tech purple — vibrant, contemporary, electric' },
+    };
+
+    function setTheme(mode) {
+      document.documentElement.setAttribute('data-theme', mode);
+      document.querySelectorAll('.mode-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.mode === mode);
+      });
+      localStorage.setItem('vvc-theme', mode);
+    }
+
+    function setScheme(scheme) {
+      document.documentElement.setAttribute('data-scheme', scheme);
+      document.querySelectorAll('.scheme-dot').forEach(d => {
+        d.classList.toggle('active', d.dataset.scheme === scheme);
+      });
+      document.getElementById('schemeName').textContent = schemeInfo[scheme].name;
+      document.getElementById('schemeDesc').textContent = schemeInfo[scheme].desc;
+      localStorage.setItem('vvc-scheme', scheme);
+    }
+
+    // Restore from localStorage
+    const savedTheme = localStorage.getItem('vvc-theme');
+    const savedScheme = localStorage.getItem('vvc-scheme');
+    if (savedTheme) setTheme(savedTheme);
+    if (savedScheme) setScheme(savedScheme);
+
+    // Respect OS preference on first visit
+    if (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark');
+    }
+  </script>
+
+</body>
+</html>

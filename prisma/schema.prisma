@@ -24,6 +24,7 @@ model Post {
   createdAt   DateTime  @default(now()) @map("created_at")
   approvedAt  DateTime? @map("approved_at")
   aiAnalysis  Json?
+  descHistory Json?     // Array of {title, desc, timestamp} — last 10 versions for undo
 
   @@map("posts")
 }
@@ -63,4 +64,5 @@ enum Status {
   LIVE
   EXPIRED
   REJECTED
+  DELETED
 }
