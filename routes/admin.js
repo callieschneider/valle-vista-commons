@@ -350,6 +350,103 @@ router.post('/undo/:id', async (req, res) => {
   res.redirect('/admin');
 });
 
+// ─── In-Editor AI Rewrite (API endpoint for Tiptap button) ─
+
+router.post('/api/rewrite-editor', async (req, res) => {
+  try {
+    // Super admin bypass (no limits)
+    if (req.isSuperAdmin) {
+      const content = req.body.content || '';
+      const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+      const prompt = settings?.rewritePrompt || 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
+      
+      const result = await require('../lib/openrouter').chatCompletion({
+        model: settings?.rewriteModel || 'anthropic/claude-3.5-haiku',
+        messages: [
+          { role: 'user', content: `${prompt}\n\nText to rewrite:\n${content}` }
+        ],
+        temperature: 0.3,
+      });
+      
+      return res.json({ success: true, rewritten: result || content });
+    }
+
+    // Regular mod: check limits
+    if (!req.mod) {
+      return res.status(403).json({ error: 'Not authenticated as mod' });
+    }
+
+    const mod = req.mod;
+    if (!mod.rewriteEnabled) {
+      return res.status(403).json({ error: 'AI Rewrite disabled for your account' });
+    }
+
+    const postId = req.body.postId;
+    if (!postId) {
+      return res.status(400).json({ error: 'postId required' });
+    }
+
+    // Check per-post limit
+    const post = await prisma.post.findUnique({ where: { id: postId } });
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    if (post.rewriteCount >= mod.rewriteLimitPerPost) {
+      return res.status(429).json({ error: `Post rewrite limit reached (${mod.rewriteLimitPerPost} per post)` });
+    }
+
+    // Check per-hour limit
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const recentRewrites = await prisma.rewriteLog.count({
+      where: {
+        modId: mod.id,
+        createdAt: { gte: oneHourAgo },
+      },
+    });
+
+    if (recentRewrites >= mod.rewriteLimitPerHour) {
+      return res.status(429).json({ error: `Hourly rewrite limit reached (${mod.rewriteLimitPerHour}/hour)` });
+    }
+
+    // Perform rewrite
+    const content = req.body.content || '';
+    const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    const prompt = settings?.rewritePrompt || 'Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning.';
+    
+    const result = await require('../lib/openrouter').chatCompletion({
+      model: settings?.rewriteModel || 'anthropic/claude-3.5-haiku',
+      messages: [
+        { role: 'user', content: `${prompt}\n\nText to rewrite:\n${content}` }
+      ],
+      temperature: 0.3,
+    });
+
+    if (!result) {
+      return res.status(500).json({ error: 'LLM rewrite failed' });
+    }
+
+    // Log rewrite and increment post counter
+    await prisma.$transaction([
+      prisma.rewriteLog.create({
+        data: {
+          postId: post.id,
+          modId: mod.id,
+        },
+      }),
+      prisma.post.update({
+        where: { id: post.id },
+        data: { rewriteCount: { increment: 1 } },
+      }),
+    ]);
+
+    res.json({ success: true, rewritten: result });
+  } catch (err) {
+    console.error('Editor rewrite error:', err.message);
+    res.status(500).json({ error: 'Rewrite failed' });
+  }
+});
+
 // ─── Archive ────────────────────────────────────────────
 
 // Restore rejected post back to pending queue

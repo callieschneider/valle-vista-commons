@@ -31,11 +31,23 @@ router.get('/', async (req, res) => {
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     const hasApiKey = !!process.env.OPENROUTER_API_KEY;
 
+    // Fetch rewrite stats for all mods
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const modRewriteStats = {};
+    for (const mod of mods) {
+      const total = await prisma.rewriteLog.count({ where: { modId: mod.id } });
+      const lastHour = await prisma.rewriteLog.count({
+        where: { modId: mod.id, createdAt: { gte: oneHourAgo } },
+      });
+      modRewriteStats[mod.id] = { total, lastHour };
+    }
+
     res.render('super', {
       mods,
       settings,
       models: AVAILABLE_MODELS,
       hasApiKey,
+      modRewriteStats,
       error: req.query.error || null,
       msg: req.query.msg || null,
     });
@@ -97,12 +109,33 @@ router.post('/mods/:id/delete', async (req, res) => {
   res.redirect('/super');
 });
 
+router.post('/mods/:id/rewrite-settings', async (req, res) => {
+  try {
+    const rewriteEnabled = req.body.rewriteEnabled === 'on';
+    const rewriteLimitPerPost = parseInt(req.body.rewriteLimitPerPost) || 10;
+    const rewriteLimitPerHour = parseInt(req.body.rewriteLimitPerHour) || 5;
+
+    await prisma.mod.update({
+      where: { id: req.params.id },
+      data: {
+        rewriteEnabled,
+        rewriteLimitPerPost: Math.max(1, Math.min(50, rewriteLimitPerPost)),
+        rewriteLimitPerHour: Math.max(1, Math.min(100, rewriteLimitPerHour)),
+      },
+    });
+  } catch (err) {
+    console.error('Update rewrite settings error:', err.message);
+  }
+  res.redirect('/super');
+});
+
 // ─── LLM Settings ───────────────────────────────────────
 
 router.post('/settings/llm', async (req, res) => {
   try {
     const analysisModel = req.body.analysisModel;
     const rewriteModel = req.body.rewriteModel;
+    const rewritePrompt = (req.body.rewritePrompt || '').trim() || null;
 
     // Validate models are in allowed list
     const validIds = AVAILABLE_MODELS.map(m => m.id);
@@ -112,13 +145,13 @@ router.post('/settings/llm', async (req, res) => {
 
     await prisma.siteSettings.update({
       where: { id: 'default' },
-      data: { analysisModel, rewriteModel },
+      data: { analysisModel, rewriteModel, rewritePrompt },
     });
 
     res.redirect('/super?msg=llm_saved');
   } catch (err) {
-    console.error('LLM settings error:', err.message);
-    res.redirect('/super?error=llm_save_failed');
+    console.error('Save LLM settings error:', err.message);
+    res.redirect('/super?error=save_failed');
   }
 });
 

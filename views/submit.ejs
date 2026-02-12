@@ -2,10 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="robots" content="noindex, nofollow">
   <title>Submit a Tip — <%= settings.boardName %></title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -75,6 +79,7 @@
               <div class="editor-toolbar" id="toolbar">
                 <button type="button" data-action="bold" title="Bold"><b>B</b></button>
                 <button type="button" data-action="italic" title="Italic"><i>I</i></button>
+                <button type="button" data-action="strike" title="Strikethrough"><s>S</s></button>
                 <div class="sep"></div>
                 <button type="button" data-action="link" title="Add Link">🔗</button>
                 <div class="sep"></div>
@@ -89,9 +94,14 @@
 
           <div class="field-group">
             <label class="vvc-label" for="location">Location <span class="optional">(optional)</span></label>
-            <input type="text" class="vvc-input" id="location" name="location"
-                   maxlength="100" placeholder="e.g. Near Elm St & Oak Ave"
-                   value="<%= values.location || '' %>">
+            <div style="display: flex; gap: 8px;">
+              <input type="text" class="vvc-input" id="location" name="location"
+                     maxlength="100" placeholder="e.g. Near Elm St & Oak Ave"
+                     value="<%= values.location || '' %>" style="flex: 1;">
+              <button type="button" class="btn-outline-vvc" id="findOnMapBtn" title="Find this location on the map">
+                📍 Find on Map
+              </button>
+            </div>
             <p class="vvc-hint">Be vague — street name or intersection is enough.</p>
           </div>
 
@@ -165,5 +175,6 @@
   <script type="module" src="/js/submit-init.js"></script>
   <script type="module" src="/js/submit-map.js"></script>
   <% } %>
+  <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
 </body>
 </html>

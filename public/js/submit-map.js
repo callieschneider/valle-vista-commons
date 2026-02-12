@@ -6,10 +6,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const helper = document.getElementById('mapHelper');
   const display = document.getElementById('mapDisplay');
   const removeBtn = document.getElementById('removePin');
+  const findBtn = document.getElementById('findOnMapBtn');
+  const locationInput = document.getElementById('location');
 
   if (!toggle || !container) return;
 
   let mapInstance = null;
+
+  // Open and initialize map
+  function openMap() {
+    if (!container.classList.contains('show')) {
+      toggle.click();
+    }
+  }
 
   toggle.addEventListener('click', () => {
     const isShown = container.classList.toggle('show');
@@ -43,6 +52,32 @@ document.addEventListener('DOMContentLoaded', () => {
   removeBtn.addEventListener('click', () => {
     if (mapInstance) {
       mapInstance.removePin();
+    }
+  });
+
+  // Find on Map button
+  findBtn.addEventListener('click', async () => {
+    const address = locationInput.value.trim();
+    if (!address) {
+      alert('Enter a location first');
+      locationInput.focus();
+      return;
+    }
+
+    // Open map if not already open
+    openMap();
+    
+    // Wait for map to initialize
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    if (mapInstance && mapInstance.geocodeAndCenter) {
+      findBtn.disabled = true;
+      findBtn.textContent = 'Searching...';
+      
+      await mapInstance.geocodeAndCenter(address);
+      
+      findBtn.disabled = false;
+      findBtn.textContent = '📍 Find on Map';
     }
   });
 });

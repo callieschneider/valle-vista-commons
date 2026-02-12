@@ -48,7 +48,7 @@ async function uploadFile(file) {
 }
 
 // Initialize a Tiptap editor instance
-export function initEditor({ element, hiddenInput, toolbar, content = '', mode = 'full' }) {
+export function initEditor({ element, hiddenInput, toolbar, content = '', mode = 'full', postId = null, enableAiRewrite = false }) {
   const extensions = [
     StarterKit.configure({
       heading: mode === 'full' ? { levels: [1, 2, 3, 4] } : false,
@@ -86,7 +86,7 @@ export function initEditor({ element, hiddenInput, toolbar, content = '', mode =
 
   // Set up toolbar buttons
   if (toolbar) {
-    setupToolbar(toolbar, editor);
+    setupToolbar(toolbar, editor, postId, enableAiRewrite);
   }
 
   // Handle paste/drop of files
@@ -131,7 +131,7 @@ async function handleFileInsert(editor, file) {
   }
 }
 
-function setupToolbar(toolbar, editor) {
+function setupToolbar(toolbar, editor, postId, enableAiRewrite) {
   toolbar.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -214,6 +214,11 @@ function setupToolbar(toolbar, editor) {
           input.click();
           break;
         }
+        case 'ai-rewrite': {
+          if (!enableAiRewrite || !postId) break;
+          handleAiRewrite(editor, postId, btn);
+          break;
+        }
       }
 
       // Update active states
@@ -224,6 +229,35 @@ function setupToolbar(toolbar, editor) {
   // Update active states on selection change
   editor.on('selectionUpdate', () => updateToolbarState(toolbar, editor));
   editor.on('update', () => updateToolbarState(toolbar, editor));
+}
+
+async function handleAiRewrite(editor, postId, btn) {
+  const originalText = btn.textContent;
+  btn.textContent = '⏳';
+  btn.disabled = true;
+
+  try {
+    const content = editor.getText(); // Get plain text from editor
+    const res = await fetch('/admin/api/rewrite-editor', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ postId, content }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.error || 'Rewrite failed');
+      return;
+    }
+
+    // Replace editor content with rewritten text
+    editor.commands.setContent(`<p>${data.rewritten}</p>`);
+  } catch (err) {
+    alert('Rewrite failed: ' + err.message);
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
 }
 
 function updateToolbarState(toolbar, editor) {

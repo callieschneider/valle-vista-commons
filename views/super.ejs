@@ -2,10 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="robots" content="noindex, nofollow">
   <title>Super Admin — Valle Vista Commons</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -90,21 +94,58 @@
         <% } else { %>
           <% mods.forEach(mod => { %>
             <div class="mod-row">
-              <div>
+              <div style="flex: 1;">
                 <strong style="font-size: 0.9rem; color: var(--text-primary);"><%= mod.username %></strong>
                 <span class="<%= mod.active ? 'status-active' : 'status-disabled' %>" style="margin-left: 8px;"><%= mod.active ? 'Active' : 'Disabled' %></span>
-                <div style="font-size: 0.72rem; color: var(--text-muted);">Created <%= new Date(mod.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">
+                  Created <%= new Date(mod.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                  <% if (modRewriteStats && modRewriteStats[mod.id]) { %>
+                    · <span style="color: var(--accent-primary);"><%=modRewriteStats[mod.id].total || 0 %> rewrites</span>
+                    (<%=modRewriteStats[mod.id].lastHour || 0 %> in last hour)
+                  <% } %>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">
+                  Rewrite: <span style="color: <%= mod.rewriteEnabled ? 'var(--accent-success)' : 'var(--accent-warning)' %>;"><%= mod.rewriteEnabled ? 'Enabled' : 'Disabled' %></span>
+                  · Limits: <%= mod.rewriteLimitPerPost %>/post, <%= mod.rewriteLimitPerHour %>/hour
+                </div>
               </div>
-              <div style="display: flex; gap: 6px;">
-                <form method="POST" action="/super/mods/<%= mod.id %>/toggle" style="display:inline;">
-                  <button type="submit" class="action-btn outline <%= mod.active ? '' : 'success' %>" style="<%= mod.active ? 'border-color: var(--accent-warning-soft); color: var(--accent-warning);' : '' %>">
-                    <%= mod.active ? 'Disable' : 'Enable' %>
+              <div style="display: flex; gap: 6px; flex-direction: column; align-items: flex-end;">
+                <div style="display: flex; gap: 6px;">
+                  <form method="POST" action="/super/mods/<%= mod.id %>/toggle" style="display:inline;">
+                    <button type="submit" class="action-btn outline <%= mod.active ? '' : 'success' %>" style="<%= mod.active ? 'border-color: var(--accent-warning-soft); color: var(--accent-warning);' : '' %>">
+                      <%= mod.active ? 'Disable' : 'Enable' %>
+                    </button>
+                  </form>
+                  <button type="button" class="action-btn outline" onclick="toggleModRewriteForm('<%= mod.id %>')">
+                    ⚙️ Rewrite
                   </button>
-                </form>
-                <form method="POST" action="/super/mods/<%= mod.id %>/delete" style="display:inline;"
-                      onsubmit="return confirm('Delete mod &quot;<%= mod.username %>&quot; permanently?')">
-                  <button type="submit" class="action-btn outline delete">Delete</button>
-                </form>
+                  <form method="POST" action="/super/mods/<%= mod.id %>/delete" style="display:inline;"
+                        onsubmit="return confirm('Delete mod &quot;<%= mod.username %>&quot; permanently?')">
+                    <button type="submit" class="action-btn outline delete">Delete</button>
+                  </form>
+                </div>
+                <div id="modRewriteForm-<%= mod.id %>" style="display: none; margin-top: 8px; padding: 12px; background: var(--bg-lighter); border-radius: 8px; width: 300px;">
+                  <form method="POST" action="/super/mods/<%= mod.id %>/rewrite-settings">
+                    <div style="margin-bottom: 8px;">
+                      <label style="font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+                        <input type="checkbox" name="rewriteEnabled" <%= mod.rewriteEnabled ? 'checked' : '' %> style="width: auto;">
+                        Enable AI Rewrite
+                      </label>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                      <label style="font-size: 0.75rem; color: var(--text-secondary);">Per-Post Limit</label>
+                      <input type="number" name="rewriteLimitPerPost" value="<%= mod.rewriteLimitPerPost %>" min="1" max="50" class="vvc-input" style="font-size: 0.85rem; padding: 6px 10px;">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                      <label style="font-size: 0.75rem; color: var(--text-secondary);">Per-Hour Limit</label>
+                      <input type="number" name="rewriteLimitPerHour" value="<%= mod.rewriteLimitPerHour %>" min="1" max="100" class="vvc-input" style="font-size: 0.85rem; padding: 6px 10px;">
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                      <button type="submit" class="action-btn outline success" style="flex: 1; font-size: 0.8rem;">Save</button>
+                      <button type="button" class="action-btn outline" style="flex: 1; font-size: 0.8rem;" onclick="toggleModRewriteForm('<%= mod.id %>')">Cancel</button>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           <% }) %>
@@ -165,6 +206,13 @@
               </select>
               <p class="model-note">Used for on-demand tip rewrites</p>
             </div>
+
+            <div class="field-group">
+              <label class="model-label">In-Editor Rewrite Prompt</label>
+              <textarea name="rewritePrompt" class="vvc-textarea" rows="6" placeholder="Custom prompt template for AI Rewrite button in editor (leave blank for default)"
+                        style="font-size: 0.85rem; padding: 8px 12px; font-family: monospace;"><%= settings && settings.rewritePrompt ? settings.rewritePrompt : '' %></textarea>
+              <p class="model-note">Leave blank for default: "Rewrite this text to be clear, concise, and factual. Fix grammar and spelling. Maintain the original meaning."</p>
+            </div>
           </div>
           <button type="submit" class="panel-btn-primary">Save LLM Settings</button>
         </form>
@@ -207,5 +255,12 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/theme.js"></script>
   <script src="/js/lightbox.js"></script>
+  <script>
+    function toggleModRewriteForm(modId) {
+      const form = document.getElementById('modRewriteForm-' + modId);
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+  </script>
+  <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
 </body>
 </html>

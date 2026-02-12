@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
       toolbar: document.getElementById('notesToolbar'),
       content: '',
       mode: 'full',
+      postId: null,
+      enableAiRewrite: false, // Board notes don't need AI rewrite (they're fresh content)
     });
   }
 
@@ -18,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const id = el.id;
     const prefix = id.replace('editEditor-', '');
     const content = decodeURIComponent(el.dataset.content || '');
+    const postId = el.dataset.postId || null;
     const toolbar = document.getElementById(`editToolbar-${prefix}`);
     const hidden = document.getElementById(`editHidden-${prefix}`);
 
@@ -28,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
         toolbar: toolbar,
         content: content,
         mode: 'full',
+        postId: postId,
+        enableAiRewrite: !!postId, // Enable if editing a post
       });
       // Sync initial content
       hidden.value = content;

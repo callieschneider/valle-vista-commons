@@ -2,10 +2,39 @@
 // Usage: initMapPicker({ containerId, latInput, lngInput, nameInput, initialLat?, initialLng?, onPinSet?, onPinRemove? })
 
 const NOMINATIM_ENDPOINT = 'https://nominatim.openstreetmap.org/reverse';
-const DEFAULT_CENTER = [34.0522, -118.2437]; // Los Angeles area - adjust for Valle Vista
-const DEFAULT_ZOOM = 13;
+const NOMINATIM_SEARCH_ENDPOINT = 'https://nominatim.openstreetmap.org/search';
+
+// Valle Vista Commons specific bounds
+const DEFAULT_CENTER = [45.487792, -122.445500]; // Valle Vista center
+const DEFAULT_ZOOM = 16;
+const MAP_BOUNDS = [
+  [45.484798, -122.448344], // Southwest corner (bottom-left)
+  [45.490063, -122.442604]  // Northeast corner (top-right)
+];
 
 let reverseGeocodeTimeout = null;
+let forwardGeocodeTimeout = null;
+
+// Forward geocode (address → coordinates)
+async function forwardGeocode(address) {
+  try {
+    const url = `${NOMINATIM_SEARCH_ENDPOINT}?format=json&q=${encodeURIComponent(address)}&limit=1&bounded=1&viewbox=-122.448344,45.490063,-122.442604,45.484798`;
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Valle Vista Commons Board' }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.length === 0) return null;
+    return {
+      lat: parseFloat(data[0].lat),
+      lng: parseFloat(data[0].lon),
+      name: data[0].display_name
+    };
+  } catch (err) {
+    console.error('Forward geocode failed:', err);
+    return null;
+  }
+}
 
 // Reverse geocode with rate limiting (1 req/sec per Nominatim policy)
 async function reverseGeocode(lat, lng) {
@@ -42,7 +71,12 @@ export function initMapPicker(options) {
   const hasInitialPin = initialLat && initialLng;
   const center = hasInitialPin ? [initialLat, initialLng] : DEFAULT_CENTER;
   
-  const map = L.map(containerId).setView(center, DEFAULT_ZOOM);
+  const map = L.map(containerId, {
+    maxBounds: MAP_BOUNDS,
+    maxBoundsViscosity: 1.0,
+    minZoom: 14,
+    maxZoom: 19
+  }).setView(center, DEFAULT_ZOOM);
   
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
@@ -106,5 +140,27 @@ export function initMapPicker(options) {
     if (onPinRemove) onPinRemove();
   }
 
-  return { map, marker, removePin };
+  // Geocode and center on address
+  async function geocodeAndCenter(address) {
+    if (!address || address.trim() === '') return;
+    
+    const result = await forwardGeocode(address);
+    if (!result) {
+      alert('Could not find that location. Try a nearby street or landmark.');
+      return;
+    }
+    
+    map.setView([result.lat, result.lng], DEFAULT_ZOOM);
+    
+    if (marker) {
+      marker.setLatLng([result.lat, result.lng]);
+    } else {
+      marker = L.marker([result.lat, result.lng], { draggable: true }).addTo(map);
+      setupMarkerDrag(marker);
+    }
+    
+    await updateCoordinates(result.lat, result.lng);
+  }
+
+  return { map, marker, removePin, geocodeAndCenter };
 }

@@ -2,10 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="robots" content="noindex, nofollow">
   <title>Admin — Valle Vista Commons</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -199,17 +203,24 @@
                     <div class="editor-toolbar" id="editToolbar-p<%= idx %>">
                       <button type="button" data-action="bold"><b>B</b></button>
                       <button type="button" data-action="italic"><i>I</i></button>
+                      <button type="button" data-action="strike"><s>S</s></button>
                       <div class="sep"></div>
+                      <button type="button" data-action="heading1">H1</button>
                       <button type="button" data-action="heading2">H2</button>
                       <button type="button" data-action="heading3">H3</button>
+                      <button type="button" data-action="heading4">H4</button>
                       <div class="sep"></div>
                       <button type="button" data-action="bulletList">• List</button>
                       <button type="button" data-action="link">Link</button>
                       <div class="sep"></div>
                       <button type="button" data-action="image">Image</button>
                       <button type="button" data-action="video">Video</button>
+                      <% if (hasApiKey) { %>
+                        <div class="sep"></div>
+                        <button type="button" data-action="ai-rewrite" title="AI Rewrite">🤖</button>
+                      <% } %>
                     </div>
-                    <div class="admin-editor tiptap-content admin-editor" id="editEditor-p<%= idx %>" data-content="<%= encodeURIComponent(post.desc) %>"></div>
+                    <div class="admin-editor tiptap-content admin-editor" id="editEditor-p<%= idx %>" data-content="<%= encodeURIComponent(post.desc) %>" data-post-id="<%= post.id %>"></div>
                   </div>
                   <input type="hidden" name="desc" id="editHidden-p<%= idx %>">
                 </div>
@@ -361,17 +372,24 @@
                     <div class="editor-toolbar" id="editToolbar-l<%= idx %>">
                       <button type="button" data-action="bold"><b>B</b></button>
                       <button type="button" data-action="italic"><i>I</i></button>
+                      <button type="button" data-action="strike"><s>S</s></button>
                       <div class="sep"></div>
+                      <button type="button" data-action="heading1">H1</button>
                       <button type="button" data-action="heading2">H2</button>
                       <button type="button" data-action="heading3">H3</button>
+                      <button type="button" data-action="heading4">H4</button>
                       <div class="sep"></div>
                       <button type="button" data-action="bulletList">• List</button>
                       <button type="button" data-action="link">Link</button>
                       <div class="sep"></div>
                       <button type="button" data-action="image">Image</button>
                       <button type="button" data-action="video">Video</button>
+                      <% if (hasApiKey) { %>
+                        <div class="sep"></div>
+                        <button type="button" data-action="ai-rewrite" title="AI Rewrite">🤖</button>
+                      <% } %>
                     </div>
-                    <div class="admin-editor tiptap-content admin-editor" id="editEditor-l<%= idx %>" data-content="<%= encodeURIComponent(post.desc) %>"></div>
+                    <div class="admin-editor tiptap-content admin-editor" id="editEditor-l<%= idx %>" data-content="<%= encodeURIComponent(post.desc) %>" data-post-id="<%= post.id %>"></div>
                   </div>
                   <input type="hidden" name="desc" id="editHidden-l<%= idx %>">
                 </div>
@@ -513,5 +531,6 @@
   <script src="/js/lightbox.js"></script>
   <script type="module" src="/js/admin-init.js"></script>
   <script type="module" src="/js/admin-maps.js"></script>
+  <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
 </body>
 </html>

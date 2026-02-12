@@ -13,6 +13,25 @@ html:not([data-theme]) { visibility: hidden; }
 /* ─── Reset ──────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ─── PWA / iOS standalone app behavior ──────────────────────── */
+html {
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+}
+html, body { overscroll-behavior-y: none; }
+
+/* Prevent pull-to-refresh in standalone mode */
+@media all and (display-mode: standalone) {
+  body { overscroll-behavior: none; }
+}
+
+/* Disable tap highlights and text selection on interactive elements */
+button, a, .action-btn, .nav-btn, .fab, .theme-trigger, .scheme-dot, .mode-btn {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    COLOR SCHEMES
    ═══════════════════════════════════════════════════════════════ */
@@ -310,7 +329,10 @@ a:hover { color: var(--primary-600); }
    ═══════════════════════════════════════════════════════════════ */
 
 /* ─── Page Container ──────────────────────────────────────── */
-.vvc-container { max-width: 640px; margin: 0 auto; padding: 1.5rem 1.25rem 6rem; }
+.vvc-container {
+  max-width: 640px; margin: 0 auto;
+  padding: calc(1.5rem + env(safe-area-inset-top, 0px)) calc(1.25rem + env(safe-area-inset-right, 0px)) calc(6rem + env(safe-area-inset-bottom, 0px)) calc(1.25rem + env(safe-area-inset-left, 0px));
+}
 .vvc-container--wide { max-width: 820px; }
 .vvc-container--narrow { max-width: 560px; }
 
@@ -523,7 +545,9 @@ a:hover { color: var(--primary-600); }
 
 /* ─── FAB ─────────────────────────────────────────────────── */
 .fab {
-  position: fixed; bottom: 28px; right: 28px;
+  position: fixed;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  right: calc(28px + env(safe-area-inset-right, 0px));
   width: 56px; height: 56px; border-radius: var(--radius-full);
   background: linear-gradient(135deg, var(--primary-800), var(--primary-700));
   color: var(--text-inverted); border: none; font-size: 1.5rem;
@@ -1010,10 +1034,10 @@ a:hover { color: var(--primary-600); }
    RESPONSIVE
    ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 480px) {
-  .vvc-container { padding: 1.25rem 1rem 5rem; }
+  .vvc-container { padding: calc(1.25rem + env(safe-area-inset-top, 0px)) calc(1rem + env(safe-area-inset-right, 0px)) calc(5rem + env(safe-area-inset-bottom, 0px)) calc(1rem + env(safe-area-inset-left, 0px)); }
   .site-title { font-size: 1.5rem; }
   .post-card { padding: 0.875rem 1rem; }
-  .fab { bottom: 20px; right: 20px; width: 52px; height: 52px; }
+  .fab { bottom: calc(20px + env(safe-area-inset-bottom, 0px)); right: calc(20px + env(safe-area-inset-right, 0px)); width: 52px; height: 52px; }
   .category-grid { grid-template-columns: 1fr; }
   .admin-header { flex-direction: column; gap: 12px; align-items: flex-start; }
   .admin-nav { width: 100%; justify-content: flex-end; }
@@ -1022,6 +1046,33 @@ a:hover { color: var(--primary-600); }
 /* ═══════════════════════════════════════════════════════════════
    MAP PICKER & MINI-MAPS
    ═══════════════════════════════════════════════════════════════ */
+
+/* Find on Map button */
+.btn-outline-vvc {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.55rem 1rem;
+  background: transparent;
+  border: 1.5px solid var(--primary-700);
+  border-radius: 8px;
+  color: var(--primary-700);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  white-space: nowrap;
+}
+.btn-outline-vvc:hover {
+  background: var(--primary-700);
+  color: var(--text-inverted);
+  border-color: var(--primary-700);
+}
+.btn-outline-vvc:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .map-toggle {
   cursor: pointer;
   color: var(--primary-700);
@@ -1058,6 +1109,94 @@ a:hover { color: var(--primary-600); }
   margin: 10px 0;
   border: 2px solid var(--surface-border);
   overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.2s ease;
+}
+.post-mini-map:hover {
+  border-color: var(--primary-600);
+}
+.post-mini-map::after {
+  content: '🔍 Click to expand';
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.post-mini-map:hover::after {
+  opacity: 1;
+}
+
+/* Map modal */
+.map-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.map-modal.show {
+  display: flex;
+}
+.map-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+}
+.map-modal-content {
+  position: relative;
+  width: 90vw;
+  max-width: 1000px;
+  height: 80vh;
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  z-index: 10001;
+}
+.map-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10002;
+  width: 40px;
+  height: 40px;
+  background: var(--surface-card);
+  border: 1.5px solid var(--surface-border);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s var(--ease-out);
+  box-shadow: var(--shadow-md);
+}
+.map-modal-close:hover {
+  background: var(--primary-700);
+  color: var(--text-inverted);
+  border-color: var(--primary-700);
+}
+.modal-map-container {
+  width: 100%;
+  height: 100%;
 }
 
 .map-popup-content {
@@ -1110,7 +1249,9 @@ a:hover { color: var(--primary-600); }
   cursor: default;
 }
 .vvc-lightbox-close {
-  position: absolute; top: 16px; right: 20px;
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  right: calc(20px + env(safe-area-inset-right, 0px));
   background: none; border: none; color: #fff; font-size: 1.5rem;
   cursor: pointer; opacity: 0.7; transition: opacity 0.2s;
   line-height: 1; padding: 4px 8px;

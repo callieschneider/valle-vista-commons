@@ -28,8 +28,10 @@ model Post {
   approvedAt  DateTime? @map("approved_at")
   aiAnalysis  Json?
   descHistory Json?     // Array of {title, desc, timestamp} — last 10 versions for undo
+  rewriteCount Int      @default(0) // How many times this post has been rewritten (for 10 per post limit)
   submitterId Int?      @map("submitter_id")
   submitter   Submitter? @relation(fields: [submitterId], references: [id])
+  rewriteLogs RewriteLog[]
 
   @@map("posts")
 }
@@ -48,7 +50,11 @@ model Mod {
   username  String   @unique @db.VarChar(50)
   passHash  String   @db.VarChar(64)
   active    Boolean  @default(true)
+  rewriteEnabled Boolean @default(true) // Can this mod use AI rewrite?
+  rewriteLimitPerPost Int @default(10) // Max rewrites per post
+  rewriteLimitPerHour Int @default(5)  // Max rewrites per hour
   createdAt DateTime @default(now()) @map("created_at")
+  rewriteLogs RewriteLog[]
 
   @@map("mods")
 }
@@ -59,10 +65,25 @@ model SiteSettings {
   boardTagline    String   @default("Your neighborhood board")
   analysisModel   String   @default("anthropic/claude-3.5-haiku")
   rewriteModel    String   @default("anthropic/claude-3.5-haiku")
+  rewritePrompt   String?  @db.Text // Custom prompt template for in-editor AI rewrite
   aboutText       String?  @db.Text
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@map("site_settings")
+}
+
+model RewriteLog {
+  id        String   @id @default(cuid())
+  postId    String   @map("post_id")
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  modId     String   @map("mod_id")
+  mod       Mod      @relation(fields: [modId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([postId])
+  @@index([modId])
+  @@index([createdAt])
+  @@map("rewrite_logs")
 }
 
 enum Section {
