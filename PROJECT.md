@@ -42,7 +42,7 @@ No accounts. No tracking. No personal information collected. Ever.
 | Client-side search across all sections | ✅ |
 | Rate limiting | ✅ |
 | Railway deployment | ✅ |
-| **Tiptap rich text editor with Strikethrough, H1-H4 headings** | ✅ |
+| **Tiptap rich text editor with uniform body text (no heading controls)** | ✅ |
 | Image upload with EXIF/GPS stripping | ✅ |
 | Video upload (MP4, WebM) | ✅ |
 | HTML sanitization + safe rendering | ✅ |

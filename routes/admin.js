@@ -205,6 +205,11 @@ router.get('/', async (req, res) => {
     // Board notes (for separate management tab)
     const boardNotes = live.filter(p => p.modPost);
 
+    // Normalize legacy rich-text HTML at render time for consistent editor/post display.
+    pending.forEach((p) => { p.desc = sanitizeRichText(p.desc || ''); });
+    live.forEach((p) => { p.desc = sanitizeRichText(p.desc || ''); });
+    archived.forEach((p) => { p.desc = sanitizeRichText(p.desc || ''); });
+
     // Submitter counts
     const submitterIds = [...new Set(
       [...pending, ...live, ...archived]

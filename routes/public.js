@@ -162,6 +162,8 @@ router.get('/', async (req, res) => {
       where: { status: 'LIVE' },
       orderBy: [{ pinned: 'desc' }, { approvedAt: 'desc' }],
     });
+    // Normalize legacy rich-text HTML at render time for cross-device consistency.
+    posts.forEach((p) => { p.desc = sanitizeRichText(p.desc || ''); });
 
     const board = {
       alerts: posts.filter(p => p.section === 'ALERT'),

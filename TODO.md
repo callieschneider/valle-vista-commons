@@ -3,7 +3,7 @@
 > Actionable items for the current/next work session. Not a roadmap — these are things that need doing NOW.
 > For project overview and status, see [PROJECT.md](./PROJECT.md).
 
-*Last updated: February 12, 2026 (linter error fixes)*
+*Last updated: February 12, 2026 (rich-text rendering parity fixes)*
 
 ---
 
@@ -60,6 +60,12 @@
 ---
 
 ## DONE
+
+### Rich-Text Rendering Parity (iOS + Desktop)
+**Added:** 2026-02-12
+**Completed:** 2026-02-12
+**Context:** Normalized legacy rich-text HTML at render time in `routes/public.js` and `routes/admin.js` so old heading markup renders consistently across editor/admin/public views. Updated `lib/sanitize.js` to convert heading tags (`h1`-`h6`) to paragraphs and preserve intentional blank lines by converting empty paragraphs to `<p><br></p>`. Scoped iOS text-size safeguards in `public/css/style.css` to prevent Safari text inflation while keeping desktop parity.
+**Status:** DONE
 
 ### EJS Linter Errors Fixed
 **Added:** 2026-02-12

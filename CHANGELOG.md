@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-02-12 - Rich Text Rendering Parity (iOS + Desktop)
+
+### Fixed
+- **Inconsistent typography between editor and rendered posts** — legacy stored heading tags (`h1`-`h6`) caused mixed weight/color output across posts, especially visible in dark mode and iOS Safari. Added render-time normalization to both board and admin routes so legacy content displays with the same body-text pattern as current editor output.
+- **Blank line collapse after save** — intentional empty rows entered in Tiptap were being flattened in rendered output. Sanitization now preserves blank lines by normalizing empty paragraphs to `<p><br></p>`.
+- **iOS Safari text inflation drift** — mobile Safari auto text-size behavior could diverge from desktop rendering inside rich-text containers. Added iOS-safe text-size guards to lock parity.
+
+### Changed
+- `lib/sanitize.js` — expanded heading normalization (`h1`-`h6` → `p`) and added blank-line preservation post-processing.
+- `routes/public.js` — normalize post HTML at render time for all LIVE posts.
+- `routes/admin.js` — normalize post HTML at render time for pending/live/archived lists.
+- `public/css/style.css` — scoped iOS input zoom prevention to Safari support checks and added text-size-adjust parity guards for rich-text containers.
+- `PROJECT.md` — updated Tiptap feature line to reflect uniform body text behavior (no heading controls).
+
+---
+
 ## 2026-02-12 - EJS Linter Errors Fixed
 
 ### Fixed
