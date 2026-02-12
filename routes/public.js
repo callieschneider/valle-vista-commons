@@ -179,6 +179,8 @@ router.get('/', async (req, res) => {
     // Check if visitor has a valid admin/mod auth cookie (for "Return to Admin" link)
     const authPayload = getAuthFromCookie(req);
     const isAdmin = !!(authPayload && (authPayload.isSuperAdmin || authPayload.modId));
+    // DEBUG: remove after confirming admin link works
+    console.log('[board] cookie present:', !!req.cookies?.vvc_auth, '| payload:', !!authPayload, '| isAdmin:', isAdmin);
 
     res.render('board', { board, settings, timeAgo, sitekey: HCAPTCHA_SITEKEY, isAdmin });
   } catch (err) {
