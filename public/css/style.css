@@ -604,12 +604,9 @@ a:hover { color: var(--primary-600); }
 .fab:active { transform: scale(0.96); }
 .fab svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; fill: none; }
 
-/* ─── Admin Return Bar (top of page, admin-only) ── */
-.admin-return-bar {
-  min-height: calc(28px + env(safe-area-inset-top, 0px));
-  padding: calc(8px + env(safe-area-inset-top, 0px)) 14px 6px calc(14px + env(safe-area-inset-left, 0px));
-}
+/* ─── Admin Return Link (inside container, admin-only) ── */
 .admin-return-link {
+  display: inline-block; margin-bottom: 0.25rem;
   font-size: 0.78rem; font-weight: 500; letter-spacing: 0.01em;
   color: var(--text-muted); text-decoration: none; opacity: 0.65;
   transition: opacity 0.2s ease;

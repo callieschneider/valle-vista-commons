@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-02-12 - PWA Admin Access
+
+### Added
+- **"Return to Admin" link on public board** — authenticated mods and super admins see `‹ Admin` at the top of the board that links back to `/admin`. Uses `visibility:hidden` when not applicable to preserve iOS safe-area spacing.
+- **localStorage persistence** — once logged in, the admin link remains visible even after cookie expiry. Tapping it redirects to login page if needed. Admin pages set the localStorage flag on load; logout clears it.
+- **Secret 7-tap gesture** — tap the "VV" logo 7 times quickly to access admin login from PWA when not logged in (no address bar access).
+
+### Changed
+- `routes/public.js` — checks `vvc_auth` cookie via `getAuthFromCookie()` and passes `isAdmin` boolean to the board template.
+- `views/board.ejs` — renders admin return bar with conditional visibility, adds 7-tap secret gesture handler, syncs localStorage with server auth state.
+- `views/admin.ejs` — sets localStorage flag on admin page load, clears it on logout click.
+- `public/css/style.css` — `.admin-return-bar` reserves safe-area-inset-top even when hidden to prevent iOS notch overlap.
+- `server.js` — added `app.set('trust proxy', 1)` for Railway reverse proxy cookie support.
+
+---
+
 ## 2026-02-12 - Admin Return Button for Mobile PWA
 
 ### Added
