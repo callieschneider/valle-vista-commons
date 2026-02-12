@@ -266,6 +266,18 @@ a:hover { color: var(--primary-600); }
   pointer-events: auto;
 }
 
+/* In sidebar footer: open upward instead */
+.admin-sidebar-footer .theme-popover {
+  top: auto;
+  bottom: calc(100% + 8px); /* Position above the button */
+  left: 0; /* Align to left edge of button */
+  right: auto;
+  transform: translateY(6px) scale(0.97); /* Transform upward */
+}
+.admin-sidebar-footer .theme-popover.open {
+  transform: translateY(0) scale(1);
+}
+
 /* Popover section labels */
 .popover-label {
   font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
