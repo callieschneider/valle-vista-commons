@@ -137,6 +137,17 @@
     <!-- Footer (removed - content moved to About section) -->
   </div>
 
+  <% if (isAdmin) { %>
+  <!-- Admin Return Button (only visible to logged-in mods/super admins) -->
+  <a href="/admin" class="admin-return-fab" title="Return to Admin" aria-label="Return to Admin">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+      <path d="M2 17l10 5 10-5"></path>
+      <path d="M2 12l10 5 10-5"></path>
+    </svg>
+  </a>
+  <% } %>
+
   <!-- FAB -->
   <a href="/submit" class="fab" title="Submit a tip" aria-label="Submit a tip">
     <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">

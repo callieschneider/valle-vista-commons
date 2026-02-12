@@ -3,7 +3,7 @@
 > Actionable items for the current/next work session. Not a roadmap — these are things that need doing NOW.
 > For project overview and status, see [PROJECT.md](./PROJECT.md).
 
-*Last updated: February 12, 2026 (rich-text rendering parity fixes)*
+*Last updated: February 12, 2026 (admin return button for mobile PWA)*
 
 ---
 
@@ -60,6 +60,12 @@
 ---
 
 ## DONE
+
+### Admin Return Button for Mobile PWA
+**Added:** 2026-02-12
+**Completed:** 2026-02-12
+**Context:** Added a "Return to Admin" floating button on the public board visible only to authenticated mods/super admins. Checks `vvc_auth` cookie on the board GET route and passes `isAdmin` flag to the template. Button appears bottom-left (opposite the submit FAB) with a subtle layered icon. Enables mobile PWA users (who can't type URLs) to get back into admin. No sessions, no tracking — cookie is already set by admin login.
+**Status:** DONE
 
 ### Rich-Text Rendering Parity (iOS + Desktop)
 **Added:** 2026-02-12

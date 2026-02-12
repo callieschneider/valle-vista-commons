@@ -7,6 +7,7 @@ const prisma = require('../lib/db');
 const { analyzeInBackground } = require('../lib/ai');
 const { upload, processAndSave } = require('../lib/upload');
 const { sanitizeRichText, stripHtml } = require('../lib/sanitize');
+const { getAuthFromCookie } = require('../lib/auth');
 
 // ─── Config ──────────────────────────────────────────────
 const HCAPTCHA_SECRET = process.env.HCAPTCHA_SECRET || '';
@@ -175,7 +176,11 @@ router.get('/', async (req, res) => {
 
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
 
-    res.render('board', { board, settings, timeAgo, sitekey: HCAPTCHA_SITEKEY });
+    // Check if visitor has a valid admin/mod auth cookie (for "Return to Admin" link)
+    const authPayload = getAuthFromCookie(req);
+    const isAdmin = !!(authPayload && (authPayload.isSuperAdmin || authPayload.modId));
+
+    res.render('board', { board, settings, timeAgo, sitekey: HCAPTCHA_SITEKEY, isAdmin });
   } catch (err) {
     console.error('Board error:', err.message);
     res.render('board', {
@@ -183,6 +188,7 @@ router.get('/', async (req, res) => {
       settings: { boardName: 'Valle Vista Commons', boardTagline: 'Your neighborhood board', aboutText: '' },
       timeAgo,
       sitekey: HCAPTCHA_SITEKEY,
+      isAdmin: false,
     });
   }
 });

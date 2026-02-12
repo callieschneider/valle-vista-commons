@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-02-12 - Admin Return Button for Mobile PWA
+
+### Added
+- **"Return to Admin" button on public board** — authenticated mods and super admins see a subtle floating button (bottom-left corner, opposite the submit FAB) that links back to `/admin`. Solves the mobile PWA problem where admins can't type a URL to reach the admin panel.
+- `routes/public.js` — checks `vvc_auth` cookie via `getAuthFromCookie()` and passes `isAdmin` boolean to the board template.
+- `views/board.ejs` — conditionally renders the admin return FAB when `isAdmin` is true.
+- `public/css/style.css` — styled `.admin-return-fab` with safe-area insets for iOS home bar.
+
+---
+
 ## 2026-02-12 - Rich Text Rendering Parity (iOS + Desktop)
 
 ### Fixed
