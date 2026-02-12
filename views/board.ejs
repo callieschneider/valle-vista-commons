@@ -155,9 +155,25 @@
     // Admin return link: show if server says admin OR localStorage remembers
     (function(){
       var isAdmin = <%= isAdmin ? 'true' : 'false' %>;
+      var bar = document.getElementById('adminReturnBar');
       if (isAdmin) localStorage.setItem('vvc-admin','1');
       if (isAdmin || localStorage.getItem('vvc-admin') === '1') {
-        document.getElementById('adminReturnBar').style.display = '';
+        bar.style.display = '';
+      }
+      
+      // Secret: tap logo 7 times to reveal admin access
+      var logo = document.querySelector('.site-logo');
+      var taps = 0, timer;
+      if (logo) {
+        logo.addEventListener('click', function(){
+          taps++;
+          clearTimeout(timer);
+          if (taps >= 7) {
+            localStorage.setItem('vvc-admin','1');
+            window.location.href = '/admin';
+          }
+          timer = setTimeout(function(){ taps = 0; }, 2000);
+        });
       }
     })();
   </script>
