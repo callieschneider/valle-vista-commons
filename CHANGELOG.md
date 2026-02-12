@@ -6,6 +6,107 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-02-11 - Submit Form Validation UX
+
+### Summary
+Improved submit form with required field indicators and inline validation. Users now see clear `*` markers on required fields and get a specific error banner below the submit button when fields are missing, instead of a browser alert dialog.
+
+### Added
+- **Required field indicators** — Title, Description, and Category labels now show red `*`
+- **Inline validation banner** — appears below submit button listing exactly which fields are missing
+- **Field-level error highlighting** — missing fields get red border/outline
+- **Shake animation** on validation banner for attention
+- **Auto-clear errors** — field error state clears as user interacts with the field
+
+### Changed
+- Replaced `alert('Please add a description.')` with comprehensive client-side validation
+- Removed native `required` attributes to let custom validation handle everything consistently
+
+### Files Changed
+- `views/submit.ejs` — added `*` spans, validation banner div, removed native `required`
+- `public/js/submit-init.js` — full validation logic replacing `alert()`
+- `public/css/style.css` — `.required-star`, `.validation-banner`, `.field-error`, shake keyframes
+
+---
+
+## 2026-02-12 - Interactive Map Picker
+
+### Summary
+Added optional interactive map picker for posts using Leaflet + OpenStreetMap. Users can drop pins on an interactive map when submitting tips. Posts with coordinates display mini-maps on the public board. Mods can edit/remove pins via the admin dashboard. No API key required, fully privacy-first.
+
+### Added
+- **Map picker on submit form** — collapsible interactive map where users drop pins manually
+- **Mini-maps on board** — posts with coordinates show embedded 180px maps with pin markers
+- **Map popup with "Copy Address" button** — clicking pin shows location name and coordinates
+- **Reverse geocoding** — coordinates automatically resolved to nearest address via Nominatim
+- **Admin map editor** — edit forms in admin dashboard include map picker to move/remove pins
+- **Three new Post fields** — `latitude` (Float?), `longitude` (Float?), `locationName` (VarChar 200?)
+- **Leaflet 1.9.4** — loaded via unpkg CDN, no npm dependency
+- **OpenStreetMap tiles** — free map tiles from OSM, no API key required
+- **Coordinate validation** — server validates lat (-90 to 90) and lng (-180 to 180)
+- **Map utility module** (`public/js/map-picker.js`) — reusable ES module for map initialization
+- **Three map scripts** — `submit-map.js`, `board-maps.js`, `admin-maps.js`
+
+### Changed
+- **CSP updated** — added `unpkg.com` (Leaflet), `tile.openstreetmap.org` (tiles), `nominatim.openstreetmap.org` (geocoding)
+- **CSS** — added map styles for `.map-toggle`, `.post-mini-map`, `.admin-map-container`, `.copy-address-btn`
+- **Submit route** — saves latitude, longitude, locationName fields
+- **Admin edit route** — saves latitude, longitude, locationName fields with validation
+- **PROJECT.md** — updated status to v1.3.0, added map features to tech stack
+
+### Privacy
+- **No auto-geolocation** — users must manually drop a pin (no location permission requested)
+- **Manual pin drop only** — respects existing privacy model (no tracking, no PII)
+- **Optional feature** — users can skip the map entirely, text location field still works
+
+### Database Migration
+- `20260212035516_add_map_coordinates` — added `latitude`, `longitude`, `locationName` to Post model
+
+---
+
+## 2026-02-12 - Anonymous Submitter Tracking
+
+### Summary
+Added optional anonymous submitter tracking so admins can identify repeat posters without collecting any personal information. Each submitter gets a sequential user number (e.g. "User #14") derived from a one-way hash of their IP address. No raw IPs are ever stored.
+
+### Added
+- **Submitter model** — new DB table with auto-incrementing ID and SHA-256 hash column
+- **Post → Submitter relation** — nullable FK on Post, populated at submission time
+- **`resolveSubmitter()` helper** in `routes/public.js` — computes salted IP hash, finds or creates Submitter record
+- **"User #N" badge** on admin dashboard — shown on pending, live, and archived posts (not on mod-authored Board Notes)
+- **Post count per submitter** — badge shows "(7 posts)" when a submitter has multiple posts
+- **`AUTHOR_HASH_SALT` env var** — secret salt for hashing. Feature is disabled when not set.
+- **Race condition handling** — `P2002` unique constraint catch in case two concurrent requests create the same Submitter
+
+### Changed
+- Admin dashboard queries now `include: { submitter: { select: { id: true } } }` for all post lists
+- Admin dashboard receives `submitterCounts` map for post count display
+- CSS: added `.badge-submitter` styles
+
+### Privacy
+- **No raw IPs are stored** — only a one-way SHA-256 hash
+- **Hash is irreversible** — cannot be reversed to obtain the original IP
+- **Salt is a secret env var** — not committed to repo
+- **Admin-only** — user numbers are never shown on the public board
+- **Gracefully disabled** — if `AUTHOR_HASH_SALT` is not set, no hashing occurs and no submitter data is stored
+
+### Database Migration
+- `20260212035502_add_submitter_tracking`: Added `submitters` table, `submitter_id` FK on `posts`
+
+### Environment Variables
+- `AUTHOR_HASH_SALT` (optional) — random secret string for IP hashing
+
+### Files Changed
+- `prisma/schema.prisma` — Submitter model, Post relation
+- `routes/public.js` — crypto import, `resolveSubmitter()`, wired into POST /submit
+- `routes/admin.js` — include submitter in queries, compute submitterCounts
+- `views/admin.ejs` — User #N badge in pending, live, and archive sections
+- `public/css/style.css` — `.badge-submitter` styles
+- `.env.example` — AUTHOR_HASH_SALT placeholder
+- `PROJECT.md` — schema docs, privacy model, env vars
+
+---
+
 ## 2026-02-12 - Design System v2: Themes, Dark Mode, Modern UI
 
 ### Summary

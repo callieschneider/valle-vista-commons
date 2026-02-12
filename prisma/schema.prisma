@@ -12,6 +12,9 @@ model Post {
   title       String    @db.VarChar(100)
   desc        String    @db.Text
   location    String?   @db.VarChar(100)
+  latitude    Float?
+  longitude   Float?
+  locationName String?  @db.VarChar(200)
   section     Section   @default(NEIGHBORS)
   status      Status    @default(PENDING)
   pinned      Boolean   @default(false)
@@ -25,8 +28,19 @@ model Post {
   approvedAt  DateTime? @map("approved_at")
   aiAnalysis  Json?
   descHistory Json?     // Array of {title, desc, timestamp} — last 10 versions for undo
+  submitterId Int?      @map("submitter_id")
+  submitter   Submitter? @relation(fields: [submitterId], references: [id])
 
   @@map("posts")
+}
+
+model Submitter {
+  id        Int      @id @default(autoincrement())
+  hash      String   @unique @db.VarChar(64)
+  createdAt DateTime @default(now()) @map("created_at")
+  posts     Post[]
+
+  @@map("submitters")
 }
 
 model Mod {

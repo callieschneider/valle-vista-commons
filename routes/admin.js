@@ -43,17 +43,36 @@ router.get('/', async (req, res) => {
     const pending = await prisma.post.findMany({
       where: { status: 'PENDING' },
       orderBy: { createdAt: 'asc' },
+      include: { submitter: { select: { id: true } } },
     });
 
     const live = await prisma.post.findMany({
       where: { status: 'LIVE' },
       orderBy: [{ pinned: 'desc' }, { approvedAt: 'desc' }],
+      include: { submitter: { select: { id: true } } },
     });
 
     const archived = await prisma.post.findMany({
       where: { status: { in: ['REJECTED', 'EXPIRED', 'DELETED'] } },
       orderBy: { createdAt: 'desc' },
+      include: { submitter: { select: { id: true } } },
     });
+
+    // Build submitter post counts for display (e.g. "User #14 (7 posts)")
+    const submitterIds = [...new Set(
+      [...pending, ...live, ...archived]
+        .map(p => p.submitterId)
+        .filter(Boolean)
+    )];
+    const submitterCounts = {};
+    if (submitterIds.length > 0) {
+      const counts = await prisma.post.groupBy({
+        by: ['submitterId'],
+        where: { submitterId: { in: submitterIds } },
+        _count: { id: true },
+      });
+      counts.forEach(c => { submitterCounts[c.submitterId] = c._count.id; });
+    }
 
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     const hasApiKey = !!process.env.OPENROUTER_API_KEY;
@@ -64,12 +83,13 @@ router.get('/', async (req, res) => {
       archived,
       settings,
       hasApiKey,
+      submitterCounts,
       error: req.query.error || null,
       msg: req.query.msg || null,
     });
   } catch (err) {
     console.error('Admin error:', err.message);
-    res.render('admin', { pending: [], live: [], archived: [], settings: null, hasApiKey: false, error: 'Failed to load dashboard', msg: null });
+    res.render('admin', { pending: [], live: [], archived: [], settings: null, hasApiKey: false, submitterCounts: {}, error: 'Failed to load dashboard', msg: null });
   }
 });
 
@@ -120,9 +140,22 @@ router.post('/edit/:id', async (req, res) => {
     const location = sanitize(req.body.location || '').substring(0, 100) || null;
     const section = req.body.section || undefined;
 
+    // Parse map coordinates (optional)
+    const latitude = req.body.latitude ? parseFloat(req.body.latitude) : null;
+    const longitude = req.body.longitude ? parseFloat(req.body.longitude) : null;
+    const locationName = req.body.locationName ? sanitize(req.body.locationName).substring(0, 200) : null;
+
+    // Validate coordinates if provided
+    if ((latitude !== null || longitude !== null) && 
+        (latitude === null || longitude === null || 
+         latitude < -90 || latitude > 90 || 
+         longitude < -180 || longitude > 180)) {
+      return res.redirect('/admin?error=invalid_coordinates');
+    }
+
     await prisma.post.update({
       where: { id: req.params.id },
-      data: { title, desc, location, section, editedAt: new Date(), descHistory: pushHistory(post) },
+      data: { title, desc, location, latitude, longitude, locationName, section, editedAt: new Date(), descHistory: pushHistory(post) },
     });
   } catch (err) {
     console.error('Edit error:', err.message);

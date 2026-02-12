@@ -6,12 +6,15 @@ No accounts. No tracking. No personal information collected. Ever.
 
 ---
 
-## Status: v1.2.0 — AI Rewrite, Undo, Universal Archive
+## Status: v1.3.0 — Interactive Map Picker
 
 | Feature | Status |
 |---------|--------|
 | Sectioned public board (Alerts, Happenings, Lost & Found, Neighbors, Board Notes) | ✅ |
 | Anonymous tip submission with section picker | ✅ |
+| **Interactive map picker on submit form (optional)** | ✅ |
+| **Mini-maps on board postcards with pin markers** | ✅ |
+| **Map pin editor in admin dashboard** | ✅ |
 | hCaptcha + honeypot spam protection | ✅ |
 | Two-tier auth: Super admin (env vars) + Mods (DB) | ✅ |
 | Admin dashboard with review queue, AI analysis, edit, pin, urgent, expire | ✅ |
@@ -52,6 +55,8 @@ No accounts. No tracking. No personal information collected. Ever.
 | Captcha | hCaptcha (free tier) |
 | AI | OpenRouter API (configurable models) |
 | Rich Text | Tiptap 2 (CDN via esm.sh) |
+| Maps | Leaflet 1.9.4 + OpenStreetMap tiles (CDN via unpkg) |
+| Geocoding | Nominatim (reverse geocoding only, client-side) |
 | Uploads | multer (multipart), sharp (image processing) |
 | Hosting | Railway (+ volume for uploads) |
 
@@ -144,6 +149,9 @@ prisma/
 | title | VarChar(100) | Required |
 | desc | Text | Required. Stores sanitized HTML from Tiptap editor |
 | location | VarChar(100)? | Optional, intentionally vague |
+| latitude | Float? | Map pin latitude coordinate (-90 to 90) |
+| longitude | Float? | Map pin longitude coordinate (-180 to 180) |
+| locationName | VarChar(200)? | Resolved address from reverse geocoding |
 | section | Enum: ALERT, HAPPENINGS, LOST_FOUND, NEIGHBORS, BOARD_NOTES | Board section |
 | status | Enum: PENDING, LIVE, EXPIRED, REJECTED, DELETED | Moderation state |
 | pinned | Boolean | Pinned to top of section |
@@ -157,6 +165,14 @@ prisma/
 | approvedAt | DateTime? | Set when approved |
 | aiAnalysis | Json? | AI analysis result |
 | descHistory | Json? | Array of {title, desc, timestamp} — last 10 versions for undo |
+| submitterId | Int? | FK → Submitter. Anonymous submitter tracking (admin-only) |
+
+### Submitter
+| Column | Type | Notes |
+|--------|------|-------|
+| id | Int (autoincrement) | Sequential user number (User #1, #2, etc.) |
+| hash | VarChar(64) | SHA-256 hash of IP + salt. One-way, irreversible. |
+| createdAt | DateTime | Auto-set |
 
 ### Mod
 | Column | Type | Notes |
@@ -185,7 +201,8 @@ prisma/
 | Concern | Approach |
 |---------|----------|
 | User identity | None collected — fully anonymous |
-| IP addresses | Used only for in-memory rate limiting; never stored |
+| IP addresses | Used only for in-memory rate limiting; never stored as raw IPs |
+| Submitter tracking | Optional. When `AUTHOR_HASH_SALT` is set, a one-way SHA-256 hash of IP+salt is stored and mapped to a sequential user number. Raw IPs are never persisted. Only visible to admins. Disabled if salt is empty. |
 | Cookies/Sessions | None. Stateless app. |
 | Tracking | No analytics, no scripts, no pixels |
 | Post content | Sanitized with xss-filters before storage |
@@ -228,6 +245,7 @@ Both use HTTP Basic Auth. No sessions, no cookies.
 | `PORT` | No | `3000` | Server port (Railway auto-provides) |
 | `NODE_ENV` | No | — | Set to `production` in Railway |
 | `UPLOAD_DIR` | No | `./uploads` | Upload directory (Railway volume mounted at `/uploads/`) |
+| `AUTHOR_HASH_SALT` | No | — | Secret salt for anonymous submitter tracking. When set, submitters get sequential user numbers visible to admins. |
 
 ---
 

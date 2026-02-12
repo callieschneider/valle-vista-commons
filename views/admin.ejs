@@ -6,6 +6,8 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Admin — Valle Vista Commons</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -94,6 +96,9 @@
             <div class="post-row-header">
               <span class="post-row-title"><%= post.title %></span>
               <span class="badge badge-section-<%= post.section %>"><%= post.section.replace('_', ' ') %></span>
+              <% if (post.submitter) { %>
+                <span class="badge-submitter" title="Anonymous submitter #<%= post.submitter.id %>">User #<%= post.submitter.id %><% if (submitterCounts[post.submitterId] > 1) { %> <span class="submitter-count">(<%= submitterCounts[post.submitterId] %> posts)</span><% } %></span>
+              <% } %>
             </div>
             <div class="post-row-desc rich-content"><%- post.desc %></div>
             <div class="post-row-meta">
@@ -212,6 +217,25 @@
                   <input type="text" name="location" class="vvc-input" value="<%= post.location || '' %>" maxlength="100" placeholder="Location (optional)" style="font-size: 0.85rem; padding: 8px 12px;">
                 </div>
                 <div style="margin-bottom: 8px;">
+                  <label style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">Map Pin (optional)</label>
+                  <div id="adminMap-p<%= idx %>" class="admin-map-container"></div>
+                  <div class="map-coord-display">
+                    <span id="coordDisplay-p<%= idx %>">
+                      <% if (post.latitude && post.longitude) { %>
+                        📍 <%= post.latitude.toFixed(5) %>, <%= post.longitude.toFixed(5) %>
+                      <% } else { %>
+                        Click map to drop a pin
+                      <% } %>
+                    </span>
+                    <button type="button" class="btn-link-vvc" id="removeMapPin-p<%= idx %>" style="font-size: 0.75rem; margin-left: 8px;">
+                      Remove pin
+                    </button>
+                  </div>
+                  <input type="hidden" name="latitude" id="adminLat-p<%= idx %>" value="<%= post.latitude || '' %>">
+                  <input type="hidden" name="longitude" id="adminLng-p<%= idx %>" value="<%= post.longitude || '' %>">
+                  <input type="hidden" name="locationName" id="adminName-p<%= idx %>" value="<%= post.locationName || '' %>">
+                </div>
+                <div style="margin-bottom: 8px;">
                   <select name="section" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
                     <% ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS'].forEach(s => { %>
                       <option value="<%= s %>" <%= post.section === s ? 'selected' : '' %>><%= s.replace('_', ' ') %></option>
@@ -264,6 +288,9 @@
               <% if (post.urgent) { %><span class="badge badge-urgent-admin">Urgent</span><% } %>
               <% if (post.editedAt) { %><span class="badge badge-edited">edited</span><% } %>
               <% if (post.modPost) { %><span class="badge badge-mod">mod post</span><% } %>
+              <% if (post.submitter) { %>
+                <span class="badge-submitter" title="Anonymous submitter #<%= post.submitter.id %>">User #<%= post.submitter.id %><% if (submitterCounts[post.submitterId] > 1) { %> <span class="submitter-count">(<%= submitterCounts[post.submitterId] %> posts)</span><% } %></span>
+              <% } %>
             </div>
             <div class="post-row-desc rich-content"><%- post.desc %></div>
             <div class="post-row-meta">
@@ -352,6 +379,25 @@
                   <input type="text" name="location" class="vvc-input" value="<%= post.location || '' %>" maxlength="100" placeholder="Location (optional)" style="font-size: 0.85rem; padding: 8px 12px;">
                 </div>
                 <div style="margin-bottom: 8px;">
+                  <label style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">Map Pin (optional)</label>
+                  <div id="adminMap-l<%= idx %>" class="admin-map-container"></div>
+                  <div class="map-coord-display">
+                    <span id="coordDisplay-l<%= idx %>">
+                      <% if (post.latitude && post.longitude) { %>
+                        📍 <%= post.latitude.toFixed(5) %>, <%= post.longitude.toFixed(5) %>
+                      <% } else { %>
+                        Click map to drop a pin
+                      <% } %>
+                    </span>
+                    <button type="button" class="btn-link-vvc" id="removeMapPin-l<%= idx %>" style="font-size: 0.75rem; margin-left: 8px;">
+                      Remove pin
+                    </button>
+                  </div>
+                  <input type="hidden" name="latitude" id="adminLat-l<%= idx %>" value="<%= post.latitude || '' %>">
+                  <input type="hidden" name="longitude" id="adminLng-l<%= idx %>" value="<%= post.longitude || '' %>">
+                  <input type="hidden" name="locationName" id="adminName-l<%= idx %>" value="<%= post.locationName || '' %>">
+                </div>
+                <div style="margin-bottom: 8px;">
                   <select name="section" class="vvc-select" style="font-size: 0.85rem; padding: 8px 12px;">
                     <% ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS', 'BOARD_NOTES'].forEach(s => { %>
                       <option value="<%= s %>" <%= post.section === s ? 'selected' : '' %>><%= s.replace('_', ' ') %></option>
@@ -398,6 +444,9 @@
                   <span class="post-row-title" style="font-size: 0.85rem;"><%= post.title %></span>
                   <span class="badge badge-section-<%= post.section %>"><%= post.section.replace('_', ' ') %></span>
                   <span class="badge" style="background: var(--accent-<%= post.status === 'REJECTED' ? 'danger' : 'warning' %>-soft); color: var(--accent-<%= post.status === 'REJECTED' ? 'danger' : 'warning' %>);"><%= post.status %></span>
+                  <% if (post.submitter) { %>
+                    <span class="badge-submitter" title="Anonymous submitter #<%= post.submitter.id %>">User #<%= post.submitter.id %><% if (submitterCounts[post.submitterId] > 1) { %> <span class="submitter-count">(<%= submitterCounts[post.submitterId] %> posts)</span><% } %></span>
+                  <% } %>
                 </div>
                 <div style="display: flex; gap: 6px;">
                   <form method="POST" action="/admin/restore/<%= post.id %>" style="display:inline;">
@@ -462,5 +511,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/theme.js"></script>
   <script type="module" src="/js/admin-init.js"></script>
+  <script type="module" src="/js/admin-maps.js"></script>
 </body>
 </html>

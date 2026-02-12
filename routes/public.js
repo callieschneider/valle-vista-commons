@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const xssFilters = require('xss-filters');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 const prisma = require('../lib/db');
@@ -12,6 +13,7 @@ const HCAPTCHA_SECRET = process.env.HCAPTCHA_SECRET || '';
 const HCAPTCHA_SITEKEY = process.env.HCAPTCHA_SITEKEY || '';
 
 const VALID_SUBMIT_SECTIONS = ['ALERT', 'HAPPENINGS', 'LOST_FOUND', 'NEIGHBORS'];
+const AUTHOR_HASH_SALT = process.env.AUTHOR_HASH_SALT || '';
 
 const submitLimiter = new RateLimiterMemory({
   points: 5,
@@ -19,6 +21,30 @@ const submitLimiter = new RateLimiterMemory({
 });
 
 // ─── Helpers ────────────────────────────────────────────
+
+/**
+ * Find or create a Submitter record from the request IP.
+ * Returns submitterId (Int) or null if feature is disabled.
+ */
+async function resolveSubmitter(req) {
+  if (!AUTHOR_HASH_SALT) return null;
+  const ip = req.ip || 'unknown';
+  const hash = crypto.createHash('sha256').update(ip + AUTHOR_HASH_SALT).digest('hex');
+  try {
+    const existing = await prisma.submitter.findUnique({ where: { hash } });
+    if (existing) return existing.id;
+    const created = await prisma.submitter.create({ data: { hash } });
+    return created.id;
+  } catch (err) {
+    // Race condition: another request created it between findUnique and create
+    if (err.code === 'P2002') {
+      const found = await prisma.submitter.findUnique({ where: { hash } });
+      return found ? found.id : null;
+    }
+    console.error('Submitter resolve error:', err.message);
+    return null;
+  }
+}
 
 function sanitize(str) {
   if (!str) return '';
@@ -200,6 +226,24 @@ router.post('/submit', async (req, res) => {
     const location = sanitize(req.body.location || '').substring(0, 100) || null;
     const section = (req.body.section || '').toUpperCase();
 
+    // Parse map coordinates (optional)
+    const latitude = req.body.latitude ? parseFloat(req.body.latitude) : null;
+    const longitude = req.body.longitude ? parseFloat(req.body.longitude) : null;
+    const locationName = req.body.locationName ? sanitize(req.body.locationName).substring(0, 200) : null;
+
+    // Validate coordinates if provided
+    if ((latitude !== null || longitude !== null) && 
+        (latitude === null || longitude === null || 
+         latitude < -90 || latitude > 90 || 
+         longitude < -180 || longitude > 180)) {
+      return res.status(400).render('submit', {
+        ...renderOpts,
+        error: 'Invalid map coordinates.',
+        success: false,
+        values: req.body,
+      });
+    }
+
     // Check there's actual text content (not just empty HTML tags)
     const plainText = stripHtml(desc);
     if (!title || !plainText) {
@@ -220,9 +264,12 @@ router.post('/submit', async (req, res) => {
       });
     }
 
+    // Resolve anonymous submitter (salted IP hash → sequential user number)
+    const submitterId = await resolveSubmitter(req);
+
     // Create post (pending moderation)
     const post = await prisma.post.create({
-      data: { title, desc, location, section, status: 'PENDING' },
+      data: { title, desc, location, latitude, longitude, locationName, section, status: 'PENDING', submitterId },
     });
 
     res.render('submit', { ...renderOpts, error: null, success: true, values: {} });

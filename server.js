@@ -45,12 +45,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "https://cdn.jsdelivr.net", "https://hcaptcha.com", "https://*.hcaptcha.com", "https://esm.sh"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://hcaptcha.com", "https://*.hcaptcha.com", "https://esm.sh", "https://unpkg.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "https://unpkg.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       frameSrc: ["https://hcaptcha.com", "https://*.hcaptcha.com"],
-      connectSrc: ["'self'", "https://hcaptcha.com", "https://*.hcaptcha.com", "https://esm.sh"],
-      imgSrc: ["'self'", "data:"],
+      connectSrc: ["'self'", "https://hcaptcha.com", "https://*.hcaptcha.com", "https://esm.sh", "https://nominatim.openstreetmap.org"],
+      imgSrc: ["'self'", "data:", "https://*.tile.openstreetmap.org"],
       mediaSrc: ["'self'"],
     }
   },

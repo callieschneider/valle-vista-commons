@@ -6,6 +6,8 @@
   <meta name="robots" content="noindex, nofollow">
   <title><%= settings.boardName %></title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -97,6 +99,15 @@
                     <% } %>
                   </div>
                   <div class="post-body rich-content"><%- post.desc %></div>
+                  
+                  <!-- Mini-map if coordinates exist -->
+                  <% if (post.latitude && post.longitude) { %>
+                    <div class="post-mini-map" id="map-<%= post.id %>" 
+                         data-lat="<%= post.latitude %>" 
+                         data-lng="<%= post.longitude %>"
+                         data-name="<%= post.locationName || 'Location' %>"></div>
+                  <% } %>
+                  
                   <div class="post-meta">
                     <% if (post.location) { %><span>📍 <%= post.location %></span><span class="sep"></span><% } %>
                     <span><%= timeAgo(post.approvedAt || post.createdAt) %></span>
@@ -133,5 +144,6 @@
 
   <script src="/js/theme.js"></script>
   <script src="/js/board-search.js"></script>
+  <script src="/js/board-maps.js"></script>
 </body>
 </html>

@@ -470,8 +470,11 @@ a:hover { color: var(--primary-600); }
 }
 .post-body p { margin-bottom: 0.35rem; }
 .post-body p:last-child { margin-bottom: 0; }
-.post-body img { max-width: 100%; border-radius: var(--radius-sm); margin: 6px 0; display: inline-block; vertical-align: top; }
-.post-body img[style] { max-width: 100%; height: auto; }
+.post-body img {
+  width: 100%; max-width: 100%; height: auto;
+  border-radius: var(--radius-sm); margin: 6px 0; display: block;
+}
+.post-body img[style] { width: 100% !important; max-width: 100% !important; height: auto !important; display: block; }
 .post-body video { max-width: 100%; border-radius: var(--radius-sm); margin: 6px 0; }
 .post-body a { color: var(--primary-700); text-decoration: underline; text-underline-offset: 2px; }
 [data-theme="dark"] .post-body a { color: var(--primary-600); }
@@ -671,6 +674,39 @@ a:hover { color: var(--primary-600); }
 }
 .alert-banner .alert-close:hover { opacity: 1; }
 
+/* ─── Required Field Indicator ────────────────────────────── */
+.required-star { color: var(--accent-danger); font-weight: 700; }
+
+/* ─── Validation Banner (below submit button) ────────────── */
+.validation-banner {
+  margin-top: 0.75rem; padding: 10px 14px; border-radius: var(--radius-sm);
+  font-size: 0.8125rem; font-weight: 500; line-height: 1.5;
+  background: var(--accent-danger-soft); color: var(--accent-danger);
+  border: 1px solid rgba(220,38,38,0.15);
+  animation: vvc-shake 0.4s ease;
+}
+.validation-banner ul { margin: 0.25rem 0 0 1.1rem; padding: 0; }
+.validation-banner li { margin-bottom: 0.125rem; }
+
+/* ─── Field Error State ──────────────────────────────────── */
+.field-group.field-error .vvc-input,
+.field-group.field-error .editor-wrapper {
+  border-color: var(--accent-danger);
+  box-shadow: 0 0 0 2px rgba(220,38,38,0.10);
+}
+.field-group.field-error .category-grid {
+  outline: 2px solid var(--accent-danger);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+@keyframes vvc-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+
 /* ─── Admin Section Headers ───────────────────────────────── */
 .admin-section { margin-bottom: 2.5rem; }
 .admin-section-header {
@@ -730,7 +766,7 @@ a:hover { color: var(--primary-600); }
 }
 .post-row-desc p { margin-bottom: 0.25rem; }
 .post-row-desc p:last-child { margin-bottom: 0; }
-.post-row-desc img { max-width: 100%; border-radius: 6px; margin: 4px; vertical-align: top; display: inline-block; }
+.post-row-desc img { width: 100%; max-width: 100%; height: auto; border-radius: 6px; margin: 6px 0; display: block; }
 .post-row-desc video { max-width: 100%; border-radius: 6px; margin: 4px 0; }
 .post-row-desc a { color: var(--accent-info); }
 
@@ -947,6 +983,29 @@ a:hover { color: var(--primary-600); }
 .post-card:nth-child(4) { animation-delay: 0.2s; }
 
 /* ═══════════════════════════════════════════════════════════════
+   SUBMITTER BADGE (admin only)
+   ═══════════════════════════════════════════════════════════════ */
+.badge-submitter {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.badge-submitter .submitter-count {
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 480px) {
@@ -958,3 +1017,81 @@ a:hover { color: var(--primary-600); }
   .admin-header { flex-direction: column; gap: 12px; align-items: flex-start; }
   .admin-nav { width: 100%; justify-content: flex-end; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   MAP PICKER & MINI-MAPS
+   ═══════════════════════════════════════════════════════════════ */
+.map-toggle {
+  cursor: pointer;
+  color: var(--primary-700);
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.75rem 0;
+  transition: color 0.15s ease;
+}
+.map-toggle:hover { color: var(--primary-600); }
+.map-toggle .optional { font-weight: 400; color: var(--text-tertiary); }
+
+#mapContainer {
+  height: 300px;
+  border-radius: 10px;
+  margin-top: 10px;
+  border: 1px solid var(--surface-border);
+  overflow: hidden;
+}
+#mapContainer.show { display: block; }
+
+.map-helper {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+.map-helper strong { color: var(--text-primary); }
+
+.post-mini-map {
+  height: 180px;
+  border-radius: 10px;
+  margin: 10px 0;
+  border: 2px solid var(--surface-border);
+  overflow: hidden;
+}
+
+.map-popup-content {
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.map-popup-content strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+.copy-address-btn {
+  background: var(--primary-700);
+  color: var(--text-inverted);
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  margin-top: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.15s ease;
+}
+.copy-address-btn:hover { background: var(--primary-600); }
+
+.admin-map-container {
+  height: 250px;
+  border-radius: 8px;
+  margin: 8px 0;
+  border: 1px solid var(--surface-border);
+  overflow: hidden;
+}
+.map-coord-display {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+

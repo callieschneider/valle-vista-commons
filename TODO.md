@@ -3,7 +3,7 @@
 > Actionable items for the current/next work session. Not a roadmap — these are things that need doing NOW.
 > For project overview and status, see [PROJECT.md](./PROJECT.md).
 
-*Last updated: February 12, 2026*
+*Last updated: February 11, 2026*
 
 ---
 
@@ -49,33 +49,7 @@
 
 ## MEDIUM
 
-### Map Picker for Posts (Location Pin Feature)
-**Added:** 2026-02-12
-**Context:** Allow users to select a location on an interactive map when submitting a tip/post. The selected pin should be stored with the post and displayed on the public board. Key requirements:
-
-**Submission flow:**
-- Embed an interactive map picker in the submit form so users can drop a pin on a location
-- Store the selected coordinates (lat/lng) with the post
-- Location selection should be optional (not all tips need a map)
-
-**Mod capabilities:**
-- Mods should be able to edit/move the pin location on any post from the admin dashboard
-- Mods should be able to remove a pin if it's inaccurate or inappropriate
-
-**Public board (viewer experience):**
-- Each postcard with a location shows an embedded mini-map with the pin
-- Viewers can pan/zoom the mini-map to get their bearings on where the deal/tip is
-- Clicking the pin opens a popup showing the location name/address
-- The popup includes a "Copy Address" button (copies the nearest address or coordinates)
-
-**Technical considerations:**
-- Evaluate map providers: Leaflet + OpenStreetMap (free, no API key), Mapbox, or Google Maps
-- Reverse geocoding needed to resolve coordinates → nearest address for the copy feature
-- Schema change required: add optional `latitude`, `longitude`, and `locationName` fields to Post model
-- Privacy: no user location auto-detection — manual pin drop only
-- Mobile-friendly map interactions
-
-**Status:** PENDING
+*(No items)*
 
 ---
 
@@ -87,4 +61,20 @@
 
 ## DONE
 
-*(Completed items move here with a completion date)*
+### Submit Form Validation UX
+**Added:** 2026-02-11
+**Completed:** 2026-02-11
+**Context:** Added `*` required indicators to Title, Description, and Category labels. Replaced browser `alert()` with inline validation banner below submit button that lists missing fields, highlights errored field groups with red borders, and shakes on appear. Errors clear on interaction. No new dependencies.
+**Status:** DONE
+
+### Map Picker for Posts (Location Pin Feature)
+**Added:** 2026-02-12
+**Completed:** 2026-02-12
+**Context:** Implemented interactive map picker using Leaflet + OpenStreetMap. Users can drop pins on submit form, mini-maps display on board postcards, mods can edit/remove pins in admin dashboard. Includes reverse geocoding via Nominatim and "Copy Address" button in map popups. Database migration added `latitude`, `longitude`, and `locationName` fields to Post model. Privacy-first: manual pin drop only, no auto-geolocation.
+**Status:** DONE
+
+### Anonymous Submitter Tracking (User Numbers)
+**Added:** 2026-02-12
+**Completed:** 2026-02-12
+**Context:** Added Submitter model with auto-increment IDs. Public submissions compute a salted SHA-256 hash of the IP and map it to a sequential user number. Admin dashboard shows "User #N (X posts)" badges. Feature disabled when `AUTHOR_HASH_SALT` env var is not set.
+**Status:** DONE
